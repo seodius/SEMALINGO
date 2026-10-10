@@ -13,6 +13,8 @@ on:
       - "semalingo/fetch.py"
       - "semalingo/writer.py"
       - "semalingo/matching.py"
+      - "semalingo/wikitext.py"
+      - "scripts/report_lists.py"
       - "semalingo/schema/**"
       - "Dockerfile"
       - ".github/workflows/load.yml"
@@ -28,6 +30,7 @@ jobs:
           docker build -t semalingo:load .
           mkdir -p data
           echo "RUN=docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data semalingo:load" >> "$GITHUB_ENV"
+          echo "LISTS=basic-english wiktionary-1000-basic basic-english-combined voa-special-english simple-misspellings nsm-primes" >> "$GITHUB_ENV"
 
       - name: Fetch glottolog
         timeout-minutes: 10
@@ -85,13 +88,25 @@ jobs:
         timeout-minutes: 15
         run: $RUN load concepticon-maps
 
-      - name: Match WordNet words to Concepticon by gloss
+      - name: Fetch and load the word lists
+        timeout-minutes: 10
+        run: $RUN build $LISTS
+
+      - name: Match words to Concepticon by gloss
         timeout-minutes: 15
         shell: bash
         run: |
           set -o pipefail
-          $RUN match oewn | tee match.txt
-          grep -v '\.\.\.$' match.txt | sed 's/^/::notice title=match::/'
+          $RUN match oewn $LISTS | tee match.txt
+          grep -v -e '\.\.\.$' -e ' done in ' match.txt | sed 's/^/::notice title=match::/'
+
+      - name: Word-list report
+        shell: bash
+        run: |
+          set -o pipefail
+          docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
+            --entrypoint python semalingo:load scripts/report_lists.py $LISTS | tee lists.txt
+          sed 's/^/::notice title=lists::/' lists.txt
 
       - name: Report
         if: always()

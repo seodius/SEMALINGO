@@ -255,6 +255,64 @@ class GlossMatchingTest(LoaderTestCase):
         self.assertEqual(self.value("SELECT COUNT(*) FROM mappings WHERE method = 'gloss' AND from_id LIKE 'oewn:%'"), 2)
 
 
+class WordListsTest(LoaderTestCase):
+    def categories(self, source_id):
+        return dict(self.rows(
+            "SELECT f.written_form, p.value_text FROM forms f JOIN properties p ON p.node_id = f.form_id "
+            "AND p.property = 'category' WHERE f.source_id = ?", source_id))
+
+    def props(self, node):
+        return dict(self.rows("SELECT property, COALESCE(value_text, value_num) FROM properties WHERE node_id = ?", node))
+
+    def test_basic_english_categories(self):
+        self.assertEqual(self.load("basic-english")["forms"], 14)  # 15 links, watch twice
+        categories = self.categories("basic-english")
+        self.assertEqual(categories["watch"], "operations; things (picturable)")
+        self.assertEqual(categories["look"], "things (general)")
+        self.assertEqual(categories["bad"], "qualities (opposites)")
+        self.assertNotIn("Pictures of these 200 words", categories)
+        self.assertEqual(self.value("SELECT language FROM forms WHERE form_id = 'basic-english:eye'"), "stan1293")
+
+    def test_1000_basic_words(self):
+        self.assertEqual(self.load("wiktionary-1000-basic")["forms"], 5)
+
+    def test_combined_list(self):
+        self.assertEqual(self.load("basic-english-combined")["forms"], 9)  # working twice
+        categories = self.categories("basic-english-combined")
+        self.assertEqual(categories["working"], "endings; compound")
+        self.assertEqual(categories["meter"], "addendum")
+        self.assertIn("micro-", categories)
+
+    def test_voa_definitions_and_parts_of_speech(self):
+        self.load("voa-special-english")
+        self.assertEqual(self.props("voa-special-english:a"), {"category": "core", "pos": "ad", "definition": "one; any; each", "variant": "an"})
+        love = self.props("voa-special-english:love")
+        self.assertEqual(love["pos"], "v, n")
+        self.assertEqual(love["definition"], "to like very much; a strong, kind emotion for someone or something; opposite hate")
+        self.assertEqual(self.props("voa-special-english:un-")["category"], "common prefixes")
+        self.assertEqual(self.props("voa-special-english:carry_out")["definition"], 'to do; to put into effect ("Please carry out the plan.")')
+        self.assertEqual(self.categories("voa-special-english")["adverb"], "parts of speech")
+
+    def test_misspellings(self):
+        self.assertEqual(self.load("simple-misspellings")["forms"], 4)
+        self.assertEqual(self.props("simple-misspellings:comfortable")["misspellings"], "confortable")
+        self.assertEqual(self.props("simple-misspellings:accidently")["misspellings"], "accidentaly")
+
+    def test_nsm_primes_and_exponents(self):
+        counts = self.load("nsm-primes")
+        self.assertEqual(counts["concepts"], 20)
+        glosses = dict(self.rows("SELECT concept_id, gloss FROM concepts"))
+        self.assertEqual(glosses["nsm-primes:something-thing"], "SOMETHING~THING")
+        self.assertEqual(glosses["nsm-primes:other-else-another"], "OTHER~ELSE~ANOTHER")
+        self.assertEqual(glosses["nsm-primes:be-someone-something"], "BE (SOMEONE/SOMETHING)")
+        self.assertEqual(
+            sorted(r[0] for r in self.rows("SELECT to_id FROM relations WHERE from_id = 'nsm-primes:form/be'")),
+            ["nsm-primes:be-someone-something", "nsm-primes:be-somewhere"],
+        )
+        self.assertEqual(self.value("SELECT to_id FROM relations WHERE from_id = 'nsm-primes:form/mine'"), "nsm-primes:is-mine")
+        self.assertEqual(self.props("nsm-primes:i")["category"], "Substantives")
+
+
 class ManualSourceTest(LoaderTestCase):
     def test_missing_manual_file_explains_add_file(self):
         from semalingo.loaders import ManualSourceMissing

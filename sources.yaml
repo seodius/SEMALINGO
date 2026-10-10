@@ -189,20 +189,93 @@ sources:
       rights in modifications pass to Radboud University. That matters for a public tool and language.
 
   - id: basic-english
-    name: Basic English word list
+    name: Basic English word list (Ogden's 850)
     wave: first
     unit: forms
     homepage: https://en.wiktionary.org/wiki/Appendix:Basic_English_word_list
-    download: https://en.wiktionary.org/wiki/Appendix:Basic_English_word_list
-    format: HTML
-    version: TODO
-    licence: TODO
-    redistributable: TODO
+    download: "https://en.wiktionary.org/w/index.php?title=Appendix:Basic_English_word_list&oldid=87681413&action=raw"
+    format: wikitext
+    version: "rev-87681413 (Wiktionary page revision of 2025-10-31)"
+    licence: "CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL)"
+    redistributable: "yes"
     used_by: [Q1]
-    checked: false
+    checked: true
     notes: >-
-      Seed list for lexeme candidates. The Wiktionary page could not be fetched for checking.
-      Concepticon already has Ogden-1930-200, the 200 picturable words, mapped to concept sets.
+      Ogden's 850 words (The ABC of Basic English, 1932) in his five groups: 100 operations,
+      400 general things, 200 picturable things, 100 qualities, 50 opposites. Ogden's list
+      itself dates from 1930 (public domain in the US since 2026; Ogden died in 1957, so
+      life-plus-70 countries protect it until the end of 2027). Concepticon has two parts
+      (Ogden-1930-100, Ogden-1930-200) mapped to concept sets.
+
+  - id: wiktionary-1000-basic
+    name: 1000 basic English words (Wiktionary appendix)
+    wave: first
+    unit: forms
+    homepage: https://en.wiktionary.org/wiki/Appendix:1000_basic_English_words
+    download: "https://en.wiktionary.org/w/index.php?title=Appendix:1000_basic_English_words&oldid=78256317&action=raw"
+    format: wikitext
+    version: "rev-78256317 (Wiktionary page revision of 2024-02-26)"
+    licence: "CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL)"
+    redistributable: "yes"
+    used_by: [Q1]
+    checked: true
+    notes: >-
+      A list for learners and young readers, copied from Simple English Wikipedia's "List of
+      1000 basic words"; its original source is not given. Nouns are singular, verbs
+      infinitive. 999 links, 996 distinct words.
+
+  - id: basic-english-combined
+    name: Basic English combined wordlist (Simple English Wikipedia)
+    wave: first
+    unit: forms
+    homepage: https://simple.wikipedia.org/wiki/Wikipedia:Basic_English_combined_wordlist
+    download: "https://simple.wikipedia.org/w/index.php?title=Wikipedia:Basic_English_combined_wordlist&oldid=10726644&action=raw"
+    format: wikitext
+    version: "rev-10726644 (Simple English Wikipedia page revision of 2026-01-24)"
+    licence: "CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL)"
+    redistributable: "yes"
+    used_by: [Q1]
+    checked: true
+    notes: >-
+      The words a student knows when moving from Basic English to standard English, in five
+      groups: Basic (850), International, Addendum ("The Next Steps"), Compound, and Endings
+      (Basic words with -er, -ed, -ing, -ly, -s, un-). The page claims 2,626 words; it links
+      about 2,000. Compounds and endings show which Basic English words combine into new ones,
+      which bears directly on collapses.
+
+  - id: voa-special-english
+    name: VOA Special English Word Book (Simple English Wikipedia)
+    wave: first
+    unit: forms
+    homepage: https://simple.wikipedia.org/wiki/Wikipedia:VOA_Special_English_Word_Book
+    download: "https://simple.wikipedia.org/w/index.php?title=Wikipedia:VOA_Special_English_Word_Book&oldid=9852045&action=raw"
+    format: wikitext
+    version: "rev-9852045 (Simple English Wikipedia page revision of 2024-10-28)"
+    licence: "CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL); the word book is by Voice of America, a U.S. government broadcaster, and the page asks to credit \"VOA Special English\" and \"Voice of America\""
+    redistributable: "yes"
+    used_by: [Q1]
+    checked: true
+    notes: >-
+      About 1,500 words with part of speech and a definition written in Special English
+      itself, plus parts of speech, prefixes (dis-, pro-, re-, self-, un-), common expressions,
+      science words and organs. The definitions are a ready example of defining words with a
+      small vocabulary.
+
+  - id: simple-misspellings
+    name: Commonly misspelled words (Simple English Wikipedia)
+    wave: second
+    unit: forms
+    homepage: https://simple.wikipedia.org/wiki/Commonly_misspelled_words
+    download: "https://simple.wikipedia.org/w/index.php?title=Commonly_misspelled_words&oldid=10740719&action=raw"
+    format: wikitext
+    version: "rev-10740719 (Simple English Wikipedia page revision of 2026-02-05)"
+    licence: "CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL)"
+    redistributable: "yes"
+    used_by: [Q1]
+    checked: true
+    notes: >-
+      About 330 English words with their common misspellings, collected from AskOxford,
+      Merriam-Webster and others. A rough signal of where English spelling is hard to learn.
 
   - id: wold
     name: World Loanword Database (WOLD)
@@ -287,18 +360,20 @@ sources:
     name: NSM semantic primes
     wave: first
     unit: primes
-    homepage: https://intranet.secure.griffith.edu.au/schools-departments/natural-semantic-metalanguage
-    download: "entered by hand, starting from Concepticon list Goddard-2011-63"
-    format: TSV (hand-entered)
-    version: TODO
-    licence: TODO
-    redistributable: TODO
+    homepage: https://en.wikipedia.org/wiki/Natural_semantic_metalanguage#Semantic_primes
+    download: "https://en.wikipedia.org/w/index.php?title=Natural_semantic_metalanguage&oldid=1359753587&action=raw"
+    format: wikitext (table in the "Semantic primes" section)
+    version: "rev-1359753587 (Wikipedia page revision of 2026-06-17)"
+    licence: "CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL)"
+    redistributable: "yes"
     used_by: [Q1, Q3a]
-    checked: false
+    checked: true
     notes: >-
-      Concepticon's Goddard-2011-63 comes from the 2011 chart; a later chart (v19, April 2017)
-      is published as a PDF on the Griffith site. Decide which chart is the reference and add
-      the difference by hand, mapped to Concepticon and WordNet.
+      The 65 English exponents in 16 categories, adapted on Wikipedia from Levisen and Waters
+      (eds.) 2017. Each prime is a concept (kind prime) with its exponents as forms; allolexes
+      are written with "~" (SOMETHING~THING). The authority is the NSM chart published by
+      Griffith University (v19, April 2017); Concepticon has three older versions as concept
+      lists (Goddard-2001-42, Goddard-2002-59, Goddard-2011-63).
 
   - id: oewn
     name: Open English WordNet

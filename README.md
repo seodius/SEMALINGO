@@ -106,8 +106,12 @@ semalingo/
   writer.py           buffered, repeatable writes into the core tables
   languages.py        language codes (forms carry Glottocodes)
   matching.py         gloss matching: words of any source -> Concepticon concept sets
+  wikitext.py         reading word lists out of Wiktionary/Wikipedia wikitext
   loaders/            one loader per source: glottolog, concepticon, wold, clics, datsemshift, oewn,
-                      norare, concepticon-maps, subtlex-us/-nl/-uk and childlex (frequencies.py)
+                      norare, concepticon-maps, subtlex-us/-nl/-uk and childlex (frequencies.py),
+                      word lists from Wiktionary/Wikipedia (wordlists.py): Basic English, NSM
+                      primes, 1000 basic words, Basic English combined, VOA Special English,
+                      common misspellings
   frequency.py        spreadsheet reading and Zipf values for frequency tables
   graph/              graph projection (step 5)
   ops/                the six operations, with provenance on every result (step 6)

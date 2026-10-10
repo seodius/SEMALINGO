@@ -184,6 +184,15 @@ def concepticon_maps(folder: Path) -> None:
         (folder / name).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def wiki_page(source_id: str):
+    from tests.wiki_pages import WIKI_PAGES
+
+    def build(folder: Path) -> None:
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "page.wikitext").write_text(WIKI_PAGES[source_id], encoding="utf-8")
+    return build
+
+
 def xlsx(path: Path, header: list[str], rows: list[list]) -> None:
     import openpyxl
 
@@ -277,6 +286,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
 
 
 BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn, "norare": norare, "concepticon-maps": concepticon_maps}
+BUILDERS.update({sid: wiki_page(sid) for sid in ("basic-english", "wiktionary-1000-basic", "basic-english-combined", "voa-special-english", "simple-misspellings", "nsm-primes")})
 
 
 def install(raw_root: Path, source_id: str, ref: str) -> Path:

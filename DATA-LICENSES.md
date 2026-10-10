@@ -19,12 +19,15 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012) (`kuperman-aoa`) | TODO | TODO | no |
 | Test-based AoA norms for 44 thousand English word meanings (Brysbaert & Biemiller) (`test-based-aoa`) | TODO | TODO | no |
 | BasiLex lexicon (`basilex`) | INT licence agreement for non-commercial personal research (free); a commercial edition exists | no | no |
-| Basic English word list (`basic-english`) | TODO | TODO | no |
+| Basic English word list (Ogden's 850) (`basic-english`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |
+| 1000 basic English words (Wiktionary appendix) (`wiktionary-1000-basic`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |
+| Basic English combined wordlist (Simple English Wikipedia) (`basic-english-combined`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |
+| VOA Special English Word Book (Simple English Wikipedia) (`voa-special-english`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL); the word book is by Voice of America, a U.S. government broadcaster, and the page asks to credit "VOA Special English" and "Voice of America" | yes | yes |
 | World Loanword Database (WOLD) (`wold`) | CC BY 3.0 Germany | yes | yes |
 | Lexibank (lexibank-analysed) (`lexibank`) | CC BY 4.0 | yes | yes |
 | CLICS4 (Database of Cross-Linguistic Colexifications) (`clics`) | CC BY 4.0 | yes | yes |
 | DatSemShift (Database of Semantic Shifts), CLDF edition (`datsemshift`) | CC BY 4.0 | yes | yes |
-| NSM semantic primes (`nsm-primes`) | TODO | TODO | no |
+| NSM semantic primes (`nsm-primes`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |
 | Open English WordNet (`oewn`) | CC BY 4.0 | yes | yes |
 | SUMO and its WordNet mappings (`sumo`) | TODO | TODO | no |
 | Wordbank (`wordbank`) | CC BY 4.0, unless otherwise stated for a dataset | yes | no |
@@ -41,6 +44,7 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 
 | Source | Licence | Raw data redistributable | Verified |
 | --- | --- | --- | --- |
+| Commonly misspelled words (Simple English Wikipedia) (`simple-misspellings`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |
 | CLICS³ (Database of Cross-Linguistic Colexifications, third release) (`clics3`) | CC BY 4.0 (README) | yes | yes |
 | CHILDES / TalkBank (`childes`) | TODO | TODO | no |
 | AoA-32lang (age of acquisition of 299 words in 32 languages) (`aoa-32lang`) | TODO | TODO | no |
