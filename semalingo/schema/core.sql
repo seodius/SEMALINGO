@@ -10,6 +10,22 @@ CREATE TABLE IF NOT EXISTS sources (
     loaded_at    TIMESTAMP
 );
 
+-- Languages, dialects and families: a reference table filled from Glottolog. Forms point here
+-- through their language code, so counts by language family and the gap map can be computed.
+CREATE TABLE IF NOT EXISTS languages (
+    glottocode      TEXT PRIMARY KEY,
+    source_id       TEXT NOT NULL,
+    name            TEXT,
+    iso639_3        TEXT,
+    level           TEXT,                   -- language, dialect or family
+    family_id       TEXT,
+    family_name     TEXT,
+    parent_language TEXT,                   -- for a dialect: the language it belongs to
+    macroarea       TEXT,
+    latitude        DOUBLE,
+    longitude       DOUBLE
+);
+
 -- A written word in a language, as one source lists it.
 CREATE TABLE IF NOT EXISTS forms (
     form_id      TEXT PRIMARY KEY,

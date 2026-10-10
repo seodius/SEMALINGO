@@ -86,8 +86,8 @@ sources:
     wave: first
     unit: forms
     homepage: https://kdutch.ivdnt.org/wiki/Subtlex_NL
-    download: https://osf.io/3d8cx/
-    format: TODO
+    download: "https://osf.io/3d8cx/ (SUBTLEX-NL with pos and Zipf.xlsx, a copy is in conlang/downloads)"
+    format: XLSX with part of speech and Zipf values (37.7 MB)
     version: TODO
     licence: TODO
     redistributable: TODO
@@ -147,21 +147,21 @@ sources:
       machine-readable, so files and terms must be checked by hand.
 
   - id: basilex
-    name: BasiLex
+    name: BasiLex lexicon
     wave: first
     unit: lemmas
-    homepage: https://taalmaterialen.ivdnt.org/?p=1132
-    download: http://hdl.handle.net/10032/tm-a2-n4
-    format: FoLiA XML
-    version: "1.0"
-    licence: "Free (non-commercial edition) with a signed licence agreement; a commercial edition exists"
+    homepage: https://taalmaterialen.ivdnt.org/?p=1135
+    download: "http://hdl.handle.net/10032/tm-a2-k7 (BP_BasiLex-lexicon_NC.zip, a copy is in conlang/downloads)"
+    format: ZIP (236 KB; contents still to inspect)
+    version: "1.0.1"
+    licence: "Free for non-commercial use with a signed licence agreement; a commercial edition exists"
     redistributable: "no"
     used_by: [Q1]
     checked: false
     notes: >-
-      Dutch texts written for children aged 4 to 12 (11.5 million words); a separate BasiLex
-      lexicon with lemma frequencies exists. Redistribution terms are in the licence agreement,
-      which is not public; "no" is the safe assumption until it has been read.
+      Lemmas with frequencies from BasiLex, the 11.5-million-word corpus of Dutch texts written
+      for children aged 4 to 12. The lexicon is the part SEMALINGO needs; the full corpus has its
+      own licence page. Redistribution terms are in the licence agreement, which is not public.
 
   - id: basic-english
     name: Basic English word list
@@ -360,6 +360,84 @@ sources:
       are offered by their collector under a fair-use argument, which needs checking before
       anything derived is published. Reading RDS needs R or the pyreadr package.
 
+  - id: glottolog
+    name: Glottolog
+    wave: first
+    unit: other
+    homepage: https://glottolog.org
+    download: https://github.com/glottolog/glottolog-cldf/tree/v5.3/cldf
+    format: CLDF StructureDataset (languages.csv is loaded)
+    version: "v5.3 (git tag in glottolog/glottolog-cldf)"
+    licence: CC BY 4.0
+    redistributable: "yes"
+    used_by: [Q1, Q4, Q5]
+    checked: true
+    notes: >-
+      Languages, dialects and families with macroareas and coordinates, loaded into the
+      languages reference table: the basis for counts by language family and for the gap map.
+      The downloads page also offers CSV, SQL and RDF; CLDF releases are archived under DOI
+      10.5281/zenodo.3260727.
+
+  - id: subtlex-uk
+    name: SUBTLEX-UK
+    wave: first
+    unit: forms
+    homepage: TODO
+    download: "manual download: SUBTLEX-UK.zip (190 MB), a copy is in conlang/downloads"
+    format: ZIP (contents still to inspect)
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: >-
+      British English subtitle frequencies. Its children's-TV parts (CBeebies, CBBC) are the
+      English counterpart to BasiLex for "learnable at 12".
+
+  - id: childlex
+    name: childLex
+    wave: first
+    unit: forms
+    homepage: TODO
+    download: "manual download: file \"childlex\" (42.7 MB, no extension), a copy is in conlang/downloads"
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: German word frequencies from books for children aged 6 to 12; the German counterpart to BasiLex.
+
+  - id: nt2lex
+    name: NT2Lex (CEFRLex, Dutch as a second language)
+    wave: first
+    unit: forms
+    homepage: https://cental.uclouvain.be/cefrlex/download/
+    download: manual download from the CEFRLex download page
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q3b]
+    checked: false
+    notes: >-
+      Receptive vocabulary of Dutch learners, graded by CEFR level: the second-language source
+      for Q1's "learnable for second-language learners". The download page states no licence.
+
+  - id: efllex
+    name: EFLLex (CEFRLex, English as a foreign language)
+    wave: first
+    unit: forms
+    homepage: https://cental.uclouvain.be/cefrlex/download/
+    download: manual download from the CEFRLex download page
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q3b]
+    checked: false
+    notes: Receptive vocabulary of English learners, graded by CEFR level. The download page states no licence.
+
   # ---------- second wave ----------
 
   - id: childes
@@ -449,6 +527,96 @@ sources:
     used_by: [Q1]
     checked: false
     notes: Older psycholinguistic norms.
+
+  - id: flelex
+    name: FLELex (CEFRLex, French as a foreign language)
+    wave: second
+    unit: forms
+    homepage: https://cental.uclouvain.be/cefrlex/download/
+    download: manual download from the CEFRLex download page
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q3b]
+    checked: false
+    notes: French learner vocabulary graded by CEFR level. The download page states no licence.
+
+  - id: elelex
+    name: ELELex (CEFRLex, Spanish as a foreign language)
+    wave: second
+    unit: forms
+    homepage: https://cental.uclouvain.be/cefrlex/download/
+    download: manual download from the CEFRLex download page
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q3b]
+    checked: false
+    notes: Spanish learner vocabulary graded by CEFR level. The download page states no licence.
+
+  - id: svalex
+    name: SVALex (CEFRLex, Swedish as a second language, receptive)
+    wave: second
+    unit: forms
+    homepage: https://cental.uclouvain.be/cefrlex/download/
+    download: manual download from the CEFRLex download page
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q3b]
+    checked: false
+    notes: Swedish learner vocabulary graded by CEFR level. The download page states no licence.
+
+  - id: swellex
+    name: SweLLex (CEFRLex, Swedish as a second language, productive)
+    wave: second
+    unit: forms
+    homepage: https://cental.uclouvain.be/cefrlex/download/
+    download: manual download from the CEFRLex download page
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q3b]
+    checked: false
+    notes: Swedish learner vocabulary graded by CEFR level. The download page states no licence.
+
+  - id: phoible
+    name: PHOIBLE (phoneme inventories)
+    wave: second
+    unit: other
+    homepage: https://phoible.org
+    download: https://github.com/cldf-datasets/phoible/tree/v2.0.1/cldf
+    format: CLDF StructureDataset (languages, segments with features, inventory values)
+    version: "v2.0.1 (git tag in cldf-datasets/phoible)"
+    licence: TODO
+    redistributable: TODO
+    used_by: []
+    checked: false
+    notes: >-
+      Phoneme inventories of about 2,000 languages with distinctive features. Not lexical: for
+      choosing syllables that most speakers can pronounce. The CLDF metadata states no licence.
+      The phoible/static/data folder of the clld/phoible web app holds only the 2012 data and
+      bibliographies, not the current inventories.
+
+  - id: omw
+    name: Open Multilingual Wordnet
+    wave: second
+    unit: senses
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q5]
+    checked: false
+    notes: >-
+      Wordnets in many languages linked through the same interlingual index (ILI) that the Open
+      English WordNet loader already stores; cross-language bubbles for Q5 without embeddings.
 
   # ---------- Open Lexicon collection (generated by scripts/import_openlexicon.py from commit 9009f48) ----------
 

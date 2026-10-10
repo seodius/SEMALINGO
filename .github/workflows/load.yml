@@ -28,6 +28,13 @@ jobs:
           mkdir -p data
           echo "RUN=docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data semalingo:load" >> "$GITHUB_ENV"
 
+      - name: Fetch glottolog
+        timeout-minutes: 10
+        run: $RUN fetch glottolog
+      - name: Load glottolog
+        timeout-minutes: 15
+        run: $RUN load glottolog
+
       - name: Fetch datsemshift
         timeout-minutes: 10
         run: $RUN fetch datsemshift

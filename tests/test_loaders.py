@@ -136,6 +136,17 @@ class DuckDBMatchesSQLiteTest(LoaderTestCase):
             duck.close()
 
 
+class GlottologTest(LoaderTestCase):
+    def test_languages_get_family_names(self):
+        counts = self.load("glottolog")
+        self.assertEqual(counts["languages"], 3)
+        self.assertEqual(
+            self.rows("SELECT name, iso639_3, family_name, macroarea FROM languages WHERE glottocode = 'dutc1256'"),
+            [("Dutch", "nld", "Indo-European", "Eurasia")],
+        )
+        self.assertEqual(self.value("SELECT parent_language FROM languages WHERE glottocode = 'zeeu1238'"), "dutc1256")
+
+
 class RawIntegrityTest(LoaderTestCase):
     def test_load_refuses_changed_raw_files(self):
         item = loader("datsemshift")

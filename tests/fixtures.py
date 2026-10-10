@@ -113,6 +113,17 @@ def datsemshift(folder: Path) -> None:
     ])
 
 
+def glottolog(folder: Path) -> None:
+    columns = ["ID", "Name", "Macroarea", "Latitude", "Longitude", "Glottocode", "ISO639P3code", "Level", "Family_ID", "Language_ID"]
+    write_cldf(folder, "cldf-metadata.json", [
+        (table_spec("languages.csv", columns, "LanguageTable"), [
+            {"ID": "indo1319", "Name": "Indo-European", "Glottocode": "indo1319", "Level": "family"},
+            {"ID": "dutc1256", "Name": "Dutch", "Macroarea": "Eurasia", "Latitude": "52.0", "Longitude": "5.0", "Glottocode": "dutc1256", "ISO639P3code": "nld", "Level": "language", "Family_ID": "indo1319"},
+            {"ID": "zeeu1238", "Name": "Zeeuws", "Glottocode": "zeeu1238", "Level": "dialect", "Family_ID": "indo1319", "Language_ID": "dutc1256"},
+        ], False),
+    ])
+
+
 OEWN_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <LexicalResource>
   <Lexicon id="oewn" label="Open English WordNet" language="en" version="2025">
@@ -151,7 +162,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
         handle.write(OEWN_XML)
 
 
-BUILDERS = {"concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn}
+BUILDERS = {"glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn}
 
 
 def install(raw_root: Path, source_id: str, ref: str) -> Path:

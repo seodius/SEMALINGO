@@ -6,8 +6,8 @@ shifts, word associations, ontologies) into one graph for analysis. It is built 
 answer concrete design questions for a constructed language, then opened to researchers
 and students in linguistics, ontology and AI.
 
-**Status:** early. The registry, core schema, raw layer and five loaders work (Concepticon,
-WOLD, CLICS4, DatSemShift, Open English WordNet); mappings beyond the sources' own
+**Status:** early. The registry, core schema, raw layer and six loaders work (Glottolog,
+Concepticon, WOLD, CLICS4, DatSemShift, Open English WordNet); mappings beyond the sources' own
 Concepticon links, the graph and the operations follow (see [the build steps](#build-steps)).
 
 ## Principles
@@ -83,7 +83,7 @@ semalingo/
   cldf.py             a small CLDF reader (standard library only)
   fetch.py            downloads into the raw layer
   writer.py           buffered, repeatable writes into the core tables
-  loaders/            one loader per source: concepticon, wold, clics, datsemshift, oewn
+  loaders/            one loader per source: glottolog, concepticon, wold, clics, datsemshift, oewn
   graph/              graph projection (step 5)
   ops/                the six operations, with provenance on every result (step 6)
   mcp_server/         MCP server over the operations (step 7)

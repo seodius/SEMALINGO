@@ -17,7 +17,7 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | Concreteness ratings for 40 thousand English lemmas (Brysbaert et al.) (`brysbaert-concreteness`) | TODO | TODO | no |
 | Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012) (`kuperman-aoa`) | TODO | TODO | no |
 | Test-based AoA norms for 44 thousand English word meanings (Brysbaert & Biemiller) (`test-based-aoa`) | TODO | TODO | no |
-| BasiLex (`basilex`) | Free (non-commercial edition) with a signed licence agreement; a commercial edition exists | no | no |
+| BasiLex lexicon (`basilex`) | Free for non-commercial use with a signed licence agreement; a commercial edition exists | no | no |
 | Basic English word list (`basic-english`) | TODO | TODO | no |
 | World Loanword Database (WOLD) (`wold`) | CC BY 3.0 Germany | yes | yes |
 | Lexibank (lexibank-analysed) (`lexibank`) | CC BY 4.0 | yes | yes |
@@ -30,6 +30,11 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | Small World of Words (`swow`) | CC BY-NC-ND 3.0 Unported (as named on the research page) | TODO | no |
 | MorphoLex-en (derivational morphology for ~70,000 English words) (`morpholex-en`) | CC BY-NC-SA 4.0 | yes | yes |
 | WorldLex (blog, Twitter and newspaper word frequencies, 64 languages) (`worldlex`) | TODO | TODO | no |
+| Glottolog (`glottolog`) | CC BY 4.0 | yes | yes |
+| SUBTLEX-UK (`subtlex-uk`) | TODO | TODO | no |
+| childLex (`childlex`) | TODO | TODO | no |
+| NT2Lex (CEFRLex, Dutch as a second language) (`nt2lex`) | TODO | TODO | no |
+| EFLLex (CEFRLex, English as a foreign language) (`efllex`) | TODO | TODO | no |
 
 ## Second wave
 
@@ -41,6 +46,12 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | ConceptNet (`conceptnet`) | TODO | TODO | no |
 | TinyDialogues (`tinydialogues`) | TODO | TODO | no |
 | MRC Psycholinguistic Database (`mrc`) | TODO | TODO | no |
+| FLELex (CEFRLex, French as a foreign language) (`flelex`) | TODO | TODO | no |
+| ELELex (CEFRLex, Spanish as a foreign language) (`elelex`) | TODO | TODO | no |
+| SVALex (CEFRLex, Swedish as a second language, receptive) (`svalex`) | TODO | TODO | no |
+| SweLLex (CEFRLex, Swedish as a second language, productive) (`swellex`) | TODO | TODO | no |
+| PHOIBLE (phoneme inventories) (`phoible`) | TODO | TODO | no |
+| Open Multilingual Wordnet (`omw`) | TODO | TODO | no |
 | AoA_FamConcept_1225 (Open Lexicon) (`aoa-famconcept-1225`) | TODO | TODO | no |
 | AoA_FreqSub_1493 (Open Lexicon) (`aoa-freqsub-1493`) | TODO | TODO | no |
 | Assoc_366 (Open Lexicon) (`assoc-366`) | TODO | TODO | no |

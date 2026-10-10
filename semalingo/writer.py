@@ -13,6 +13,10 @@ import tempfile
 from .registry import Source
 
 COLUMNS = {
+    "languages": (
+        "glottocode", "source_id", "name", "iso639_3", "level", "family_id", "family_name",
+        "parent_language", "macroarea", "latitude", "longitude",
+    ),
     "forms": ("form_id", "source_id", "language", "written_form"),
     "concepts": ("concept_id", "source_id", "kind", "gloss"),
     "relations": ("source_id", "from_id", "to_id", "relation_type", "weight"),
@@ -21,6 +25,7 @@ COLUMNS = {
 }
 # Positions of the primary-key columns in COLUMNS, used to drop duplicates before inserting.
 KEYS = {
+    "languages": (0,),
     "forms": (0,),
     "concepts": (0,),
     "relations": (0, 1, 2, 3),
@@ -82,6 +87,11 @@ class Writer:
         self.buffers: dict[str, list[tuple]] = {table: [] for table in COLUMNS}
 
     # --- rows -------------------------------------------------------------
+    def language(self, glottocode: str, **fields) -> None:
+        row = {column: None for column in COLUMNS["languages"]}
+        row.update(fields, glottocode=glottocode, source_id=self.source.id)
+        self.buffers["languages"].append(tuple(row[c] for c in COLUMNS["languages"]))
+
     def concept(self, concept_id: str, kind: str, gloss: str | None = None) -> None:
         self.buffers["concepts"].append((concept_id, self.source.id, kind, gloss))
 
@@ -112,7 +122,7 @@ class Writer:
     # --- lifecycle --------------------------------------------------------
     def clear(self) -> None:
         sid = self.source.id
-        for table in ("forms", "concepts", "relations", "properties"):
+        for table in ("languages", "forms", "concepts", "relations", "properties"):
             self.conn.execute(f"DELETE FROM {table} WHERE source_id = ?", [sid])
         self.conn.execute("DELETE FROM mappings WHERE method = 'imported' AND from_id LIKE ?", [sid + ":%"])
         self.conn.execute("DELETE FROM sources WHERE source_id = ?", [sid])
@@ -134,7 +144,7 @@ class Writer:
 def source_counts(conn, source_id: str) -> dict[str, int]:
     """Rows a source has in each core table (imported mappings counted by their from_id)."""
     counts = {}
-    for table in ("forms", "concepts", "relations", "properties"):
+    for table in ("languages", "forms", "concepts", "relations", "properties"):
         counts[table] = conn.execute(f"SELECT COUNT(*) FROM {table} WHERE source_id = ?", [source_id]).fetchone()[0]
     counts["mappings"] = conn.execute(
         "SELECT COUNT(*) FROM mappings WHERE method = 'imported' AND from_id LIKE ?", [source_id + ":%"]
