@@ -10,6 +10,7 @@ from semalingo.db import apply_schema
 from semalingo.loaders import LOADERS
 from semalingo.raw import MANIFEST
 from semalingo.registry import load_registry
+from semalingo.writer import is_duckdb
 
 from tests import fixtures
 
@@ -121,6 +122,8 @@ class DuckDBMatchesSQLiteTest(LoaderTestCase):
     def test_same_counts_on_both_engines(self):
         duck = duckdb.connect(":memory:")
         apply_schema(duck)
+        self.assertTrue(is_duckdb(duck), "DuckDB connections must take the bulk-insert path")
+        self.assertFalse(is_duckdb(self.conn))
         try:
             for source_id in sorted(LOADERS):
                 item = loader(source_id)

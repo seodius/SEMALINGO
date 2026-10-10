@@ -42,7 +42,9 @@ def dedupe(table: str, rows: list[tuple]) -> list[tuple]:
 
 
 def is_duckdb(conn) -> bool:
-    return type(conn).__module__.split(".")[0] == "duckdb"
+    # The connection class lives in DuckDB's compiled module, "_duckdb" in recent versions.
+    kind = type(conn)
+    return kind.__name__ == "DuckDBPyConnection" or "duckdb" in kind.__module__.lower()
 
 
 def bulk_insert(conn, table: str, columns: tuple[str, ...], rows: list[tuple]) -> None:
