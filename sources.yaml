@@ -1,0 +1,423 @@
+# SEMALINGO source registry: one entry per dataset.
+#
+# This file is the source of truth for what SEMALINGO loads and under which terms.
+# DATA-LICENSES.md is generated from it (`semalingo licences --write`).
+#
+# Fields
+#   id               slug, also the prefix of every node id from this source ("<id>:<local id>")
+#   name             human-readable name
+#   wave             first | second | parked
+#   unit             what one row is: forms | lemmas | concepts | meanings | senses | classes |
+#                    primes | properties | associations | aggregates | other
+#   homepage         where the source is described
+#   download         where the raw data comes from
+#   format           raw format
+#   version          pinned version, or TODO
+#   licence          licence of the raw data, or TODO
+#   redistributable  yes | no | TODO  (may the raw data be redistributed?)
+#   used_by          exit questions this source serves: Q1, Q3a, Q3b, Q4, Q5
+#   checked          true once every field above has been verified against the source itself
+#   notes            free text
+#
+# Nothing is checked yet: every entry stays `checked: false` until its fields have been
+# verified on the source's own pages. Raw data is never committed to this repository.
+
+sources:
+
+  # ---------- first wave ----------
+
+  - id: concepticon
+    name: Concepticon
+    wave: first
+    unit: concepts
+    homepage: https://concepticon.clld.org
+    download: https://github.com/concepticon/concepticon-data
+    format: CLDF / TSV
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q3a, Q4, Q5]
+    checked: false
+    notes: Pivot for the concept side; Wordbank uni-lemmas and other lists map onto it.
+
+  - id: norare
+    name: NoRaRe (Norms, Ratings and Relations)
+    wave: first
+    unit: properties
+    homepage: https://norare.clld.org
+    download: https://github.com/concepticon/norare-data
+    format: CLDF / TSV
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Norms already mapped to Concepticon concept sets; curated with pynorare.
+
+  - id: subtlex-us
+    name: SUBTLEX-US
+    wave: first
+    unit: forms
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Subtitle word frequencies, American English.
+
+  - id: subtlex-nl
+    name: SUBTLEX-NL
+    wave: first
+    unit: forms
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Subtitle word frequencies, Dutch.
+
+  - id: brysbaert-concreteness
+    name: Concreteness ratings for English (Brysbaert et al.)
+    wave: first
+    unit: forms
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Concreteness as its own axis, so stability can be judged separately for concrete and abstract candidates.
+
+  - id: kuperman-aoa
+    name: Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012)
+    wave: first
+    unit: forms
+    homepage: https://macsphere.mcmaster.ca/handle/11375/22967
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q3a]
+    checked: false
+    notes: Rated AoA for 30,121 English content words (nouns, verbs, adjectives).
+
+  - id: test-based-aoa
+    name: Test-based AoA norms for 44 thousand English word meanings (Brysbaert & Biemiller)
+    wave: first
+    unit: meanings
+    homepage: https://osf.io/kz2px
+    download: https://osf.io/kz2px
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Per meaning, by school grade; the main source for "learnable at 12".
+
+  - id: basilex
+    name: BasiLex
+    wave: first
+    unit: lemmas
+    homepage: https://taalmaterialen.ivdnt.org/?p=1132
+    download: http://hdl.handle.net/10032/tm-a2-n4
+    format: FoLiA XML
+    version: "1.0"
+    licence: Free for non-commercial use with a signed licence agreement
+    redistributable: "no"
+    used_by: [Q1]
+    checked: false
+    notes: Dutch texts written for children aged 4 to 12 (11.5 million words); a separate BasiLex lexicon exists.
+
+  - id: basic-english
+    name: Basic English word list
+    wave: first
+    unit: forms
+    homepage: https://en.wiktionary.org/wiki/Appendix:Basic_English_word_list
+    download: https://en.wiktionary.org/wiki/Appendix:Basic_English_word_list
+    format: HTML
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Seed list for lexeme candidates.
+
+  - id: wold
+    name: World Loanword Database (WOLD)
+    wave: first
+    unit: meanings
+    homepage: https://wold.clld.org
+    download: TODO
+    format: CLDF
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Borrowability and stability of meanings.
+
+  - id: lexibank
+    name: Lexibank
+    wave: first
+    unit: meanings
+    homepage: https://github.com/lexibank
+    download: TODO
+    format: CLDF
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q5]
+    checked: false
+    notes: Cross-linguistic word lists; licences differ per dataset in the collection.
+
+  - id: clics
+    name: CLICS (Database of Cross-Linguistic Colexifications)
+    wave: first
+    unit: concepts
+    homepage: https://clics.clld.org
+    download: TODO
+    format: CLDF
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q4]
+    checked: false
+    notes: Colexification network; undirected edges weighted by language families.
+
+  - id: datsemshift
+    name: DatSemShift (Database of Semantic Shifts), CLDF edition
+    wave: first
+    unit: concepts
+    homepage: https://datsemshift.ru
+    download: https://github.com/lexibank/datsemshift
+    format: CLDF
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Directed semantic shifts between concepts; for stability.
+
+  - id: nsm-primes
+    name: NSM semantic primes
+    wave: first
+    unit: primes
+    homepage: TODO
+    download: entered by hand
+    format: TSV (hand-entered)
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q3a]
+    checked: false
+    notes: The prime list and its exponents, entered by hand and mapped to Concepticon and WordNet manually.
+
+  - id: oewn
+    name: Open English WordNet
+    wave: first
+    unit: senses
+    homepage: https://github.com/globalwordnet/english-wordnet
+    download: https://github.com/globalwordnet/english-wordnet
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q4]
+    checked: false
+    notes: Senses, hypernymy and derivational links.
+
+  - id: sumo
+    name: SUMO and its WordNet mappings
+    wave: first
+    unit: classes
+    homepage: https://github.com/ontologyportal/sumo
+    download: https://github.com/ontologyportal/sumo
+    format: SUO-KIF + mapping files
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q4]
+    checked: false
+    notes: Ontology side; the SUMO-WordNet mappings are imported as mapping edges.
+
+  - id: wordbank
+    name: Wordbank
+    wave: first
+    unit: aggregates
+    homepage: https://wordbank.stanford.edu
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q3a]
+    checked: false
+    notes: Toddler vocabulary (CDI) across languages; loaded as aggregates by age; uni-lemmas map to Concepticon.
+
+  - id: swow
+    name: Small World of Words
+    wave: first
+    unit: associations
+    homepage: https://smallworldofwords.org
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q4]
+    checked: false
+    notes: Word association norms (cue to response), English and Dutch.
+
+  # ---------- second wave ----------
+
+  - id: childes
+    name: CHILDES / TalkBank
+    wave: second
+    unit: aggregates
+    homepage: TODO
+    download: TODO
+    format: CHAT
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q3a]
+    checked: false
+    notes: First of the second wave; affix emergence by age from the morphology tier; aggregates only; check usage rules.
+
+  - id: aoa-22-languages
+    name: AoA norms for nouns and verbs in 22 languages
+    wave: second
+    unit: forms
+    homepage: https://reff.f.bg.ac.rs/handle/123456789/4649
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: 158 nouns and 142 verbs; cross-cultural check on learnability.
+
+  - id: babelnet
+    name: BabelNet
+    wave: second
+    unit: senses
+    homepage: https://babelnet.org
+    download: https://babelnet.org
+    format: TODO
+    version: TODO
+    licence: BabelNet Non-Commercial License (attribution, non-commercial, share-alike)
+    redistributable: "no"
+    used_by: [Q4, Q5]
+    checked: false
+    notes: Neighbourhoods only (nodes within 2 hops of the pivot set); adaptations may only go to research institutions.
+
+  - id: conceptnet
+    name: ConceptNet
+    wave: second
+    unit: other
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1, Q4]
+    checked: false
+    notes: Neighbourhoods only; its relation types are a list of candidate collapse directions.
+
+  - id: tinydialogues
+    name: TinyDialogues
+    wave: second
+    unit: aggregates
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q5]
+    checked: false
+    notes: Frequency aggregates only.
+
+  - id: mrc
+    name: MRC Psycholinguistic Database
+    wave: second
+    unit: forms
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: Older psycholinguistic norms.
+
+  # ---------- parked ----------
+
+  - id: blimp
+    name: BLiMP
+    wave: parked
+    unit: other
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: []
+    checked: false
+    notes: Minimal sentence pairs; belongs to a later grammar layer.
+
+  - id: devbench
+    name: DevBench
+    wave: parked
+    unit: other
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: []
+    checked: false
+    notes: Multimodal benchmark; not lexical.
+
+  - id: babyview
+    name: BabyView
+    wave: parked
+    unit: other
+    homepage: https://arxiv.org/abs/2406.10447
+    download: Databrary (restricted)
+    format: video + transcripts
+    version: TODO
+    licence: Restricted access via Databrary; requires authorized-investigator status
+    redistributable: "no"
+    used_by: []
+    checked: false
+    notes: Out of reach for independent researchers without an institutional sponsor.
+
+  - id: cogsci
+    name: CogSci (dataset not yet identified)
+    wave: parked
+    unit: other
+    homepage: TODO
+    download: TODO
+    format: TODO
+    version: TODO
+    licence: TODO
+    redistributable: TODO
+    used_by: []
+    checked: false
+    notes: Which dataset is meant is still an open question.

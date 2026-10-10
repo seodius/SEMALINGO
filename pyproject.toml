@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semalingo"
+version = "0.0.1"
+description = "Semantic and linguistic datasets merged into one graph for analysis."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+semalingo = "semalingo.cli:main"
+
+[project.urls]
+Repository = "https://github.com/seodius/SEMALINGO"
+
+[tool.setuptools.packages.find]
+include = ["semalingo*"]
+
+[tool.setuptools.package-data]
+semalingo = ["schema/*.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
