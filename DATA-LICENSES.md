@@ -11,6 +11,7 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | Source | Licence | Raw data redistributable | Verified |
 | --- | --- | --- | --- |
 | Concepticon (`concepticon`) | CC BY 4.0 | yes | yes |
+| Concepticon gloss lookup tables (`concepticon-maps`) | CC BY 4.0 (.zenodo.json and metadata.json of concepticon-data) | yes | yes |
 | NoRaRe (Norms, Ratings and Relations) (`norare`) | CC BY 4.0 (norare-cldf LICENSE file and CLDF metadata); the curation repository norare-data is CC BY-NC 4.0 | yes | yes |
 | SUBTLEX-US (`subtlex-us`) | CC BY-SA, as stated in Open Lexicon's SUBTLEX-US readme | yes | no |
 | SUBTLEX-NL (`subtlex-nl`) | TODO | TODO | no |
@@ -40,6 +41,7 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 
 | Source | Licence | Raw data redistributable | Verified |
 | --- | --- | --- | --- |
+| CLICS³ (Database of Cross-Linguistic Colexifications, third release) (`clics3`) | CC BY 4.0 (README) | yes | yes |
 | CHILDES / TalkBank (`childes`) | TODO | TODO | no |
 | AoA-32lang (age of acquisition of 299 words in 32 languages) (`aoa-32lang`) | TODO | TODO | no |
 | BabelNet (`babelnet`) | BabelNet Non-Commercial License (attribution, non-commercial, share-alike) | no | no |

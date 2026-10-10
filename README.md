@@ -6,10 +6,11 @@ shifts, word associations, ontologies) into one graph for analysis. It is built 
 answer concrete design questions for a constructed language, then opened to researchers
 and students in linguistics, ontology and AI.
 
-**Status:** early. The registry, core schema, raw layer and eleven loaders work (Glottolog,
-Concepticon, WOLD, CLICS4, DatSemShift, Open English WordNet, NoRaRe, SUBTLEX-US/-NL/-UK,
-childLex); mappings beyond the sources' own Concepticon links, the graph and the operations
-follow (see [the build steps](#build-steps)).
+**Status:** early. The registry, core schema, raw layer and twelve loaders work (Glottolog,
+Concepticon with its gloss lookup tables, WOLD, CLICS4, DatSemShift, Open English WordNet,
+NoRaRe, SUBTLEX-US/-NL/-UK, childLex), and so does a first mapping pass: gloss matching of
+any source's words to Concepticon. Reviewed mappings, the graph and the operations follow
+(see [the build steps](#build-steps)).
 
 ## Principles
 
@@ -75,6 +76,16 @@ semalingo add-file subtlex-uk SUBTLEX-UK_all.xlsx
 semalingo add-file childlex childlex
 ```
 
+Words from any loaded source can be linked to Concepticon concept sets through Concepticon's
+own gloss lookup tables (step 4, first pass). Each link is a mapping with method `gloss`, type
+`close` and a confidence: the share of the gloss's uses in Concepticon's lists that go to that
+concept set ("watch" splits over WATCH, WRISTWATCH, LOOK, CLOCK).
+
+```bash
+semalingo build concepticon concepticon-maps
+semalingo match subtlex-uk subtlex-nl childlex oewn
+```
+
 `fetch` downloads only what a loader needs (selected CLDF tables at a pinned git tag, or a
 pinned release file) into `data/raw/<source>/<version>/`, with `SOURCE.json` and a
 `SHA256SUMS` manifest; `load` refuses raw files that no longer match their checksums.
@@ -93,8 +104,10 @@ semalingo/
   cldf.py             a small CLDF reader (standard library only)
   fetch.py            downloads into the raw layer
   writer.py           buffered, repeatable writes into the core tables
+  languages.py        language codes (forms carry Glottocodes)
+  matching.py         gloss matching: words of any source -> Concepticon concept sets
   loaders/            one loader per source: glottolog, concepticon, wold, clics, datsemshift, oewn,
-                      norare, subtlex-us/-nl/-uk and childlex (frequencies.py)
+                      norare, concepticon-maps, subtlex-us/-nl/-uk and childlex (frequencies.py)
   frequency.py        spreadsheet reading and Zipf values for frequency tables
   graph/              graph projection (step 5)
   ops/                the six operations, with provenance on every result (step 6)

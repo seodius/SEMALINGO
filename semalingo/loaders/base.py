@@ -80,6 +80,13 @@ class CLDFLoader(Loader):
     metadata_path: ClassVar[str] = "cldf/cldf-metadata.json"
     tables: ClassVar[tuple[str, ...] | None] = None  # file names to fetch; None = all
 
+    def is_fetched(self, raw_root: Path) -> bool:
+        """Also False when a loader now needs a table that an earlier fetch did not download."""
+        if not super().is_fetched(raw_root):
+            return False
+        folder = self.raw_folder(raw_root)
+        return all((folder / t).exists() or (folder / (t + ".zip")).exists() for t in self.tables or ())
+
     def download(self, folder: Path) -> None:
         files = fetch_cldf(self.repo, self.ref, self.metadata_path, self.tables, folder)
         write_source_info(folder, source=self.source_id, repo=self.repo, ref=self.ref, files=files)

@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS languages (
 CREATE TABLE IF NOT EXISTS forms (
     form_id      TEXT PRIMARY KEY,
     source_id    TEXT NOT NULL,
-    language     TEXT NOT NULL,              -- Glottocode or ISO 639-3
+    language     TEXT NOT NULL,              -- Glottocode (a source's own code only when it has none)
     written_form TEXT NOT NULL
 );
 
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS property_types (
     statistic    TEXT,                       -- mean, count, percentage, rank, zipf, ...
     category     TEXT,                       -- norms (corpora, lists), ratings (people) or relations
     method       TEXT,                       -- users, corpus, meta, ...
-    language     TEXT,                       -- Glottocode or ISO 639-3, when the measure is for one language
+    language     TEXT,                       -- Glottocode, when the measure is for one language
     description  TEXT,
     PRIMARY KEY (source_id, property)
 );

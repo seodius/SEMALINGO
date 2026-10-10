@@ -64,6 +64,26 @@ class ConcepticonTest(LoaderTestCase):
         self.assertEqual(self.value("SELECT weight FROM relations WHERE relation_type = 'linked'"), 2.0)
         self.assertEqual(self.value("SELECT value_text FROM properties WHERE node_id = 'concepticon:list/Goddard-2011-63' AND property = 'tags'"), "primes; nsm")
 
+    def test_glosses_in_several_languages(self):
+        counts = self.load("concepticon")
+        self.assertEqual(counts["forms"], 3)
+        self.assertEqual(self.value("SELECT written_form FROM forms WHERE language = 'dutc1256'"), "oog")
+        self.assertEqual(
+            self.rows("SELECT to_id, relation_type FROM relations WHERE from_id = 'concepticon:gloss/Ogden-1930-200-1-2' ORDER BY relation_type"),
+            [("concepticon:1209", "expresses"), ("concepticon:list/Ogden-1930-200", "in_list")],
+        )
+        # an unmapped gloss is kept, without an "expresses" edge
+        self.assertEqual(self.value("SELECT COUNT(*) FROM relations WHERE from_id = 'concepticon:gloss/Ogden-1930-200-2-1'"), 1)
+
+    def test_fetch_again_when_a_needed_table_is_missing(self):
+        item = loader("concepticon")
+        folder = fixtures.install(self.raw, "concepticon", item.ref)
+        self.assertTrue(item.is_fetched(self.raw))
+        (folder / "glosses.csv").unlink()
+        from semalingo.raw import write_checksums
+        write_checksums(folder)
+        self.assertFalse(item.is_fetched(self.raw))
+
     def test_reloading_replaces_rows(self):
         first = self.load("concepticon")
         second = loader("concepticon").load(self.conn, self.raw)
@@ -151,7 +171,7 @@ class FrequencyLoadersTest(LoaderTestCase):
     def test_subtlex_nl_skips_punctuation_and_numbers(self):
         counts = self.load("subtlex-nl")
         self.assertEqual(counts["forms"], 2)
-        self.assertEqual(self.value("SELECT language FROM forms WHERE form_id = 'subtlex-nl:oog'"), "nld")
+        self.assertEqual(self.value("SELECT language FROM forms WHERE form_id = 'subtlex-nl:oog'"), "dutc1256")
         self.assertEqual(self.value("SELECT value_text FROM properties WHERE node_id = 'subtlex-nl:oog' AND property = 'dominant_pos'"), "N")
         zipf = dict(self.rows("SELECT node_id, value_num FROM properties WHERE property = 'zipf'"))
         self.assertGreater(zipf["subtlex-nl:ik"], zipf["subtlex-nl:oog"])
@@ -199,6 +219,40 @@ class NorareTest(LoaderTestCase):
             self.rows("SELECT property, construct FROM property_types WHERE source_id = 'subtlex-nl' AND property IN ('zipf', 'cd_count') ORDER BY property"),
             [("cd_count", "contextual diversity"), ("zipf", "frequency")],
         )
+
+
+class GlossMatchingTest(LoaderTestCase):
+    def test_lookup_tables_give_shares_per_gloss(self):
+        counts = self.load("concepticon-maps")
+        self.assertEqual(counts["forms"], 7)  # en: eye, eyes, see, watch; nl: oog, zien, kijken
+        shares = dict(self.rows("SELECT to_id, confidence FROM mappings WHERE from_id = 'concepticon-maps:en/watch'"))
+        self.assertEqual(shares, {"concepticon:1650": 0.7, "concepticon:3349": 0.3})
+        self.assertEqual(self.value("SELECT language FROM forms WHERE form_id = 'concepticon-maps:nl/kijken'"), "dutc1256")
+
+    def test_gloss_keys(self):
+        from semalingo.matching import gloss_keys
+        self.assertEqual(gloss_keys("the Eyes", "stan1293"), ["eyes"])
+        self.assertEqual(gloss_keys("to see (perceive)", "stan1293"), ["see"])
+        self.assertEqual(gloss_keys("zien, kijken", "dutc1256"), ["zien", "kijken"])
+        self.assertEqual(gloss_keys("de ogen", "dutc1256"), ["de ogen"])  # leading words are only stripped for English
+        self.assertEqual(gloss_keys("anxiety, worry", "stan1293", split=False), ["anxiety, worry"])
+
+    def test_words_of_other_sources_get_gloss_mappings(self):
+        from semalingo.matching import build_index, match_source
+        self.load("concepticon-maps")
+        self.load("subtlex-nl")
+        self.load("oewn")
+        index = build_index(self.conn)
+        self.assertEqual(match_source(self.conn, "subtlex-nl", index), {"forms": 2, "matched": 1, "mappings": 1})
+        self.assertEqual(
+            self.rows("SELECT to_id, mapping_type, confidence, method FROM mappings WHERE from_id = 'subtlex-nl:oog'"),
+            [("concepticon:1209", "close", 1.0, "gloss")],
+        )
+        result = match_source(self.conn, "oewn", index, min_share=0.5)
+        self.assertEqual(result["matched"], 2)  # eye, see; not sight
+        # matching again replaces the earlier gloss mappings
+        self.assertEqual(match_source(self.conn, "oewn", index, min_share=0.5), result)
+        self.assertEqual(self.value("SELECT COUNT(*) FROM mappings WHERE method = 'gloss' AND from_id LIKE 'oewn:%'"), 2)
 
 
 class ManualSourceTest(LoaderTestCase):

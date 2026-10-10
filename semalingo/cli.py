@@ -154,6 +154,27 @@ def cmd_stats(args) -> int:
     return 0
 
 
+def cmd_match(args) -> int:
+    from .db import init_db
+    from .matching import INDEX_SOURCE, build_index, match_source
+
+    conn = init_db(args.db)
+    try:
+        index = build_index(conn)
+        if not index:
+            raise RuntimeError(f"no gloss lookup loaded; run: semalingo build {INDEX_SOURCE}")
+        for source_id in args.sources:
+            result = timed(f"match {source_id}", lambda: match_source(conn, source_id, index, args.min_share, args.top))
+            print(
+                f"  {source_id}: {result['matched']} of {result['forms']} forms matched, "
+                f"{result['mappings']} gloss mappings to Concepticon",
+                flush=True,
+            )
+    finally:
+        conn.close()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="semalingo", description=__doc__)
     parser.add_argument("--version", action="version", version=f"semalingo {__version__}")
@@ -199,6 +220,13 @@ def build_parser() -> argparse.ArgumentParser:
     with_sources(p)
     p.add_argument("--db", type=Path, default=DEFAULT_DB)
     p.set_defaults(func=lambda a: cmd_load(a, fetch_first=True))
+
+    p = sub.add_parser("match", help="link the words of loaded sources to Concepticon concept sets by gloss")
+    p.add_argument("sources", nargs="+", help="source ids whose forms to match, e.g. subtlex-nl oewn")
+    p.add_argument("--min-share", type=float, default=0.05, help="drop concept sets with a smaller share of the gloss's uses")
+    p.add_argument("--top", type=int, default=5, help="keep at most this many concept sets per word")
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_match)
 
     p = sub.add_parser("stats", help="row counts per loaded source")
     p.add_argument("--db", type=Path, default=DEFAULT_DB)

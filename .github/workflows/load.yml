@@ -12,6 +12,7 @@ on:
       - "semalingo/cldf.py"
       - "semalingo/fetch.py"
       - "semalingo/writer.py"
+      - "semalingo/matching.py"
       - "semalingo/schema/**"
       - "Dockerfile"
       - ".github/workflows/load.yml"
@@ -76,6 +77,21 @@ jobs:
       - name: Load norare
         timeout-minutes: 15
         run: $RUN load norare
+
+      - name: Fetch concepticon-maps
+        timeout-minutes: 10
+        run: $RUN fetch concepticon-maps
+      - name: Load concepticon-maps
+        timeout-minutes: 15
+        run: $RUN load concepticon-maps
+
+      - name: Match WordNet words to Concepticon by gloss
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -o pipefail
+          $RUN match oewn | tee match.txt
+          grep -v '\.\.\.$' match.txt | sed 's/^/::notice title=match::/'
 
       - name: Report
         if: always()

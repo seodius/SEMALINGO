@@ -1,6 +1,9 @@
-"""Concepticon: concept sets, concept lists and the relations between concept sets.
+"""Concepticon: concept sets, concept lists, the relations between concept sets, and the words
+that the concept lists use for each concept set, in 56 languages.
 
-Node ids: concept sets are "concepticon:<id>", concept lists "concepticon:list/<list id>".
+Node ids: concept sets are "concepticon:<id>", concept lists "concepticon:list/<list id>",
+words "concepticon:gloss/<gloss id>" (forms, with "expresses" to their concept set and
+"in_list" to the list they come from).
 """
 
 from __future__ import annotations
@@ -17,7 +20,7 @@ class ConcepticonLoader(CLDFLoader):
     repo = "concepticon/concepticon-cldf"
     ref = "v3.4.2"
     metadata_path = "cldf/Wordlist-metadata.json"
-    tables = ("concepticon.csv", "conceptlists.csv", "concepts.csv", "parameter_network.csv")
+    tables = ("concepticon.csv", "conceptlists.csv", "concepts.csv", "parameter_network.csv", "languages.csv", "glosses.csv")
 
     def read(self, folder, writer):
         data = self.dataset(folder)
@@ -40,10 +43,22 @@ class ConcepticonLoader(CLDFLoader):
             writer.prop(node, "tags", row.get("Tags"))
 
         # Which concept sets each list contains.
+        item_list = {}
         for row in data.table("concepts.csv"):
+            item_list[row["ID"]] = row["Conceptlist_ID"]
             if row.get("Concepticon_ID") in (None, "0"):
                 continue
             writer.relation(self.node(row["Concepticon_ID"]), self.node(f"list/{row['Conceptlist_ID']}"), "in_list")
+
+        # The words each list uses for its concepts (English and 55 other languages).
+        languages = {row["ID"]: row.get("Glottocode") or row["ID"] for row in data.table("LanguageTable")}
+        for row in data.table("FormTable"):
+            node = self.node(f"gloss/{row['ID']}")
+            writer.form(node, languages.get(row["Language_ID"], row["Language_ID"]), (row.get("Form") or "").strip())
+            if row.get("Parameter_ID") not in (None, "", "0"):
+                writer.relation(node, self.node(row["Parameter_ID"]), "expresses")
+            if row.get("Concept_ID") in item_list:
+                writer.relation(node, self.node(f"list/{item_list[row['Concept_ID']]}"), "in_list")
 
         # Relations between concept sets; the weight counts how many rows support the edge.
         edges = Counter()

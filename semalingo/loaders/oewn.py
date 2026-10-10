@@ -1,7 +1,7 @@
 """Open English WordNet from its WN-LMF XML release.
 
 Node ids: synsets are "oewn:<synset id>" (kind "sense"), lexical entries "oewn:entry/<entry id>"
-(forms, language "eng"). Relations: entry -> synset "sense_of"; synset -> synset by WordNet
+(forms, language English, Glottocode stan1293). Relations: entry -> synset "sense_of"; synset -> synset by WordNet
 relation type (hypernym, part_holonym, ...); entry -> entry for sense relations such as
 derivation and antonym, so derivational families and opposites can be followed.
 """
@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from ..fetch import download, write_source_info
+from ..languages import ENGLISH
 from .base import Loader, register
 
 RELEASES = "https://en-word.net/downloads"
@@ -48,7 +49,7 @@ class OewnLoader(Loader):
                 if tag == "Lemma":
                     lemma = element.get("writtenForm")
                     entry = self.node(f"entry/{entry_id}")
-                    writer.form(entry, "eng", lemma or "")
+                    writer.form(entry, ENGLISH, lemma or "")
                     writer.prop(entry, "pos", element.get("partOfSpeech"))
                 elif tag == "Sense":
                     synset = element.get("synset")

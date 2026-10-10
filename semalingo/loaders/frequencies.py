@@ -17,6 +17,7 @@ from pathlib import Path
 from ..cldf import to_float
 from ..fetch import download, write_source_info
 from ..frequency import is_word, xlsx_rows, zipf_values
+from ..languages import DUTCH, ENGLISH, GERMAN
 from .base import Loader, ManualLoader, register
 
 
@@ -88,7 +89,7 @@ class SubtlexUsLoader(Loader):
         write_source_info(folder, source=self.source_id, url=self.url, ref=self.ref, md5=self.md5, files=[self.filename])
 
     def read(self, folder, writer):
-        table = FrequencyTable(self, "eng")
+        table = FrequencyTable(self, ENGLISH)
         with open(folder / self.filename, encoding="utf-8", errors="replace", newline="") as handle:
             for row in csv.DictReader(handle, delimiter="\t"):
                 table.add(row.get("Word"), to_float(row.get("FREQcount")), cd_count=to_float(row.get("CDcount")))
@@ -103,7 +104,7 @@ class SubtlexNlLoader(ManualLoader):
     instructions = "the SUBTLEX-NL Excel file with part of speech and Zipf values, from osf.io/3d8cx"
 
     def read(self, folder, writer):
-        table = FrequencyTable(self, "nld")
+        table = FrequencyTable(self, DUTCH)
         for row in xlsx_rows(folder / self.files[0]):
             table.add(
                 row.get("Word"), to_float(row.get("FREQcount")),
@@ -122,7 +123,7 @@ class SubtlexUkLoader(ManualLoader):
     instructions = "SUBTLEX-UK_all.xlsx from the SUBTLEX-UK download"
 
     def read(self, folder, writer):
-        table = FrequencyTable(self, "eng")
+        table = FrequencyTable(self, ENGLISH)
         for row in xlsx_rows(folder / self.files[0]):
             table.add(
                 row.get("Spelling"), to_float(row.get("Freq")),
@@ -142,12 +143,12 @@ class ChildlexLoader(ManualLoader):
     def read(self, folder, writer):
         conn = sqlite3.connect(f"file:{folder / self.files[0]}?mode=ro", uri=True)
         try:
-            words = FrequencyTable(self, "deu")
+            words = FrequencyTable(self, GERMAN)
             for word, count in conn.execute("SELECT w, f FROM w ORDER BY f DESC"):
                 words.add(word, count)
             words.write(writer)
 
-            lemmas = FrequencyTable(self, "deu")
+            lemmas = FrequencyTable(self, GERMAN)
             for lemma, count in conn.execute("SELECT l, f FROM l ORDER BY f DESC"):
                 lemmas.add(lemma, count)
             lemmas.write(writer, prefix="lemma/")

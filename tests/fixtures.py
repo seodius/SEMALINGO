@@ -69,6 +69,16 @@ def concepticon(folder: Path) -> None:
             {"ID": "a", "Description": "linked", "Target_Parameter_ID": "1409", "Source_Parameter_ID": "1209", "relation": "linked", "Contribution_ID": "X"},
             {"ID": "b", "Description": "linked", "Target_Parameter_ID": "1409", "Source_Parameter_ID": "1209", "relation": "linked", "Contribution_ID": "Y"},
         ], False),
+        (table_spec("languages.csv", ["ID", "Name", "Macroarea", "Latitude", "Longitude", "Glottocode", "ISO639P3code"], "LanguageTable"), [
+            {"ID": "english", "Name": "English", "Glottocode": "stan1293"},
+            {"ID": "dutch", "Name": "Dutch", "Glottocode": "dutc1256"},
+            {"ID": "protoworld", "Name": "protoworld"},
+        ], False),
+        (table_spec("glosses.csv", ["ID", "Language_ID", "Parameter_ID", "Form", "Source", "Concept_ID"], "FormTable", {"Source": ";"}), [
+            {"ID": "Ogden-1930-200-1-1", "Language_ID": "english", "Parameter_ID": "1209", "Form": "eye", "Concept_ID": "Ogden-1930-200-1"},
+            {"ID": "Ogden-1930-200-1-2", "Language_ID": "dutch", "Parameter_ID": "1209", "Form": "oog ", "Concept_ID": "Ogden-1930-200-1"},
+            {"ID": "Ogden-1930-200-2-1", "Language_ID": "english", "Parameter_ID": "", "Form": "unmapped", "Concept_ID": "Ogden-1930-200-2"},
+        ], False),
     ])
 
 
@@ -158,6 +168,20 @@ def norare(folder: Path) -> None:
             {"ID": "4", "Unit_ID": "Speed-2021-Sensorimotor-dutc1256-1", "Variable_ID": "Speed-2021-Sensorimotor-DUTCH_VISUAL_MEAN", "Value": "0"},
         ], True),
     ])
+
+
+def concepticon_maps(folder: Path) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    english = [
+        ("1209", "EYE///eye", 10), ("1209", "EYE///the eye", 3), ("1209", "EYE///the eyes", 3),
+        ("1409", "SEE///to see", 8), ("1409", "SEE///see (perceive)", 2),
+        ("1650", "WATCH///to watch", 4), ("1650", "WATCH///watch", 1), ("3349", "WRISTWATCH///watch", 2),
+        ("0", "UNLINKED///nothing", 1),
+    ]
+    dutch = [("1209", "EYE///oog", 2), ("1409", "SEE///zien, kijken", 1)]
+    for name, rows in (("map-en.tsv", english), ("map-nl.tsv", dutch)):
+        lines = ["ID\tGLOSS\tPRIORITY"] + [f"{i}\t{g}\t{p}" for i, g, p in rows]
+        (folder / name).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def xlsx(path: Path, header: list[str], rows: list[list]) -> None:
@@ -252,7 +276,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
         handle.write(OEWN_XML)
 
 
-BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn, "norare": norare}
+BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn, "norare": norare, "concepticon-maps": concepticon_maps}
 
 
 def install(raw_root: Path, source_id: str, ref: str) -> Path:
