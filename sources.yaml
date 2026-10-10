@@ -67,16 +67,19 @@ sources:
     wave: first
     unit: forms
     homepage: https://www.ugent.be/pp/experimentele-psychologie/en/research/documents/subtlexus
-    download: https://www.ugent.be/pp/experimentele-psychologie/en/research/documents/subtlexus/subtlexus2.zip
-    format: "zipped text file, 74,286 words (Excel, Zipf and part-of-speech versions also offered)"
-    version: "no version number: pin the checksum at download"
-    licence: TODO
-    redistributable: TODO
+    download: http://www.lexique.org/databases/SUBTLEX-US/SUBTLEXus74286wordstextversion.tsv
+    format: "TSV, 74,286 words (3,298,971 bytes)"
+    version: "Open Lexicon copy, md5 ee7be8db21f26e1925ac0ea3ab598f32 (descriptor of 2019-04-30)"
+    licence: "CC BY-SA, as stated in Open Lexicon's SUBTLEX-US readme"
+    redistributable: "yes"
     used_by: [Q1]
     checked: false
     notes: >-
-      Subtitle word frequencies, American English. The download page states no licence or
-      terms of use; ask the authors before publishing anything derived from it.
+      Subtitle word frequencies, American English: frequency per million words and the
+      percentage of films a word occurs in. Taken from Open Lexicon (co-maintained by Boris
+      New, one of the two SUBTLEX-US authors), which states CC BY-SA; the UGent page, which
+      also offers Excel, Zipf and part-of-speech versions, states no licence. lexique.org
+      serves plain http, so the md5 above is the integrity check.
 
   - id: subtlex-nl
     name: SUBTLEX-NL
@@ -321,6 +324,42 @@ sources:
       version and release date. The licence sentence on the page renders incompletely, so the
       terms need a check by hand.
 
+  - id: morpholex-en
+    name: MorphoLex-en (derivational morphology for ~70,000 English words)
+    wave: first
+    unit: forms
+    homepage: https://github.com/hugomailhot/MorphoLex-en
+    download: https://github.com/hugomailhot/MorphoLex-en/raw/80bcff1bd70e311f2ec70fd64510e88eb059b0f2/MorphoLEX_en.xlsx
+    format: XLSX, with a data dictionary (MorphoLEX_en-Data_Dictionary.pdf)
+    version: "commit 80bcff1 (2022-01-08; no releases or tags)"
+    licence: CC BY-NC-SA 4.0
+    redistributable: "yes"
+    used_by: [Q1]
+    checked: true
+    notes: >-
+      Roots and affixes per word, with family sizes and affix frequencies: a direct measure for
+      "collapsible" (derivational families) and for which affixes are productive. Non-commercial
+      and share-alike, so anything derived from it keeps those terms; it gets its own named graph.
+
+  - id: worldlex
+    name: WorldLex (blog, Twitter and newspaper word frequencies, 64 languages)
+    wave: first
+    unit: forms
+    homepage: http://worldlex.lexique.org
+    download: "http://www.lexique.org/databases/WorldLex/ (one RDS file per language, e.g. WorldLex-Dutch.rds)"
+    format: RDS (R serialized data frame), one file per language
+    version: "Open Lexicon copies, md5 per file in the descriptors (e.g. Dutch 930db9efb94cccde746ede433fae7690, Hindi 6d44e8510a2ad04f5d71090bc7823004)"
+    licence: TODO
+    redistributable: TODO
+    used_by: [Q1]
+    checked: false
+    notes: >-
+      Frequencies for English, Dutch, Hindi, Korean and about 60 more languages from web text,
+      so frequency is not judged on subtitles alone and not on one language's word senses.
+      No licence is stated in Open Lexicon's readme; the underlying web corpora (HC Corpora)
+      are offered by their collector under a fair-use argument, which needs checking before
+      anything derived is published. Reading RDS needs R or the pyreadr package.
+
   # ---------- second wave ----------
 
   - id: childes
@@ -337,19 +376,23 @@ sources:
     checked: false
     notes: First of the second wave; affix emergence by age from the morphology tier; aggregates only; check usage rules.
 
-  - id: aoa-22-languages
-    name: AoA norms for nouns and verbs in 22 languages
+  - id: aoa-32lang
+    name: AoA-32lang (age of acquisition of 299 words in 32 languages)
     wave: second
     unit: forms
-    homepage: https://reff.f.bg.ac.rs/handle/123456789/4649
-    download: TODO
-    format: TODO
-    version: TODO
+    homepage: https://doi.org/10.1371/journal.pone.0220611.s001
+    download: http://www.lexique.org/databases/AoA-32lang/AoA32lang.tsv
+    format: "TSV (49,149 bytes); an RDS copy is also offered"
+    version: "Open Lexicon copy, md5 88b69473c626f5bd8673ae133d80a662"
     licence: TODO
     redistributable: TODO
-    used_by: [Q1]
+    used_by: [Q1, Q3a]
     checked: false
-    notes: 158 nouns and 142 verbs; cross-cultural check on learnability.
+    notes: >-
+      Subjective AoA ratings for 158 nouns and 141 verbs in 32 languages (Łuniewska et al.);
+      replaces the earlier 22-language set as the cross-cultural check on learnability. The
+      data is supplementary file S1 of a PLOS ONE article; PLOS normally publishes under
+      CC BY 4.0, which still needs confirming on the article page.
 
   - id: babelnet
     name: BabelNet

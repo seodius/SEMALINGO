@@ -12,7 +12,7 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | --- | --- | --- | --- |
 | Concepticon (`concepticon`) | CC BY 4.0 | yes | yes |
 | NoRaRe (Norms, Ratings and Relations) (`norare`) | CC BY-NC 4.0 per the norare-data LICENSE file; the norare.clld.org footer says CC BY 4.0 | TODO | no |
-| SUBTLEX-US (`subtlex-us`) | TODO | TODO | no |
+| SUBTLEX-US (`subtlex-us`) | CC BY-SA, as stated in Open Lexicon's SUBTLEX-US readme | yes | no |
 | SUBTLEX-NL (`subtlex-nl`) | TODO | TODO | no |
 | Concreteness ratings for 40 thousand English lemmas (Brysbaert et al.) (`brysbaert-concreteness`) | TODO | TODO | no |
 | Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012) (`kuperman-aoa`) | TODO | TODO | no |
@@ -28,13 +28,15 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | SUMO and its WordNet mappings (`sumo`) | TODO | TODO | no |
 | Wordbank (`wordbank`) | CC BY 4.0, unless otherwise stated for a dataset | yes | no |
 | Small World of Words (`swow`) | CC BY-NC-ND 3.0 Unported (as named on the research page) | TODO | no |
+| MorphoLex-en (derivational morphology for ~70,000 English words) (`morpholex-en`) | CC BY-NC-SA 4.0 | yes | yes |
+| WorldLex (blog, Twitter and newspaper word frequencies, 64 languages) (`worldlex`) | TODO | TODO | no |
 
 ## Second wave
 
 | Source | Licence | Raw data redistributable | Verified |
 | --- | --- | --- | --- |
 | CHILDES / TalkBank (`childes`) | TODO | TODO | no |
-| AoA norms for nouns and verbs in 22 languages (`aoa-22-languages`) | TODO | TODO | no |
+| AoA-32lang (age of acquisition of 299 words in 32 languages) (`aoa-32lang`) | TODO | TODO | no |
 | BabelNet (`babelnet`) | BabelNet Non-Commercial License (attribution, non-commercial, share-alike) | no | no |
 | ConceptNet (`conceptnet`) | TODO | TODO | no |
 | TinyDialogues (`tinydialogues`) | TODO | TODO | no |
