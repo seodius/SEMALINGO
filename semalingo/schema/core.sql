@@ -18,11 +18,12 @@ CREATE TABLE IF NOT EXISTS forms (
     written_form TEXT NOT NULL
 );
 
--- A concept, meaning, sense, ontology class or semantic prime, as one source defines it.
+-- A concept, meaning, sense (e.g. a WordNet synset), ontology class, semantic prime or concept list,
+-- as one source defines it.
 CREATE TABLE IF NOT EXISTS concepts (
     concept_id   TEXT PRIMARY KEY,
     source_id    TEXT NOT NULL,
-    kind         TEXT NOT NULL CHECK (kind IN ('concept', 'meaning', 'sense', 'class', 'prime')),
+    kind         TEXT NOT NULL CHECK (kind IN ('concept', 'meaning', 'sense', 'class', 'prime', 'list')),
     gloss        TEXT
 );
 

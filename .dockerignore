@@ -1,0 +1,11 @@
+.git
+.github
+data
+tests
+docs
+mappings
+**/__pycache__
+*.duckdb
+*.duckdb.wal
+*.egg-info
+.venv

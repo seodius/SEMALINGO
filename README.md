@@ -6,8 +6,9 @@ shifts, word associations, ontologies) into one graph for analysis. It is built 
 answer concrete design questions for a constructed language, then opened to researchers
 and students in linguistics, ontology and AI.
 
-**Status:** scaffold. The registry, core schema, checksum layer and CLI work; loaders,
-mappings, the graph and the operations follow (see [the build steps](#build-steps)).
+**Status:** early. The registry, core schema, raw layer and five loaders work (Concepticon,
+WOLD, CLICS4, DatSemShift, Open English WordNet); mappings beyond the sources' own
+Concepticon links, the graph and the operations follow (see [the build steps](#build-steps)).
 
 ## Principles
 
@@ -44,13 +45,29 @@ sources.yaml ──► data/raw/<source>/<version>/ (+ SHA256SUMS)
 
 ## Getting started
 
+With Docker (data ends up in `./data`):
+
+```bash
+docker compose build
+docker compose run --rm semalingo build          # fetch and load every source that has a loader
+docker compose run --rm semalingo build clics    # or just one
+docker compose run --rm semalingo stats          # row counts per loaded source
+```
+
+Without Docker:
+
 ```bash
 pip install -e ".[dev]"
 semalingo validate                  # check sources.yaml
-semalingo sources --wave first      # list sources and what is still unverified
-semalingo init-db semalingo.duckdb  # create the core tables
+semalingo sources --wave first      # sources, which have a loader, what is still unverified
+semalingo build                     # fetch into data/raw and load into data/semalingo.duckdb
+semalingo stats
 pytest
 ```
+
+`fetch` downloads only what a loader needs (selected CLDF tables at a pinned git tag, or a
+pinned release file) into `data/raw/<source>/<version>/`, with `SOURCE.json` and a
+`SHA256SUMS` manifest; `load` refuses raw files that no longer match their checksums.
 
 ## Repository layout
 
@@ -63,7 +80,10 @@ semalingo/
   ids.py              node ids: "<source id>:<local id>"
   schema/core.sql     the core tables (portable SQL, DuckDB is the target)
   db.py               create the core tables
-  loaders/            one loader per source (step 3)
+  cldf.py             a small CLDF reader (standard library only)
+  fetch.py            downloads into the raw layer
+  writer.py           buffered, repeatable writes into the core tables
+  loaders/            one loader per source: concepticon, wold, clics, datsemshift, oewn
   graph/              graph projection (step 5)
   ops/                the six operations, with provenance on every result (step 6)
   mcp_server/         MCP server over the operations (step 7)
@@ -72,6 +92,7 @@ mappings/             reviewed mapping edges as versioned TSV
 tests/                unit tests; tests/golden/ holds questions with known answers
 docs/                 exit questions and design notes
 data/                 local working data, never committed
+Dockerfile            the semalingo command in a container; compose.yaml mounts ./data
 ```
 
 ## Build steps

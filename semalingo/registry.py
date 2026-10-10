@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -68,6 +69,13 @@ class Source:
 
 
 def default_registry_path() -> Path:
+    """$SEMALINGO_REGISTRY, else ./sources.yaml, else the copy next to the package (a source checkout)."""
+    env = os.environ.get("SEMALINGO_REGISTRY")
+    if env:
+        return Path(env)
+    here = Path.cwd() / "sources.yaml"
+    if here.exists():
+        return here
     return Path(__file__).resolve().parent.parent / "sources.yaml"
 
 

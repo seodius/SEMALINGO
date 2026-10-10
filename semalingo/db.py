@@ -30,6 +30,8 @@ def init_db(path: str | Path):
         import duckdb
     except ImportError as exc:  # pragma: no cover - depends on the environment
         raise RuntimeError("DuckDB is not installed: pip install duckdb") from exc
+    if str(path) != ":memory:":
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
     conn = duckdb.connect(str(path))
     apply_schema(conn)
     return conn

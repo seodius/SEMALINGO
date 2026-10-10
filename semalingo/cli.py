@@ -1,4 +1,4 @@
-"""Command line: `semalingo validate | sources | licences | init-db`."""
+"""Command line: `semalingo validate | sources | licences | init-db | fetch | load | build | stats`."""
 
 from __future__ import annotations
 
@@ -8,6 +8,9 @@ from pathlib import Path
 
 from . import __version__
 from .registry import WAVES, default_registry_path, licence_table, load_registry, read_raw, validate
+
+DEFAULT_RAW = Path("data/raw")
+DEFAULT_DB = Path("data/semalingo.duckdb")
 
 
 def licences_path(registry: Path) -> Path:
@@ -29,6 +32,8 @@ def cmd_validate(args) -> int:
 
 
 def cmd_sources(args) -> int:
+    from .loaders import LOADERS
+
     for s in load_registry(args.registry):
         if args.wave and s.wave != args.wave:
             continue
@@ -38,7 +43,8 @@ def cmd_sources(args) -> int:
             status = f"to verify: {', '.join(s.open_fields)}"
         else:
             status = "fields filled, not confirmed (see notes)"
-        print(f"{s.wave:<7} {s.id:<24} {s.unit:<12} {status}")
+        loader = "loader" if s.id in LOADERS else "      "
+        print(f"{s.wave:<7} {s.id:<24} {s.unit:<12} {loader}  {status}")
     return 0
 
 
@@ -62,6 +68,65 @@ def cmd_init_db(args) -> int:
     return 0
 
 
+def selected_loaders(args):
+    """Loader instances for the requested source ids (default: every source that has a loader)."""
+    from .loaders import LOADERS
+
+    sources = {s.id: s for s in load_registry(args.registry)}
+    ids = args.sources or sorted(LOADERS)
+    unknown = [i for i in ids if i not in LOADERS]
+    if unknown:
+        raise ValueError(f"no loader for: {', '.join(unknown)} (available: {', '.join(sorted(LOADERS))})")
+    return [LOADERS[i](sources[i]) for i in ids]
+
+
+def cmd_fetch(args) -> int:
+    for loader in selected_loaders(args):
+        print(f"fetch {loader.source_id} {loader.ref} ...", flush=True)
+        folder = loader.fetch(args.raw, force=args.force)
+        print(f"  -> {folder}")
+    return 0
+
+
+def print_counts(source_id: str, counts: dict[str, int]) -> None:
+    summary = ", ".join(f"{n} {table}" for table, n in counts.items() if n)
+    print(f"  {source_id}: {summary or 'nothing loaded'}", flush=True)
+
+
+def cmd_load(args, fetch_first: bool = False) -> int:
+    from .db import init_db
+
+    loaders = selected_loaders(args)
+    conn = init_db(args.db)
+    try:
+        for loader in loaders:
+            if fetch_first:
+                print(f"fetch {loader.source_id} {loader.ref} ...", flush=True)
+                loader.fetch(args.raw)
+            print(f"load {loader.source_id} ...", flush=True)
+            print_counts(loader.source_id, loader.load(conn, args.raw))
+    finally:
+        conn.close()
+    return 0
+
+
+def cmd_stats(args) -> int:
+    from .db import init_db
+    from .writer import source_counts
+
+    conn = init_db(args.db)
+    try:
+        rows = conn.execute("SELECT source_id, version, loaded_at FROM sources ORDER BY source_id").fetchall()
+        if not rows:
+            print("No sources loaded yet.")
+        for source_id, version, loaded_at in rows:
+            print(f"{source_id} {version} (loaded {loaded_at})")
+            print_counts(source_id, source_counts(conn, source_id))
+    finally:
+        conn.close()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="semalingo", description=__doc__)
     parser.add_argument("--version", action="version", version=f"semalingo {__version__}")
@@ -70,7 +135,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("validate", help="check sources.yaml").set_defaults(func=cmd_validate)
 
-    p = sub.add_parser("sources", help="list sources and what is still unverified")
+    p = sub.add_parser("sources", help="list sources, whether they have a loader, and what is still unverified")
     p.add_argument("--wave", choices=WAVES)
     p.set_defaults(func=cmd_sources)
 
@@ -81,6 +146,29 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("init-db", help="create the core tables in a DuckDB file")
     p.add_argument("path", type=Path)
     p.set_defaults(func=cmd_init_db)
+
+    def with_sources(p):
+        p.add_argument("sources", nargs="*", help="source ids (default: all sources with a loader)")
+        p.add_argument("--raw", type=Path, default=DEFAULT_RAW, help="raw data folder (default: data/raw)")
+
+    p = sub.add_parser("fetch", help="download sources into the pinned raw layer")
+    with_sources(p)
+    p.add_argument("--force", action="store_true", help="download again even if an intact copy exists")
+    p.set_defaults(func=cmd_fetch)
+
+    p = sub.add_parser("load", help="load fetched sources into the DuckDB core tables")
+    with_sources(p)
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_load)
+
+    p = sub.add_parser("build", help="fetch (if needed) and load sources")
+    with_sources(p)
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=lambda a: cmd_load(a, fetch_first=True))
+
+    p = sub.add_parser("stats", help="row counts per loaded source")
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_stats)
     return parser
 
 

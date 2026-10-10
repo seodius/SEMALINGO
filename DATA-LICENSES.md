@@ -21,7 +21,7 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | Basic English word list (`basic-english`) | TODO | TODO | no |
 | World Loanword Database (WOLD) (`wold`) | CC BY 3.0 Germany | yes | yes |
 | Lexibank (lexibank-analysed) (`lexibank`) | CC BY 4.0 | yes | yes |
-| CLICS4 (Database of Cross-Linguistic Colexifications) (`clics`) | CC BY 4.0 | yes | no |
+| CLICS4 (Database of Cross-Linguistic Colexifications) (`clics`) | CC BY 4.0 | yes | yes |
 | DatSemShift (Database of Semantic Shifts), CLDF edition (`datsemshift`) | CC BY 4.0 | yes | yes |
 | NSM semantic primes (`nsm-primes`) | TODO | TODO | no |
 | Open English WordNet (`oewn`) | CC BY 4.0 | yes | yes |

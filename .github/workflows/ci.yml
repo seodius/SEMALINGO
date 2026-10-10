@@ -23,4 +23,29 @@ jobs:
       - name: Create the core tables in DuckDB
         run: semalingo init-db ci.duckdb
       - name: Run tests
-        run: pytest -v
+        shell: bash
+        run: |
+          set +e
+          pytest -v 2>&1 | tee pytest.log
+          status=${PIPESTATUS[0]}
+          # Surface failures as annotations, readable without opening the log.
+          grep -E "^(FAILED|ERROR) " pytest.log | sed 's/^/::error title=pytest::/'
+          tail -1 pytest.log | sed 's/^/::notice title=pytest::/'
+          exit $status
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t semalingo:ci .
+      - name: Validate the registry inside the image
+        run: docker run --rm semalingo:ci validate
+      - name: Fetch and load one real source inside the image
+        shell: bash
+        run: |
+          mkdir -p data
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/data:/app/data" semalingo:ci build datsemshift
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/data:/app/data" semalingo:ci stats | tee stats.txt
+          grep -q "datsemshift" stats.txt
+          while IFS= read -r line; do echo "::notice title=docker stats::$line"; done < stats.txt

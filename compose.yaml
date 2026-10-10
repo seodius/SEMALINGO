@@ -1,0 +1,13 @@
+# docker compose run --rm semalingo build          fetch and load every source that has a loader
+# docker compose run --rm semalingo build clics    one source
+# docker compose run --rm semalingo stats          row counts per loaded source
+#
+# Data (raw downloads and data/semalingo.duckdb) ends up in ./data on the host.
+# On Linux, if ./data is not writable for uid 1000, add:  user: "${UID}:${GID}"
+services:
+  semalingo:
+    build: .
+    image: semalingo:latest
+    volumes:
+      - ./data:/app/data
+    command: ["--help"]
