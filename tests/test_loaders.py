@@ -364,6 +364,25 @@ class EnglishNormsTest(LoaderTestCase):
         self.assertNotIn("dominant_pos", soda)  # "0" means none
 
 
+class LexibankTest(LoaderTestCase):
+    def test_forms_varieties_and_features(self):
+        counts = self.load("lexibank")
+        self.assertEqual(counts["forms"], 3)
+        self.assertEqual(counts["concepts"], 4)  # two concepts, two varieties
+        self.assertEqual(counts["mappings"], 2)
+        form = "lexibank:form/wold-Dutch-eye-1"
+        self.assertEqual(self.value("SELECT language FROM forms WHERE form_id = ?", form), "dutc1256")
+        self.assertEqual(
+            sorted(self.rows("SELECT to_id, relation_type FROM relations WHERE from_id = ?", form)),
+            [("lexibank:eye", "expresses"), ("lexibank:variety/wold-Dutch", "in_list")],
+        )
+        self.assertEqual(self.value("SELECT value_text FROM properties WHERE node_id = ? AND property = 'segments'", form), "oː x")
+        dutch = dict(self.rows("SELECT property, COALESCE(value_text, CAST(value_num AS TEXT)) FROM properties WHERE node_id = 'lexibank:variety/wold-Dutch'"))
+        self.assertEqual((dutch["glottocode"], dutch["EyeInTear"], dutch["SyllableStructure"]), ("dutc1256", "0.0", "3.0"))
+        self.assertNotIn("EyeInTear", dict(self.rows("SELECT property, 1 FROM properties WHERE node_id = 'lexibank:variety/abvd-Tagalog'")))  # "?" = no data
+        self.assertIn("3 = complex syllable structure", self.value("SELECT description FROM property_types WHERE property = 'SyllableStructure'"))
+
+
 class ManualSourceTest(LoaderTestCase):
     def test_missing_manual_file_explains_add_file(self):
         from semalingo.loaders import ManualSourceMissing

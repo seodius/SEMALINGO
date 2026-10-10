@@ -231,6 +231,40 @@ def brysbaert_concreteness(folder: Path) -> None:
     (folder / "concreteness_ratings.csv").write_bytes(("\r\n".join(rows) + "\r\n").encode("utf-8"))
 
 
+def lexibank(folder: Path) -> None:
+    languages = (table_spec("languages.csv", ["ID", "Name", "Macroarea", "Latitude", "Longitude", "Glottocode", "ISO639P3code", "Family", "Dataset", "Incollections"], "LanguageTable"), [
+        {"ID": "wold-Dutch", "Name": "Dutch", "Macroarea": "Eurasia", "Latitude": "52.0", "Longitude": "5.0", "Glottocode": "dutc1256", "Family": "Indo-European", "Dataset": "wold", "Incollections": "ClicsCore"},
+        {"ID": "abvd-Tagalog", "Name": "Tagalog", "Glottocode": "taga1270", "Family": "Austronesian", "Dataset": "abvd"},
+    ], False)
+    write_cldf(folder, "wordlist-metadata.json", [
+        (table_spec("forms.csv", ["ID", "Language_ID", "Parameter_ID", "Form", "Segments"], "FormTable", {"Segments": " "}), [
+            {"ID": "wold-Dutch-eye-1", "Language_ID": "wold-Dutch", "Parameter_ID": "eye", "Form": "oːx", "Segments": "oː x"},
+            {"ID": "wold-Dutch-tear-1", "Language_ID": "wold-Dutch", "Parameter_ID": "tear", "Form": "traːn", "Segments": "t r aː n"},
+            {"ID": "abvd-Tagalog-tear-1", "Language_ID": "abvd-Tagalog", "Parameter_ID": "tear", "Form": "luha", "Segments": "l u h a"},
+        ], True),
+        (table_spec("concepts.csv", ["ID", "Name", "Concepticon_ID", "Concepticon_Gloss", "Central_Concept", "Core_Concept"], "ParameterTable"), [
+            {"ID": "eye", "Name": "EYE", "Concepticon_ID": "1209", "Concepticon_Gloss": "EYE", "Central_Concept": "EYE", "Core_Concept": "Swadesh-1955-100"},
+            {"ID": "tear", "Name": "TEAR (OF EYE)", "Concepticon_ID": "1414", "Concepticon_Gloss": "TEAR (OF EYE)"},
+        ], False),
+        languages,
+    ])
+    for part, rows in (
+        ("lexicon", [("EyeInTear", "eye in tear", [("wold-Dutch", "False"), ("abvd-Tagalog", "?")])]),
+        ("phonology", [("SyllableStructure", "syllable structure", [("wold-Dutch", "3"), ("abvd-Tagalog", "2")])]),
+    ):
+        features = [{"ID": fid, "Name": name, "Description": ""} for fid, name, _ in rows]
+        values = [{"ID": f"{lang}-{fid}", "Language_ID": lang, "Parameter_ID": fid, "Value": value, "Code_ID": f"{fid}-{value}"}
+                  for fid, _, pairs in rows for lang, value in pairs]
+        codes = [{"ID": "EyeInTear-True", "Parameter_ID": "EyeInTear", "Name": "eye in tear"},
+                 {"ID": "SyllableStructure-3", "Parameter_ID": "SyllableStructure", "Name": "complex syllable structure"}]
+        write_cldf(folder, f"{part}-metadata.json", [
+            (table_spec(f"{part}-values.csv", ["ID", "Language_ID", "Parameter_ID", "Value", "Code_ID"], "ValueTable"), values, False),
+            (table_spec(f"{part}-features.csv", ["ID", "Name", "Description"], "ParameterTable"), features, False),
+            (table_spec(f"{part}-codes.csv", ["ID", "Parameter_ID", "Name"], "CodeTable"), codes, False),
+            languages,
+        ])
+
+
 def xlsx(path: Path, header: list[str], rows: list[list]) -> None:
     import openpyxl
 
@@ -324,7 +358,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
 
 
 BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn, "norare": norare, "concepticon-maps": concepticon_maps}
-BUILDERS.update({"sumo": sumo, "cili": cili, "kuperman-aoa": kuperman_aoa, "brysbaert-concreteness": brysbaert_concreteness})
+BUILDERS.update({"lexibank": lexibank, "sumo": sumo, "cili": cili, "kuperman-aoa": kuperman_aoa, "brysbaert-concreteness": brysbaert_concreteness})
 BUILDERS.update({sid: wiki_page(sid) for sid in ("basic-english", "wiktionary-1000-basic", "basic-english-combined", "voa-special-english", "simple-misspellings", "nsm-primes")})
 
 

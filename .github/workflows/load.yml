@@ -90,6 +90,10 @@ jobs:
         timeout-minutes: 15
         run: $RUN load concepticon-maps
 
+      - name: Fetch and load Lexibank
+        timeout-minutes: 20
+        run: $RUN build lexibank
+
       - name: Fetch and load SUMO and CILI
         timeout-minutes: 15
         run: $RUN build cili sumo

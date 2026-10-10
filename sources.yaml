@@ -299,16 +299,19 @@ sources:
     wave: first
     unit: meanings
     homepage: https://github.com/lexibank/lexibank-analysed
-    download: https://github.com/lexibank/lexibank-analysed
-    format: CLDF Wordlist and StructureDataset
-    version: "no release listed: pin the commit at download"
+    download: https://github.com/lexibank/lexibank-analysed/tree/v2.2.6/cldf
+    format: CLDF Wordlist (forms, concepts, languages) and two StructureDatasets (lexicon and phonology features per variety)
+    version: "v2.2.6 (git tag, 2026-06-16)"
     licence: CC BY 4.0
     redistributable: "yes"
-    used_by: [Q1, Q5]
+    used_by: [Q1, Q4, Q5]
     checked: true
     notes: >-
-      The aggregated Lexibank study dataset (5,501 varieties, 3,205 concepts, 134 sources).
-      Cite the original Lexibank sources as well.
+      1,740,092 word forms for 3,205 concepts in 5,501 language varieties from 134 datasets,
+      with segments, plus per-variety features computed from the word lists: colexifications
+      (SeeAndKnow, ArmAndHand), partial colexifications (EyeInTear, WaterInTear, HandInFinger)
+      and phonology (syllable structure, inventory sizes, MotherWithM). Cite the original
+      Lexibank datasets as well. Loading needs about 2 GB of memory.
 
   - id: clics3
     name: CLICS³ (Database of Cross-Linguistic Colexifications, third release)
