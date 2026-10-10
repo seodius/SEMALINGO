@@ -41,6 +41,47 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | ConceptNet (`conceptnet`) | TODO | TODO | no |
 | TinyDialogues (`tinydialogues`) | TODO | TODO | no |
 | MRC Psycholinguistic Database (`mrc`) | TODO | TODO | no |
+| AoA_FamConcept_1225 (Open Lexicon) (`aoa-famconcept-1225`) | TODO | TODO | no |
+| AoA_FreqSub_1493 (Open Lexicon) (`aoa-freqsub-1493`) | TODO | TODO | no |
+| Assoc_366 (Open Lexicon) (`assoc-366`) | TODO | TODO | no |
+| Assoc_520 (Open Lexicon) (`assoc-520`) | TODO | TODO | no |
+| BritishLexiconProject (Open Lexicon) (`britishlexiconproject`) | TODO | TODO | no |
+| Brulex (Open Lexicon) (`brulex`) | TODO | TODO | no |
+| Chronolex (Open Lexicon) (`chronolex`) | CC BY-SA 4.0 | yes | no |
+| Concr_ContextAv_ValEmo_Arous_1659 (Open Lexicon) (`concr-contextav-valemo-arous-1659`) | TODO | TODO | no |
+| Concr_Imag_FreqSub_Valemo_866 (Open Lexicon) (`concr-imag-freqsub-valemo-866`) | TODO | TODO | no |
+| Desrochers-Bergeron-2000 (Open Lexicon) (`desrochers-bergeron-2000`) | TODO | TODO | no |
+| TODO (Open Lexicon) (`desrochers-thompson-2009`) | TODO | TODO | no |
+| NOTE (Open Lexicon) (`dicollecte`) | Mozilla Public License 2.0 | yes | no |
+| English Lexicon Project (Open Lexicon) (`englishlexiconproject`) | TODO | TODO | no |
+| Frantext (Open Lexicon) (`frantext`) | TODO | TODO | no |
+| French Lexicon Project (Open Lexicon) (`frenchlexiconproject`) | CC BY-SA 4.0 | yes | no |
+| FreqSub_Adulte_Senior_660 (Open Lexicon) (`freqsub-adulte-senior-660`) | TODO | TODO | no |
+| FreqSub_Imag_1916 (Open Lexicon) (`freqsub-imag-1916`) | TODO | TODO | no |
+| FreqSub_Imag_3600 (Open Lexicon) (`freqsub-imag-3600`) | TODO | TODO | no |
+| Gougenheim 1.00 (Open Lexicon) (`gougenheim100`) | TODO | TODO | no |
+| Imag_1493 (Open Lexicon) (`imag-1493`) | TODO | TODO | no |
+| Img_AoA_..._400 (Open Lexicon) (`img-aoa-400`) | TODO | TODO | no |
+| Lexique-Infra (Open Lexicon) (`lexique-infra`) | CC BY-SA 4.0 | yes | no |
+| Lexique3 (Open Lexicon) (`lexique382`) | CC BY-SA 4.0 | yes | no |
+| Lexique3 (Open Lexicon) (`lexique383`) | CC BY-SA 4.0 | yes | no |
+| Liste de mots français Gutenberg (Open Lexicon) (`liste-de-mots-francais-gutenberg`) | TODO | TODO | no |
+| Manulex (Open Lexicon) (`manulex`) | TODO | TODO | no |
+| MEGALEX : méga-étude de la reconnaissance des mots écrits et parlés (Open Lexicon) (`megalex`) | CC BY-SA 4.0 | yes | no |
+| Morphalou (Open Lexicon) (`morphalou`) | Lesser General Public License For Linguistic Resources (LGPL-LR) | yes | no |
+| Morpholex-fr (Open Lexicon) (`morpholex-fr`) | TODO | TODO | no |
+| RT_LD_NMG_FLP_Mono_1482. (Open Lexicon) (`rt-ld-nmg-flp-mono-1482`) | TODO | TODO | no |
+| Francais Familiarités Jeunes Senior 660 (Open Lexicon) (`robert-dorot-mathey`) | TODO | TODO | no |
+| SILEX (Open Lexicon) (`silex`) | TODO | TODO | no |
+| SUBTLEX-CH: A database of Chinese word and character frequencies (Open Lexicon) (`subtlex-ch`) | TODO | TODO | no |
+| SemantiQc (Open Lexicon) (`semantiqc`) | TODO | TODO | no |
+| SensoryExp_1659 (Open Lexicon) (`sensoryexp-1659`) | TODO | TODO | no |
+| FreqSub_Imag_3600 (Open Lexicon) (`valemo-arous-1286`) | TODO | TODO | no |
+| FreqSub_Imag_3600 (Open Lexicon) (`valemo-arous-imag-835`) | TODO | TODO | no |
+| Valemo_Adultes_604 (Open Lexicon) (`valemo-adultes-604`) | TODO | TODO | no |
+| Valemo_Enfants_600 (Open Lexicon) (`valemo-enfants-600`) | TODO | TODO | no |
+| Voisins 1.02 (Open Lexicon) (`voisins`) | CC BY-SA | yes | no |
+| Anagrammes (Open Lexicon) (`anagrammes`) | TODO | TODO | no |
 
 ## Parked
 
