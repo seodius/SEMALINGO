@@ -46,7 +46,7 @@ def is_duckdb(conn) -> bool:
 
 
 def bulk_insert(conn, table: str, columns: tuple[str, ...], rows: list[tuple]) -> None:
-    """INSERT OR IGNORE many rows; duplicates of a primary key are skipped, CHECK violations raise."""
+    """Insert many rows that are already free of duplicate keys (see dedupe); CHECK violations raise."""
     if not rows:
         return
     names = ", ".join(columns)
@@ -65,7 +65,7 @@ def bulk_insert(conn, table: str, columns: tuple[str, ...], rows: list[tuple]) -
         spec = ", ".join(f"'{c}': '{types[c]}'" for c in columns)
         path = handle.name.replace("'", "''")
         conn.execute(
-            f"INSERT OR IGNORE INTO {table} ({names}) SELECT {names} FROM read_csv('{path}', "
+            f"INSERT INTO {table} ({names}) SELECT {names} FROM read_csv('{path}', "
             f"header = true, columns = {{{spec}}}, nullstr = '', quote = '\"', escape = '\"')"
         )
     finally:

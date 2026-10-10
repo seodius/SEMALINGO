@@ -1,7 +1,8 @@
 name: Load sources
 
-# Fetches and loads every source that has a loader, inside the Docker image, and reports
-# row counts as annotations. Runs when loading code changes, or by hand from the Actions tab.
+# Fetches and loads every source that has a loader, inside the Docker image, one step per
+# source so each step's time and outcome show up separately. Row counts are reported as
+# annotations. Runs when loading code changes, or by hand from the Actions tab.
 on:
   workflow_dispatch:
   push:
@@ -18,20 +19,54 @@ on:
 jobs:
   load:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: Build the image
-        run: docker build -t semalingo:load .
-      - name: Fetch and load
-        shell: bash
         run: |
+          docker build -t semalingo:load .
           mkdir -p data
-          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/data:/app/data" semalingo:load build 2>&1 | tee build.log
+          echo "RUN=docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data semalingo:load" >> "$GITHUB_ENV"
+
+      - name: Fetch datsemshift
+        timeout-minutes: 10
+        run: $RUN fetch datsemshift
+      - name: Load datsemshift
+        timeout-minutes: 15
+        run: $RUN load datsemshift
+
+      - name: Fetch clics
+        timeout-minutes: 10
+        run: $RUN fetch clics
+      - name: Load clics
+        timeout-minutes: 15
+        run: $RUN load clics
+
+      - name: Fetch wold
+        timeout-minutes: 10
+        run: $RUN fetch wold
+      - name: Load wold
+        timeout-minutes: 15
+        run: $RUN load wold
+
+      - name: Fetch concepticon
+        timeout-minutes: 10
+        run: $RUN fetch concepticon
+      - name: Load concepticon
+        timeout-minutes: 15
+        run: $RUN load concepticon
+
+      - name: Fetch oewn
+        timeout-minutes: 10
+        run: $RUN fetch oewn
+      - name: Load oewn
+        timeout-minutes: 15
+        run: $RUN load oewn
+
       - name: Report
         if: always()
         shell: bash
         run: |
-          grep -E "semalingo:|Error|Traceback" build.log | head -20 | sed 's/^/::error title=build::/' || true
-          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/data:/app/data" semalingo:load stats | tee stats.txt || true
+          $RUN stats | tee stats.txt || true
           while IFS= read -r line; do echo "::notice title=stats::$line"; done < stats.txt
           du -sh data/raw/* data/semalingo.duckdb 2>/dev/null | sed 's/^/::notice title=size::/' || true

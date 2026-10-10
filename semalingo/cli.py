@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 from . import __version__
@@ -80,10 +81,17 @@ def selected_loaders(args):
     return [LOADERS[i](sources[i]) for i in ids]
 
 
+def timed(label: str, action):
+    print(f"{label} ...", flush=True)
+    start = time.monotonic()
+    result = action()
+    print(f"{label} done in {time.monotonic() - start:.1f}s", flush=True)
+    return result
+
+
 def cmd_fetch(args) -> int:
     for loader in selected_loaders(args):
-        print(f"fetch {loader.source_id} {loader.ref} ...", flush=True)
-        folder = loader.fetch(args.raw, force=args.force)
+        folder = timed(f"fetch {loader.source_id} {loader.ref}", lambda: loader.fetch(args.raw, force=args.force))
         print(f"  -> {folder}")
     return 0
 
@@ -101,10 +109,9 @@ def cmd_load(args, fetch_first: bool = False) -> int:
     try:
         for loader in loaders:
             if fetch_first:
-                print(f"fetch {loader.source_id} {loader.ref} ...", flush=True)
-                loader.fetch(args.raw)
-            print(f"load {loader.source_id} ...", flush=True)
-            print_counts(loader.source_id, loader.load(conn, args.raw))
+                timed(f"fetch {loader.source_id} {loader.ref}", lambda: loader.fetch(args.raw))
+            counts = timed(f"load {loader.source_id}", lambda: loader.load(conn, args.raw))
+            print_counts(loader.source_id, counts)
     finally:
         conn.close()
     return 0
