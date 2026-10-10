@@ -151,17 +151,20 @@ sources:
     wave: first
     unit: lemmas
     homepage: https://taalmaterialen.ivdnt.org/?p=1135
-    download: "http://hdl.handle.net/10032/tm-a2-k7 (BP_BasiLex-lexicon_NC.zip, a copy is in conlang/downloads)"
-    format: ZIP (236 KB; contents still to inspect)
+    download: "http://hdl.handle.net/10032/tm-a2-k7; a download link follows after INT receives the signed licence"
+    format: TODO
     version: "1.0.1"
-    licence: "Free for non-commercial use with a signed licence agreement; a commercial edition exists"
+    licence: "INT licence agreement for non-commercial personal research (free); a commercial edition exists"
     redistributable: "no"
     used_by: [Q1]
     checked: false
     notes: >-
-      Lemmas with frequencies from BasiLex, the 11.5-million-word corpus of Dutch texts written
-      for children aged 4 to 12. The lexicon is the part SEMALINGO needs; the full corpus has its
-      own licence page. Redistribution terms are in the licence agreement, which is not public.
+      Lemmas from BasiLex, the 11.5-million-word corpus of Dutch texts written for children aged
+      4 to 12, with part of speech, frequencies per school year, family size and family frequency.
+      BP_BasiLex-lexicon_NC.zip holds only the order instructions and the licence (free, personal
+      non-commercial research). Before signing, note articles 1.3, 4.3 and 5: products developed
+      with the lexicon may not be made public without first offering INT an exclusive licence, and
+      rights in modifications pass to Radboud University. That matters for a public tool and language.
 
   - id: basic-english
     name: Basic English word list

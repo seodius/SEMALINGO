@@ -17,7 +17,7 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | Concreteness ratings for 40 thousand English lemmas (Brysbaert et al.) (`brysbaert-concreteness`) | TODO | TODO | no |
 | Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012) (`kuperman-aoa`) | TODO | TODO | no |
 | Test-based AoA norms for 44 thousand English word meanings (Brysbaert & Biemiller) (`test-based-aoa`) | TODO | TODO | no |
-| BasiLex lexicon (`basilex`) | Free for non-commercial use with a signed licence agreement; a commercial edition exists | no | no |
+| BasiLex lexicon (`basilex`) | INT licence agreement for non-commercial personal research (free); a commercial edition exists | no | no |
 | Basic English word list (`basic-english`) | TODO | TODO | no |
 | World Loanword Database (WOLD) (`wold`) | CC BY 3.0 Germany | yes | yes |
 | Lexibank (lexibank-analysed) (`lexibank`) | CC BY 4.0 | yes | yes |
