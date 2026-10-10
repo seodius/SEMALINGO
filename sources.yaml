@@ -12,15 +12,17 @@
 #   homepage         where the source is described
 #   download         where the raw data comes from
 #   format           raw format
-#   version          pinned version, or TODO
+#   version          pinned version; for sources without releases, the commit or checksum
+#                    is recorded at download time
 #   licence          licence of the raw data, or TODO
-#   redistributable  yes | no | TODO  (may the raw data be redistributed?)
+#   redistributable  yes | no | TODO  (may the raw data be redistributed, under its licence?)
 #   used_by          exit questions this source serves: Q1, Q3a, Q3b, Q4, Q5
-#   checked          true once every field above has been verified against the source itself
+#   checked          true once every field above has been verified on the source's own pages
 #   notes            free text
 #
-# Nothing is checked yet: every entry stays `checked: false` until its fields have been
-# verified on the source's own pages. Raw data is never committed to this repository.
+# Verification pass of 2026-10-10: an entry is `checked: true` only when every field was
+# confirmed on the source's own pages; anything that could not be confirmed stays TODO and
+# the notes say why. Raw data is never committed to this repository.
 
 sources:
 
@@ -31,14 +33,17 @@ sources:
     wave: first
     unit: concepts
     homepage: https://concepticon.clld.org
-    download: https://github.com/concepticon/concepticon-data
-    format: CLDF / TSV
-    version: TODO
-    licence: TODO
-    redistributable: TODO
+    download: https://github.com/concepticon/concepticon-cldf/releases/tag/v3.4.2
+    format: CLDF Wordlist
+    version: "v3.4.2 (2026-07-15; Concepticon 3.4.0 as CLDF)"
+    licence: CC BY 4.0
+    redistributable: "yes"
     used_by: [Q1, Q3a, Q4, Q5]
-    checked: false
-    notes: Pivot for the concept side; Wordbank uni-lemmas and other lists map onto it.
+    checked: true
+    notes: >-
+      Pivot for the concept side; Wordbank uni-lemmas and other lists map onto it. Already
+      contains Goddard-2011-63 (concept list from the 2011 NSM primes chart) and
+      Ogden-1930-200 (the 200 picturable words of Basic English), both mapped to concept sets.
 
   - id: norare
     name: NoRaRe (Norms, Ratings and Relations)
@@ -46,44 +51,51 @@ sources:
     unit: properties
     homepage: https://norare.clld.org
     download: https://github.com/concepticon/norare-data
-    format: CLDF / TSV
-    version: TODO
-    licence: TODO
+    format: TSV with CSVW metadata (norare.tsv, datasets.tsv, one TSV per dataset)
+    version: "no release listed: pin the commit at download"
+    licence: "CC BY-NC 4.0 per the norare-data LICENSE file; the norare.clld.org footer says CC BY 4.0"
     redistributable: TODO
     used_by: [Q1]
     checked: false
-    notes: Norms already mapped to Concepticon concept sets; curated with pynorare.
+    notes: >-
+      Norms already mapped to Concepticon concept sets, including Kuperman-2012-AoA and
+      Brysbaert-2014-Concreteness. Open: the repository (non-commercial) and the web app
+      (CC BY) state different licences; ask the maintainers which applies to the data.
 
   - id: subtlex-us
     name: SUBTLEX-US
     wave: first
     unit: forms
-    homepage: TODO
-    download: TODO
-    format: TODO
-    version: TODO
+    homepage: https://www.ugent.be/pp/experimentele-psychologie/en/research/documents/subtlexus
+    download: https://www.ugent.be/pp/experimentele-psychologie/en/research/documents/subtlexus/subtlexus2.zip
+    format: "zipped text file, 74,286 words (Excel, Zipf and part-of-speech versions also offered)"
+    version: "no version number: pin the checksum at download"
     licence: TODO
     redistributable: TODO
     used_by: [Q1]
     checked: false
-    notes: Subtitle word frequencies, American English.
+    notes: >-
+      Subtitle word frequencies, American English. The download page states no licence or
+      terms of use; ask the authors before publishing anything derived from it.
 
   - id: subtlex-nl
     name: SUBTLEX-NL
     wave: first
     unit: forms
-    homepage: TODO
-    download: TODO
+    homepage: https://kdutch.ivdnt.org/wiki/Subtlex_NL
+    download: https://osf.io/3d8cx/
     format: TODO
     version: TODO
     licence: TODO
     redistributable: TODO
     used_by: [Q1]
     checked: false
-    notes: Subtitle word frequencies, Dutch.
+    notes: >-
+      Subtitle word frequencies, Dutch (44 million words). The IVDNT page states no licence;
+      the OSF project is not machine-readable, so files and terms must be checked by hand.
 
   - id: brysbaert-concreteness
-    name: Concreteness ratings for English (Brysbaert et al.)
+    name: Concreteness ratings for 40 thousand English lemmas (Brysbaert et al.)
     wave: first
     unit: forms
     homepage: TODO
@@ -94,7 +106,10 @@ sources:
     redistributable: TODO
     used_by: [Q1]
     checked: false
-    notes: Concreteness as its own axis, so stability can be judged separately for concrete and abstract candidates.
+    notes: >-
+      Concreteness as its own axis, so stability can be judged separately for concrete and
+      abstract candidates. Also available inside NoRaRe as Brysbaert-2014-Concreteness, which
+      would put it under NoRaRe's licence; the original download location is not confirmed.
 
   - id: kuperman-aoa
     name: Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012)
@@ -108,7 +123,9 @@ sources:
     redistributable: TODO
     used_by: [Q1, Q3a]
     checked: false
-    notes: Rated AoA for 30,121 English content words (nouns, verbs, adjectives).
+    notes: >-
+      Rated AoA for 30,121 English content words (nouns, verbs, adjectives). Also available
+      inside NoRaRe as Kuperman-2012-AoA; the original download location is not confirmed.
 
   - id: test-based-aoa
     name: Test-based AoA norms for 44 thousand English word meanings (Brysbaert & Biemiller)
@@ -122,7 +139,9 @@ sources:
     redistributable: TODO
     used_by: [Q1]
     checked: false
-    notes: Per meaning, by school grade; the main source for "learnable at 12".
+    notes: >-
+      Per meaning, by school grade; the main source for "learnable at 12". OSF pages are not
+      machine-readable, so files and terms must be checked by hand.
 
   - id: basilex
     name: BasiLex
@@ -132,11 +151,14 @@ sources:
     download: http://hdl.handle.net/10032/tm-a2-n4
     format: FoLiA XML
     version: "1.0"
-    licence: Free for non-commercial use with a signed licence agreement
+    licence: "Free (non-commercial edition) with a signed licence agreement; a commercial edition exists"
     redistributable: "no"
     used_by: [Q1]
     checked: false
-    notes: Dutch texts written for children aged 4 to 12 (11.5 million words); a separate BasiLex lexicon exists.
+    notes: >-
+      Dutch texts written for children aged 4 to 12 (11.5 million words); a separate BasiLex
+      lexicon with lemma frequencies exists. Redistribution terms are in the licence agreement,
+      which is not public; "no" is the safe assumption until it has been read.
 
   - id: basic-english
     name: Basic English word list
@@ -150,49 +172,56 @@ sources:
     redistributable: TODO
     used_by: [Q1]
     checked: false
-    notes: Seed list for lexeme candidates.
+    notes: >-
+      Seed list for lexeme candidates. The Wiktionary page could not be fetched for checking.
+      Concepticon already has Ogden-1930-200, the 200 picturable words, mapped to concept sets.
 
   - id: wold
     name: World Loanword Database (WOLD)
     wave: first
     unit: meanings
     homepage: https://wold.clld.org
-    download: TODO
-    format: CLDF
-    version: TODO
-    licence: TODO
-    redistributable: TODO
+    download: https://doi.org/10.5281/zenodo.21415389
+    format: CLDF (curated at lexibank/wold)
+    version: v4.2
+    licence: CC BY 3.0 Germany
+    redistributable: "yes"
     used_by: [Q1]
-    checked: false
-    notes: Borrowability and stability of meanings.
+    checked: true
+    notes: Borrowability and stability of meanings. All released versions are under DOI 10.5281/zenodo.1299889.
 
   - id: lexibank
-    name: Lexibank
+    name: Lexibank (lexibank-analysed)
     wave: first
     unit: meanings
-    homepage: https://github.com/lexibank
-    download: TODO
-    format: CLDF
-    version: TODO
-    licence: TODO
-    redistributable: TODO
+    homepage: https://github.com/lexibank/lexibank-analysed
+    download: https://github.com/lexibank/lexibank-analysed
+    format: CLDF Wordlist and StructureDataset
+    version: "no release listed: pin the commit at download"
+    licence: CC BY 4.0
+    redistributable: "yes"
     used_by: [Q1, Q5]
-    checked: false
-    notes: Cross-linguistic word lists; licences differ per dataset in the collection.
+    checked: true
+    notes: >-
+      The aggregated Lexibank study dataset (5,501 varieties, 3,205 concepts, 134 sources).
+      Cite the original Lexibank sources as well.
 
   - id: clics
-    name: CLICS (Database of Cross-Linguistic Colexifications)
+    name: CLICS4 (Database of Cross-Linguistic Colexifications)
     wave: first
     unit: concepts
     homepage: https://clics.clld.org
-    download: TODO
-    format: CLDF
+    download: https://zenodo.org/communities/clics/
+    format: CLDF (data at github.com/clics/clics4)
     version: TODO
-    licence: TODO
-    redistributable: TODO
+    licence: CC BY 4.0
+    redistributable: "yes"
     used_by: [Q1, Q4]
     checked: false
-    notes: Colexification network; undirected edges weighted by language families.
+    notes: >-
+      Colexification network over 3447 language varieties from 95 contributing datasets;
+      undirected edges weighted by language families. Version not pinned yet: the Zenodo
+      community page refused the request (rate limit).
 
   - id: datsemshift
     name: DatSemShift (Database of Semantic Shifts), CLDF edition
@@ -200,41 +229,44 @@ sources:
     unit: concepts
     homepage: https://datsemshift.ru
     download: https://github.com/lexibank/datsemshift
-    format: CLDF
-    version: TODO
-    licence: TODO
-    redistributable: TODO
+    format: CLDF Wordlist
+    version: "no release listed: pin the commit at download"
+    licence: CC BY 4.0
+    redistributable: "yes"
     used_by: [Q1]
-    checked: false
+    checked: true
     notes: Directed semantic shifts between concepts; for stability.
 
   - id: nsm-primes
     name: NSM semantic primes
     wave: first
     unit: primes
-    homepage: TODO
-    download: entered by hand
+    homepage: https://intranet.secure.griffith.edu.au/schools-departments/natural-semantic-metalanguage
+    download: "entered by hand, starting from Concepticon list Goddard-2011-63"
     format: TSV (hand-entered)
     version: TODO
     licence: TODO
     redistributable: TODO
     used_by: [Q1, Q3a]
     checked: false
-    notes: The prime list and its exponents, entered by hand and mapped to Concepticon and WordNet manually.
+    notes: >-
+      Concepticon's Goddard-2011-63 comes from the 2011 chart; a later chart (v19, April 2017)
+      is published as a PDF on the Griffith site. Decide which chart is the reference and add
+      the difference by hand, mapped to Concepticon and WordNet.
 
   - id: oewn
     name: Open English WordNet
     wave: first
     unit: senses
-    homepage: https://github.com/globalwordnet/english-wordnet
-    download: https://github.com/globalwordnet/english-wordnet
-    format: TODO
-    version: TODO
-    licence: TODO
-    redistributable: TODO
+    homepage: https://en-word.net
+    download: "https://en-word.net (release files), or wn.download('oewn:2025') in Python"
+    format: WN-LMF XML (also JSON, RDF Turtle and WNDB)
+    version: "2025 (released 2025-12-31)"
+    licence: CC BY 4.0
+    redistributable: "yes"
     used_by: [Q1, Q4]
-    checked: false
-    notes: Senses, hypernymy and derivational links.
+    checked: true
+    notes: Senses, hypernymy and derivational links. A "2025 Plus" edition was released the same day.
 
   - id: sumo
     name: SUMO and its WordNet mappings
@@ -242,41 +274,52 @@ sources:
     unit: classes
     homepage: https://github.com/ontologyportal/sumo
     download: https://github.com/ontologyportal/sumo
-    format: SUO-KIF + mapping files
-    version: TODO
+    format: SUO-KIF; WordNet mappings in the WordNetMappings folder (WordNet data file format)
+    version: "no release listed: pin the commit at download"
     licence: TODO
     redistributable: TODO
     used_by: [Q1, Q4]
     checked: false
-    notes: Ontology side; the SUMO-WordNet mappings are imported as mapping edges.
+    notes: >-
+      Ontology side; the SUMO-WordNet mappings are imported as mapping edges. The README says
+      "GNU Public License" without a version, and the LICENSE file could not be fetched. GPL is
+      copyleft: anything distributed that derives from SUMO stays under the GPL, so it keeps
+      its own named graph.
 
   - id: wordbank
     name: Wordbank
     wave: first
     unit: aggregates
-    homepage: https://wordbank.stanford.edu
-    download: TODO
+    homepage: https://langcog.github.io/wordbank-datapage/
+    download: https://langcog.github.io/wordbank-datapage/data.html
     format: TODO
     version: TODO
-    licence: TODO
-    redistributable: TODO
+    licence: CC BY 4.0, unless otherwise stated for a dataset
+    redistributable: "yes"
     used_by: [Q1, Q3a]
     checked: false
-    notes: Toddler vocabulary (CDI) across languages; loaded as aggregates by age; uni-lemmas map to Concepticon.
+    notes: >-
+      Toddler vocabulary (CDI) across languages; loaded as aggregates by age; uni-lemmas map
+      to Concepticon. No data version or release date is given; some datasets may carry
+      other terms.
 
   - id: swow
     name: Small World of Words
     wave: first
     unit: associations
-    homepage: https://smallworldofwords.org
-    download: TODO
+    homepage: https://smallworldofwords.org/en/project/research
+    download: official releases listed on the research page, with checksums
     format: TODO
     version: TODO
-    licence: TODO
+    licence: CC BY-NC-ND 3.0 Unported (as named on the research page)
     redistributable: TODO
     used_by: [Q1, Q4]
     checked: false
-    notes: Word association norms (cue to response), English and Dutch.
+    notes: >-
+      Word association norms (cue to response), English and Dutch. NoDerivatives: association
+      edges derived from SWOW can be used locally but not published. Cite the dataset acronym,
+      version and release date. The licence sentence on the page renders incompletely, so the
+      terms need a check by hand.
 
   # ---------- second wave ----------
 

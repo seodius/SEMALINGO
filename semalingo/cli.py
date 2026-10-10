@@ -32,7 +32,12 @@ def cmd_sources(args) -> int:
     for s in load_registry(args.registry):
         if args.wave and s.wave != args.wave:
             continue
-        status = "verified" if s.checked else f"to verify: {', '.join(s.open_fields) or 'mark checked'}"
+        if s.checked:
+            status = "verified"
+        elif s.open_fields:
+            status = f"to verify: {', '.join(s.open_fields)}"
+        else:
+            status = "fields filled, not confirmed (see notes)"
         print(f"{s.wave:<7} {s.id:<24} {s.unit:<12} {status}")
     return 0
 
