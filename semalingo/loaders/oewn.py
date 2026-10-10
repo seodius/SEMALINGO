@@ -4,6 +4,8 @@ Node ids: synsets are "oewn:<synset id>" (kind "sense"), lexical entries "oewn:e
 (forms, language English, Glottocode stan1293). Relations: entry -> synset "sense_of"; synset -> synset by WordNet
 relation type (hypernym, part_holonym, ...); entry -> entry for sense relations such as
 derivation and antonym, so derivational families and opposites can be followed.
+Synsets with an ILI id get an imported "exact" mapping to "cili:<ili>", the bridge to WordNet 3.0
+synsets (which OEWN has renumbered) and to SUMO.
 """
 
 from __future__ import annotations
@@ -13,6 +15,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from ..fetch import download, write_source_info
+from ..ids import make_node_id
 from ..languages import ENGLISH
 from .base import Loader, register
 
@@ -63,7 +66,10 @@ class OewnLoader(Loader):
                     writer.concept(synset, "sense", first_lemma.get(element.get("id")))
                     writer.prop(synset, "pos", element.get("partOfSpeech"))
                     ili = element.get("ili")
-                    writer.prop(synset, "ili", ili if ili and ili != "in" else None)
+                    if ili and ili[:1] == "i" and ili[1:].isdigit():
+                        writer.prop(synset, "ili", ili)
+                        # the Collaborative Interlingual Index links this synset to WordNet 3.0 and other wordnets
+                        writer.mapping(synset, make_node_id("cili", ili), "exact")
                     definition = element.find("Definition")
                     writer.prop(synset, "definition", definition.text if definition is not None else None)
                     for rel in element.findall("SynsetRelation"):

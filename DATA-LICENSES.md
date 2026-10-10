@@ -29,7 +29,8 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | DatSemShift (Database of Semantic Shifts), CLDF edition (`datsemshift`) | CC BY 4.0 | yes | yes |
 | NSM semantic primes (`nsm-primes`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |
 | Open English WordNet (`oewn`) | CC BY 4.0 | yes | yes |
-| SUMO and its WordNet mappings (`sumo`) | TODO | TODO | no |
+| Collaborative Interlingual Index (CILI) (`cili`) | CC BY 4.0 or any later version | yes | yes |
+| SUMO and its WordNet mappings (`sumo`) | Merge.kif carries the IEEE licence: free to copy, publish, distribute and make derivative works, provided the IEEE is acknowledged as source and copyright owner. The repository README says "GNU Public License" (no version) and asks for credit in any work that uses it. | TODO | no |
 | Wordbank (`wordbank`) | CC BY 4.0, unless otherwise stated for a dataset | yes | no |
 | Small World of Words (`swow`) | CC BY-NC-ND 3.0 Unported (as named on the research page) | TODO | no |
 | MorphoLex-en (derivational morphology for ~70,000 English words) (`morpholex-en`) | CC BY-NC-SA 4.0 | yes | yes |

@@ -389,23 +389,44 @@ sources:
     checked: true
     notes: Senses, hypernymy and derivational links. A "2025 Plus" edition was released the same day.
 
+  - id: cili
+    name: Collaborative Interlingual Index (CILI)
+    wave: first
+    unit: concepts
+    homepage: https://github.com/globalwordnet/cili
+    download: https://github.com/globalwordnet/cili/blob/a895d7ecb18019dda3443f98901e59d81ce8722b/ili-map-pwn30.tab
+    format: TSV (ILI id, WordNet 3.0 synset)
+    version: "a895d7e (commit of 2026-08-17; no tags)"
+    licence: CC BY 4.0 or any later version
+    redistributable: "yes"
+    used_by: [Q1, Q4]
+    checked: true
+    notes: >-
+      Interlingual ids for 117,659 WordNet 3.0 synsets. The bridge between resources that cite
+      WordNet 3.0 numbers (SUMO, NoRaRe's Bond-2013-OMW) and Open English WordNet, whose
+      synsets carry their ILI id.
+
   - id: sumo
     name: SUMO and its WordNet mappings
     wave: first
     unit: classes
-    homepage: https://github.com/ontologyportal/sumo
-    download: https://github.com/ontologyportal/sumo
-    format: SUO-KIF; WordNet mappings in the WordNetMappings folder (WordNet data file format)
-    version: "no release listed: pin the commit at download"
-    licence: TODO
+    homepage: https://www.ontologyportal.org
+    download: https://github.com/ontologyportal/sumo/tree/b9934d3bbdf2931dd4635c3ddd6aba37110c71de
+    format: SUO-KIF (69 ontology files); WordNet 3.0 mappings in WordNet data-file format (WordNetMappings30-*.txt)
+    version: "b9934d3 (commit of 2026-10-08; the only tag, v1, is old)"
+    licence: >-
+      Merge.kif carries the IEEE licence: free to copy, publish, distribute and make derivative
+      works, provided the IEEE is acknowledged as source and copyright owner. The repository
+      README says "GNU Public License" (no version) and asks for credit in any work that uses it.
     redistributable: TODO
     used_by: [Q1, Q4]
     checked: false
     notes: >-
-      Ontology side; the SUMO-WordNet mappings are imported as mapping edges. The README says
-      "GNU Public License" without a version, and the LICENSE file could not be fetched. GPL is
-      copyleft: anything distributed that derives from SUMO stays under the GPL, so it keeps
-      its own named graph.
+      About 32,800 terms with subclass, instance, subrelation and subAttribute links, English
+      documentation and names. The WordNet mappings (about 6,200 equivalent, 110,000
+      subsumed or instance) link terms to WordNet 3.0 synsets; they reach Open English
+      WordNet through CILI, because OEWN has renumbered its synsets. Decide whether the GPL or
+      the IEEE terms govern what is published from it.
 
   - id: wordbank
     name: Wordbank

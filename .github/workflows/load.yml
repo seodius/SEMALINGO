@@ -15,6 +15,7 @@ on:
       - "semalingo/matching.py"
       - "semalingo/wikitext.py"
       - "scripts/report_lists.py"
+      - "scripts/report_sumo.py"
       - "semalingo/schema/**"
       - "Dockerfile"
       - ".github/workflows/load.yml"
@@ -88,6 +89,10 @@ jobs:
         timeout-minutes: 15
         run: $RUN load concepticon-maps
 
+      - name: Fetch and load SUMO and CILI
+        timeout-minutes: 15
+        run: $RUN build cili sumo
+
       - name: Fetch and load the word lists
         timeout-minutes: 10
         run: $RUN build $LISTS
@@ -107,6 +112,9 @@ jobs:
           docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
             --entrypoint python semalingo:load scripts/report_lists.py $LISTS | tee lists.txt
           sed 's/^/::notice title=lists::/' lists.txt
+          docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
+            --entrypoint python semalingo:load scripts/report_sumo.py | tee sumo.txt
+          sed 's/^/::notice title=sumo::/' sumo.txt
 
       - name: Report
         if: always()

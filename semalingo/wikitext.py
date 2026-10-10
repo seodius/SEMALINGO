@@ -34,8 +34,12 @@ def strip_templates(text: str) -> str:
 
 
 def clean(text: str) -> str:
-    """Wikitext without references, comments and templates."""
-    return strip_templates(COMMENT.sub("", REFERENCE.sub("", text)))
+    """Wikitext without comments, references and templates.
+
+    Comments go first: a comment can mention "<ref>", which would otherwise open a reference
+    that swallows everything up to the next "</ref>".
+    """
+    return strip_templates(REFERENCE.sub("", COMMENT.sub("", text)))
 
 
 def link_text(match: re.Match) -> str:

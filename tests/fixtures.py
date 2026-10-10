@@ -193,6 +193,21 @@ def wiki_page(source_id: str):
     return build
 
 
+def sumo(folder: Path) -> None:
+    from tests.sumo_files import MERGE_KIF, WORDNET_NOUN
+
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "Merge.kif").write_text(MERGE_KIF, encoding="utf-8")
+    (folder / "WordNetMappings30-noun.txt").write_text(WORDNET_NOUN, encoding="utf-8")
+
+
+def cili(folder: Path) -> None:
+    from tests.sumo_files import CILI_MAP
+
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "ili-map-pwn30.tab").write_text(CILI_MAP, encoding="utf-8")
+
+
 def xlsx(path: Path, header: list[str], rows: list[list]) -> None:
     import openpyxl
 
@@ -286,6 +301,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
 
 
 BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn, "norare": norare, "concepticon-maps": concepticon_maps}
+BUILDERS.update({"sumo": sumo, "cili": cili})
 BUILDERS.update({sid: wiki_page(sid) for sid in ("basic-english", "wiktionary-1000-basic", "basic-english-combined", "voa-special-english", "simple-misspellings", "nsm-primes")})
 
 

@@ -6,9 +6,10 @@ shifts, word associations, ontologies) into one graph for analysis. It is built 
 answer concrete design questions for a constructed language, then opened to researchers
 and students in linguistics, ontology and AI.
 
-**Status:** early. The registry, core schema, raw layer and twelve loaders work (Glottolog,
+**Status:** early. The registry, core schema, raw layer and twenty loaders work (Glottolog,
 Concepticon with its gloss lookup tables, WOLD, CLICS4, DatSemShift, Open English WordNet,
-NoRaRe, SUBTLEX-US/-NL/-UK, childLex), and so does a first mapping pass: gloss matching of
+NoRaRe, SUBTLEX-US/-NL/-UK, childLex, SUMO with CILI, and six word lists including Basic
+English and the NSM primes), and so does a first mapping pass: gloss matching of
 any source's words to Concepticon. Reviewed mappings, the graph and the operations follow
 (see [the build steps](#build-steps)).
 
@@ -111,7 +112,7 @@ semalingo/
                       norare, concepticon-maps, subtlex-us/-nl/-uk and childlex (frequencies.py),
                       word lists from Wiktionary/Wikipedia (wordlists.py): Basic English, NSM
                       primes, 1000 basic words, Basic English combined, VOA Special English,
-                      common misspellings
+                      common misspellings; SUMO and CILI (sumo.py)
   frequency.py        spreadsheet reading and Zipf values for frequency tables
   graph/              graph projection (step 5)
   ops/                the six operations, with provenance on every result (step 6)

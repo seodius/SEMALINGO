@@ -127,6 +127,8 @@ class OewnTest(LoaderTestCase):
         )
         self.assertEqual(self.value("SELECT to_id FROM relations WHERE relation_type = 'hypernym'"), "oewn:oewn-05316100-n")
         self.assertEqual(self.value("SELECT COUNT(*) FROM properties WHERE property = 'ili'"), 2)  # "in" (new) dropped
+        self.assertEqual(self.value("SELECT to_id FROM mappings WHERE from_id = 'oewn:oewn-05317205-n'"), "cili:i68829")
+        self.assertEqual(counts["mappings"], 2)
 
 
 try:
@@ -311,6 +313,31 @@ class WordListsTest(LoaderTestCase):
         )
         self.assertEqual(self.value("SELECT to_id FROM relations WHERE from_id = 'nsm-primes:form/mine'"), "nsm-primes:is-mine")
         self.assertEqual(self.props("nsm-primes:i")["category"], "Substantives")
+
+
+class SumoTest(LoaderTestCase):
+    def test_classes_documentation_and_wordnet_mappings(self):
+        counts = self.load("sumo")
+        relations = set(self.rows("SELECT from_id, to_id, relation_type FROM relations"))
+        self.assertIn(("sumo:Eye", "sumo:Organ", "subclass_of"), relations)
+        self.assertIn(("sumo:Sun", "sumo:Star", "instance_of"), relations)
+        self.assertIn(("sumo:part", "sumo:located", "subrelation_of"), relations)
+        self.assertIn(("sumo:Blind", "sumo:Disabled", "subattribute_of"), relations)
+        self.assertEqual(len(relations), 9)  # the subclass inside the rule and the commented-out one do not count
+        self.assertEqual(self.value("SELECT value_text FROM properties WHERE node_id = 'sumo:Eye' AND property = 'documentation'"), 'The Organ of sight; see "Seeing".')
+        self.assertEqual(self.value("SELECT gloss FROM concepts WHERE concept_id = 'sumo:Eye'"), "eye")
+        mappings = dict(((f, t), m) for f, t, m in self.rows("SELECT from_id, to_id, mapping_type FROM mappings"))
+        self.assertEqual(mappings[("sumo:Eye", "pwn30:05311054-n")], "exact")
+        self.assertEqual(mappings[("sumo:Abstract", "pwn30:00002137-n")], "narrower")
+        self.assertEqual(mappings[("sumo:Sun", "pwn30:09450163-n")], "narrower")
+        self.assertNotIn(("sumo:Disseminating", "pwn30:05661902-n"), mappings)  # complement mappings are left out
+        self.assertEqual(counts["mappings"], 4)
+        # a mapped term without statements of its own still gets a node
+        self.assertEqual(self.value("SELECT kind FROM concepts WHERE concept_id = 'sumo:Nut'"), "class")
+
+    def test_cili_bridges_wordnet_versions(self):
+        self.assertEqual(self.load("cili")["mappings"], 3)
+        self.assertEqual(self.value("SELECT to_id FROM mappings WHERE from_id = 'cili:i64868'"), "pwn30:05311054-n")
 
 
 class ManualSourceTest(LoaderTestCase):

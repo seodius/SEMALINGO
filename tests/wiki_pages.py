@@ -84,6 +84,9 @@ This list contains 1580 words in alphabetical order.
 """,
     "simple-misspellings": """The term "'''commonly misspelled words'''"<ref name="AskO">"AskOxford", 2009.</ref> is about words.
 
+== Documented list of common misspellings ==
+<!-- Add a word only with a <ref> tag footnote,
+     stating the word is proven to be among the top 400. -->
 === A–B ===
 {| width=560
 |
@@ -91,6 +94,9 @@ This list contains 1580 words in alphabetical order.
 * accidentally/accidently – accidentaly <ref name=YD/>
 * comfortable - confortable
 |}
+
+=== Typing errors ===
+* teh
 
 == References ==
 {{reflist}}

@@ -26,6 +26,7 @@ from .frequencies import word_id
 DASH = re.compile(r"\s+(?:–|—|&ndash;|-)\s+|\s+:\s+")
 POS = re.compile(r"(?:^|;\s*)(n|v|ad|adj|adv|prep|pro|conj)\.\s")
 PARENTHESES = re.compile(r"\s*\([^)]*\)")
+LETTER_RANGE = re.compile(r"^[A-Z]\s*[–-]\s*[A-Z]$")
 
 
 class WikiListLoader(Loader):
@@ -188,8 +189,8 @@ class MisspellingsLoader(WikiListLoader):
 
     def entries(self, text):
         for heading, body in sections(text):
-            if not heading or heading.lower() in ("related pages", "references", "other websites", "notes"):
-                continue
+            if not LETTER_RANGE.match(heading):
+                continue  # the list sits in sections "A–B", "C–D", ...; the rest is about causes
             for line in body.splitlines():
                 if not line.startswith("* "):
                     continue
