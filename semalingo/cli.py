@@ -1,4 +1,4 @@
-"""Command line: `semalingo validate | sources | licences | init-db | fetch | load | build | stats`."""
+"""Command line: `semalingo validate | sources | licences | init-db | fetch | add-file | load | build | stats`."""
 
 from __future__ import annotations
 
@@ -101,15 +101,35 @@ def print_counts(source_id: str, counts: dict[str, int]) -> None:
     print(f"  {source_id}: {summary or 'nothing loaded'}", flush=True)
 
 
+def cmd_add_file(args) -> int:
+    from .loaders import LOADERS, ManualLoader
+
+    sources = {s.id: s for s in load_registry(args.registry)}
+    cls = LOADERS.get(args.source)
+    if cls is None or not issubclass(cls, ManualLoader):
+        manual = sorted(i for i, c in LOADERS.items() if issubclass(c, ManualLoader))
+        raise ValueError(f"{args.source} is not a manual source (manual sources: {', '.join(manual)})")
+    target = cls(sources[args.source]).add_file(args.raw, args.path, args.name)
+    print(f"Added {target}")
+    return 0
+
+
 def cmd_load(args, fetch_first: bool = False) -> int:
     from .db import init_db
+    from .loaders import ManualSourceMissing
 
     loaders = selected_loaders(args)
     conn = init_db(args.db)
     try:
         for loader in loaders:
             if fetch_first:
-                timed(f"fetch {loader.source_id} {loader.ref}", lambda: loader.fetch(args.raw))
+                try:
+                    timed(f"fetch {loader.source_id} {loader.ref}", lambda: loader.fetch(args.raw))
+                except ManualSourceMissing as missing:
+                    if args.sources:  # asked for by name: report it as an error
+                        raise
+                    print(f"skip {loader.source_id}: {missing}", flush=True)
+                    continue
             counts = timed(f"load {loader.source_id}", lambda: loader.load(conn, args.raw))
             print_counts(loader.source_id, counts)
     finally:
@@ -162,6 +182,13 @@ def build_parser() -> argparse.ArgumentParser:
     with_sources(p)
     p.add_argument("--force", action="store_true", help="download again even if an intact copy exists")
     p.set_defaults(func=cmd_fetch)
+
+    p = sub.add_parser("add-file", help="add a manually downloaded file for a source that cannot be fetched")
+    p.add_argument("source")
+    p.add_argument("path", type=Path)
+    p.add_argument("--as", dest="name", help="file name the loader expects, if the source expects several")
+    p.add_argument("--raw", type=Path, default=DEFAULT_RAW, help="raw data folder (default: data/raw)")
+    p.set_defaults(func=cmd_add_file)
 
     p = sub.add_parser("load", help="load fetched sources into the DuckDB core tables")
     with_sources(p)

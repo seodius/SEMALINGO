@@ -69,7 +69,7 @@ sources:
     homepage: https://www.ugent.be/pp/experimentele-psychologie/en/research/documents/subtlexus
     download: http://www.lexique.org/databases/SUBTLEX-US/SUBTLEXus74286wordstextversion.tsv
     format: "TSV, 74,286 words (3,298,971 bytes)"
-    version: "Open Lexicon copy, md5 ee7be8db21f26e1925ac0ea3ab598f32 (descriptor of 2019-04-30)"
+    version: "openlexicon-ee7be8db: Open Lexicon copy, md5 ee7be8db21f26e1925ac0ea3ab598f32 (descriptor of 2019-04-30)"
     licence: "CC BY-SA, as stated in Open Lexicon's SUBTLEX-US readme"
     redistributable: "yes"
     used_by: [Q1]
@@ -87,8 +87,8 @@ sources:
     unit: forms
     homepage: https://kdutch.ivdnt.org/wiki/Subtlex_NL
     download: "https://osf.io/3d8cx/ (SUBTLEX-NL with pos and Zipf.xlsx, a copy is in conlang/downloads)"
-    format: XLSX with part of speech and Zipf values (37.7 MB)
-    version: TODO
+    format: "XLSX (37.7 MB), 437,503 words; Word, FREQcount, CDcount, FREQlemma, SUBTLEXWF, Zipf, dominant.pos and more"
+    version: "pos-zipf: the Excel file with part of speech and Zipf values"
     licence: TODO
     redistributable: TODO
     used_by: [Q1]
@@ -386,30 +386,34 @@ sources:
     wave: first
     unit: forms
     homepage: TODO
-    download: "manual download: SUBTLEX-UK.zip (190 MB), a copy is in conlang/downloads"
-    format: ZIP (contents still to inspect)
-    version: TODO
+    download: "manual download: SUBTLEX-UK release (SUBTLEX-UK_all.xlsx is loaded; the bigram file is not needed)"
+    format: "XLSX (32 MB), 332,987 words; Spelling, Freq, CapitFreq, CD, CDCount, DomPoS and lemma columns"
+    version: "all: SUBTLEX-UK_all.xlsx"
     licence: TODO
     redistributable: TODO
     used_by: [Q1]
     checked: false
     notes: >-
-      British English subtitle frequencies. Its children's-TV parts (CBeebies, CBBC) are the
-      English counterpart to BasiLex for "learnable at 12".
+      British English subtitle frequencies. The file in hand has no children's-TV columns; the
+      CBeebies and CBBC frequencies, the English counterpart to BasiLex for "learnable at 12",
+      are in another file of the SUBTLEX-UK release.
 
   - id: childlex
     name: childLex
     wave: first
     unit: forms
     homepage: TODO
-    download: "manual download: file \"childlex\" (42.7 MB, no extension), a copy is in conlang/downloads"
-    format: TODO
-    version: TODO
+    download: "manual download: the childLex SQLite database (a file named childlex, 42.7 MB)"
+    format: "SQLite: tables w (181,236 word forms), l (118,953 lemmas), lex (word, part of speech, lemma, frequency)"
+    version: "sqlite: the childlex SQLite database"
     licence: TODO
     redistributable: TODO
     used_by: [Q1]
     checked: false
-    notes: German word frequencies from books for children aged 6 to 12; the German counterpart to BasiLex.
+    notes: >-
+      German word frequencies from books for children aged 6 to 12; the German counterpart to
+      BasiLex. This database gives total frequencies only; childLex as published also reports
+      frequencies per age group (6-8, 9-10, 11-12), which this file does not contain.
 
   - id: nt2lex
     name: NT2Lex (CEFRLex, Dutch as a second language)

@@ -5,7 +5,7 @@ pinned raw layer, then load them into the core tables. Importing this package re
 all loaders in LOADERS, keyed by source id.
 """
 
-from .base import LOADERS, CLDFLoader, Loader, register  # noqa: F401
-from . import clics, concepticon, datsemshift, glottolog, oewn, wold  # noqa: F401  (registers the loaders)
+from .base import LOADERS, CLDFLoader, Loader, ManualLoader, ManualSourceMissing, register  # noqa: F401
+from . import clics, concepticon, datsemshift, frequencies, glottolog, oewn, wold  # noqa: F401  (registers the loaders)
 
-__all__ = ["LOADERS", "CLDFLoader", "Loader", "register"]
+__all__ = ["LOADERS", "CLDFLoader", "Loader", "ManualLoader", "ManualSourceMissing", "register"]

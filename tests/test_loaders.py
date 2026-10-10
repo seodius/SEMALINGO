@@ -147,6 +147,46 @@ class GlottologTest(LoaderTestCase):
         self.assertEqual(self.value("SELECT parent_language FROM languages WHERE glottocode = 'zeeu1238'"), "dutc1256")
 
 
+class FrequencyLoadersTest(LoaderTestCase):
+    def test_subtlex_nl_skips_punctuation_and_numbers(self):
+        counts = self.load("subtlex-nl")
+        self.assertEqual(counts["forms"], 2)
+        self.assertEqual(self.value("SELECT language FROM forms WHERE form_id = 'subtlex-nl:oog'"), "nld")
+        self.assertEqual(self.value("SELECT value_text FROM properties WHERE node_id = 'subtlex-nl:oog' AND property = 'dominant_pos'"), "N")
+        zipf = dict(self.rows("SELECT node_id, value_num FROM properties WHERE property = 'zipf'"))
+        self.assertGreater(zipf["subtlex-nl:ik"], zipf["subtlex-nl:oog"])
+
+    def test_subtlex_uk_and_us(self):
+        self.assertEqual(self.load("subtlex-uk")["forms"], 2)
+        self.assertEqual(self.load("subtlex-us")["forms"], 2)
+        self.assertEqual(self.value("SELECT value_num FROM properties WHERE node_id = 'subtlex-us:eye' AND property = 'cd_count'"), 3000.0)
+
+    def test_childlex_words_lemmas_and_links(self):
+        counts = self.load("childlex")
+        self.assertEqual(counts["forms"], 3)  # Auge, Augen, lemma/Auge
+        self.assertEqual(
+            self.rows("SELECT from_id, weight FROM relations WHERE to_id = 'childlex:lemma/Auge' ORDER BY from_id"),
+            [("childlex:Auge", 900.0), ("childlex:Augen", 700.0)],
+        )
+
+
+class ManualSourceTest(LoaderTestCase):
+    def test_missing_manual_file_explains_add_file(self):
+        from semalingo.loaders import ManualSourceMissing
+
+        with self.assertRaises(ManualSourceMissing) as caught:
+            loader("subtlex-uk").fetch(self.raw)
+        self.assertIn("semalingo add-file subtlex-uk", str(caught.exception))
+
+    def test_add_file_copies_checksums_and_loads(self):
+        download = Path(self.tmp.name) / "my downloads"
+        fixtures.subtlex_uk(download)
+        item = loader("subtlex-uk")
+        item.add_file(self.raw, download / "SUBTLEX-UK_all.xlsx")
+        self.assertTrue(item.is_fetched(self.raw))
+        self.assertEqual(item.load(self.conn, self.raw)["forms"], 2)
+
+
 class RawIntegrityTest(LoaderTestCase):
     def test_load_refuses_changed_raw_files(self):
         item = loader("datsemshift")

@@ -65,6 +65,15 @@ semalingo stats
 pytest
 ```
 
+Some sources cannot be downloaded automatically (a licence or sign-up first). Add the file
+once and it is treated like any download:
+
+```bash
+semalingo add-file subtlex-nl "SUBTLEX-NL with pos and Zipf.xlsx"
+semalingo add-file subtlex-uk SUBTLEX-UK_all.xlsx
+semalingo add-file childlex childlex
+```
+
 `fetch` downloads only what a loader needs (selected CLDF tables at a pinned git tag, or a
 pinned release file) into `data/raw/<source>/<version>/`, with `SOURCE.json` and a
 `SHA256SUMS` manifest; `load` refuses raw files that no longer match their checksums.
@@ -83,7 +92,9 @@ semalingo/
   cldf.py             a small CLDF reader (standard library only)
   fetch.py            downloads into the raw layer
   writer.py           buffered, repeatable writes into the core tables
-  loaders/            one loader per source: glottolog, concepticon, wold, clics, datsemshift, oewn
+  loaders/            one loader per source: glottolog, concepticon, wold, clics, datsemshift, oewn,
+                      subtlex-us/-nl/-uk and childlex (frequencies.py)
+  frequency.py        spreadsheet reading and Zipf values for frequency tables
   graph/              graph projection (step 5)
   ops/                the six operations, with provenance on every result (step 6)
   mcp_server/         MCP server over the operations (step 7)

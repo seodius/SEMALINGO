@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import posixpath
+import shutil
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import ClassVar
@@ -90,3 +91,45 @@ class CLDFLoader(Loader):
         """Record the source's own link to a Concepticon concept set as an imported mapping."""
         if concepticon_id not in (None, "", "0"):
             writer.mapping(node_id, make_node_id("concepticon", concepticon_id))
+
+
+class ManualSourceMissing(RuntimeError):
+    """A manual source whose files have not been added yet."""
+
+
+class ManualLoader(Loader):
+    """A source that cannot be downloaded automatically (a licence, a sign-up, a manual download).
+
+    The user adds the file once with `semalingo add-file <source> <path>`; it is copied into
+    the raw layer under the expected name and checksummed like any download.
+    """
+
+    files: ClassVar[tuple[str, ...]]
+    instructions: ClassVar[str] = "see the notes for this source in sources.yaml"
+
+    def download(self, folder: Path) -> None:
+        missing = [name for name in self.files if not (folder / name).exists()]
+        if missing:
+            raise ManualSourceMissing(
+                f"{self.source_id} needs a manual download ({self.instructions}). "
+                f"Add it with: semalingo add-file {self.source_id} <path to {missing[0]}>"
+            )
+
+    def add_file(self, raw_root: Path, path: Path, name: str | None = None) -> Path:
+        """Copy a downloaded file into the raw layer and checksum it."""
+        path = Path(path)
+        if not path.is_file():
+            raise ValueError(f"not a file: {path}")
+        if name is None:
+            if len(self.files) != 1 and path.name not in self.files:
+                raise ValueError(f"{self.source_id} expects {', '.join(self.files)}; pass --as <name>")
+            name = path.name if path.name in self.files else self.files[0]
+        if name not in self.files:
+            raise ValueError(f"{self.source_id} expects {', '.join(self.files)}, not {name}")
+        folder = self.raw_folder(raw_root)
+        folder.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, folder / name)
+        added = sorted(n for n in self.files if (folder / n).exists())
+        write_source_info(folder, source=self.source_id, ref=self.ref, files=added, added_from=path.name)
+        write_checksums(folder)
+        return folder / name

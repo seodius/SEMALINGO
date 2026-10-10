@@ -124,6 +124,60 @@ def glottolog(folder: Path) -> None:
     ])
 
 
+def xlsx(path: Path, header: list[str], rows: list[list]) -> None:
+    import openpyxl
+
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.append(header)
+    for row in rows:
+        sheet.append(row)
+    workbook.save(path)
+
+
+def subtlex_nl(folder: Path) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    xlsx(folder / "SUBTLEX-NL with pos and Zipf.xlsx",
+         ["Word", "FREQcount", "CDcount", "FREQlow", "CDlow", "FREQlemma", "SUBTLEXWF", "Zipf", "SUBTLEXCD", "Lg10CD", "dominant.pos", "dominant.pos.freq", "dominant.pos.lemma"],
+         [["ik", 1744062, 8054, 778704, 3125, 1744527, 39883.0, "=LOG10((B2+1)/44.106)+3", 99.8, 3.9, "VNW", 1743609, "ik"],
+          ["oog", 12000, 2500, 9000, 2000, 15000, 274.0, None, 30.9, 3.4, "N", 11900, "oog"],
+          ["!", 50, 10, 50, 10, 50, 1.1, None, 0.1, 1.0, "LET", 50, "!"],
+          [2009, 40, 9, 40, 9, 40, 0.9, None, 0.1, 1.0, "TW", 40, "2009"]])
+
+
+def subtlex_uk(folder: Path) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    xlsx(folder / "SUBTLEX-UK_all.xlsx",
+         ["Spelling", "Freq", "CapitFreq", "CD", "CDCount", "DomPoS", "DomPosFreq", "DomLemmaPos"],
+         [["the", 9418422, 946828, 0.98, 44361, "determiner", 9412235, "the-determiner"],
+          ["eye", 30000, 500, 0.2, 9000, "noun", 29000, "eye-noun"]])
+
+
+def childlex(folder: Path) -> None:
+    import sqlite3
+
+    folder.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(folder / "childlex")
+    conn.executescript(
+        "CREATE TABLE w(w TEXT, lw, f); CREATE TABLE l(l TEXT, ll, f); CREATE TABLE lex(w TEXT, p TEXT, l TEXT, f INT);"
+        "INSERT INTO w VALUES ('Auge','auge',900),('Augen','augen',700),('!','!',82337);"
+        "INSERT INTO l VALUES ('Auge','auge',1600),('!','!',82337);"
+        "INSERT INTO lex VALUES ('Auge','NN','Auge',900),('Augen','NN','Auge',700),('!','$.','!',82337);"
+    )
+    conn.commit()
+    conn.close()
+
+
+def subtlex_us(folder: Path) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "SUBTLEXus74286wordstextversion.tsv").write_text(
+        "Word\tFREQcount\tCDcount\tFREQlow\tCdlow\tSUBTLWF\tLg10WF\tSUBTLCD\tLg10CD\n"
+        "the\t1501908\t8388\t1339811\t8388\t29449.18\t6.1766\t100\t3.9237\n"
+        "eye\t12000\t3000\t11000\t2900\t235.3\t4.08\t35.8\t3.48\n",
+        encoding="utf-8",
+    )
+
+
 OEWN_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <LexicalResource>
   <Lexicon id="oewn" label="Open English WordNet" language="en" version="2025">
@@ -162,7 +216,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
         handle.write(OEWN_XML)
 
 
-BUILDERS = {"glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn}
+BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn}
 
 
 def install(raw_root: Path, source_id: str, ref: str) -> Path:
