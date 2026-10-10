@@ -21,8 +21,13 @@ COLUMNS = {
     "concepts": ("concept_id", "source_id", "kind", "gloss"),
     "relations": ("source_id", "from_id", "to_id", "relation_type", "weight"),
     "properties": ("node_id", "source_id", "property", "value_num", "value_text"),
+    "property_types": (
+        "source_id", "property", "construct", "aspect", "statistic", "category", "method", "language", "description",
+    ),
     "mappings": ("from_id", "to_id", "mapping_type", "confidence", "method", "reviewer"),
 }
+# Tables whose rows carry a source_id (mappings are traced through their from_id instead).
+SOURCE_TABLES = ("languages", "forms", "concepts", "relations", "properties", "property_types")
 # Positions of the primary-key columns in COLUMNS, used to drop duplicates before inserting.
 KEYS = {
     "languages": (0,),
@@ -30,6 +35,7 @@ KEYS = {
     "concepts": (0,),
     "relations": (0, 1, 2, 3),
     "properties": (0, 1, 2),
+    "property_types": (0, 1),
     "mappings": (0, 1, 2, 4),
 }
 
@@ -115,6 +121,12 @@ class Writer:
         else:
             self.buffers["properties"].append((node_id, self.source.id, name, None, str(value)))
 
+    def property_type(self, name: str, **fields) -> None:
+        """Describe what a property name measures (construct, statistic, language, ...)."""
+        row = {column: None for column in COLUMNS["property_types"]}
+        row.update({k: (v if v != "" else None) for k, v in fields.items()}, source_id=self.source.id, property=name)
+        self.buffers["property_types"].append(tuple(row[c] for c in COLUMNS["property_types"]))
+
     def mapping(self, from_id: str, to_id: str, mapping_type: str = "exact", confidence: float = 1.0) -> None:
         """A mapping the source itself provides (e.g. a Concepticon_ID column)."""
         self.buffers["mappings"].append((from_id, to_id, mapping_type, confidence, "imported", None))
@@ -122,7 +134,7 @@ class Writer:
     # --- lifecycle --------------------------------------------------------
     def clear(self) -> None:
         sid = self.source.id
-        for table in ("languages", "forms", "concepts", "relations", "properties"):
+        for table in SOURCE_TABLES:
             self.conn.execute(f"DELETE FROM {table} WHERE source_id = ?", [sid])
         self.conn.execute("DELETE FROM mappings WHERE method = 'imported' AND from_id LIKE ?", [sid + ":%"])
         self.conn.execute("DELETE FROM sources WHERE source_id = ?", [sid])
@@ -144,7 +156,7 @@ class Writer:
 def source_counts(conn, source_id: str) -> dict[str, int]:
     """Rows a source has in each core table (imported mappings counted by their from_id)."""
     counts = {}
-    for table in ("languages", "forms", "concepts", "relations", "properties"):
+    for table in SOURCE_TABLES:
         counts[table] = conn.execute(f"SELECT COUNT(*) FROM {table} WHERE source_id = ?", [source_id]).fetchone()[0]
     counts["mappings"] = conn.execute(
         "SELECT COUNT(*) FROM mappings WHERE method = 'imported' AND from_id LIKE ?", [source_id + ":%"]

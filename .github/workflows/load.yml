@@ -70,6 +70,13 @@ jobs:
         timeout-minutes: 15
         run: $RUN load oewn
 
+      - name: Fetch norare
+        timeout-minutes: 10
+        run: $RUN fetch norare
+      - name: Load norare
+        timeout-minutes: 15
+        run: $RUN load norare
+
       - name: Report
         if: always()
         shell: bash

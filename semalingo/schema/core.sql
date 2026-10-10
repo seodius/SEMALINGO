@@ -64,6 +64,21 @@ CREATE TABLE IF NOT EXISTS properties (
     CHECK (value_num IS NOT NULL OR value_text IS NOT NULL)
 );
 
+-- What each property name of a source measures, so norms from different studies can be lined up
+-- (e.g. every property whose construct is 'aoa'). One row per source and property name.
+CREATE TABLE IF NOT EXISTS property_types (
+    source_id    TEXT NOT NULL,
+    property     TEXT NOT NULL,
+    construct    TEXT,                       -- what is measured: aoa, concreteness, frequency, ...
+    aspect       TEXT,                       -- a sub-dimension: visual, male raters, dunno, ...
+    statistic    TEXT,                       -- mean, count, percentage, rank, zipf, ...
+    category     TEXT,                       -- norms (corpora, lists), ratings (people) or relations
+    method       TEXT,                       -- users, corpus, meta, ...
+    language     TEXT,                       -- Glottocode or ISO 639-3, when the measure is for one language
+    description  TEXT,
+    PRIMARY KEY (source_id, property)
+);
+
 -- Links between sources (SKOS-style). Nodes are linked, never merged.
 -- Every edge records how it was made; a manual edge must name its reviewer.
 CREATE TABLE IF NOT EXISTS mappings (

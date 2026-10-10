@@ -170,6 +170,37 @@ class FrequencyLoadersTest(LoaderTestCase):
         )
 
 
+class NorareTest(LoaderTestCase):
+    def test_norms_on_words_with_property_types(self):
+        counts = self.load("norare")
+        self.assertEqual(counts["forms"], 3)
+        self.assertEqual(counts["concepts"], 4)  # two concept sets, two studies
+        self.assertEqual(counts["property_types"], 3)
+        self.assertEqual(counts["mappings"], 2)
+        eye = "norare:form/Kuperman-2012-AoA-stan1293-1"
+        self.assertEqual(self.value("SELECT language FROM forms WHERE form_id = ?", eye), "stan1293")
+        self.assertEqual(self.value("SELECT value_num FROM properties WHERE node_id = ? AND property = 'Kuperman-2012-AoA-ENGLISH_AOA_MEAN'", eye), 3.6)
+        self.assertEqual(self.value("SELECT value_text FROM properties WHERE node_id = ? AND property LIKE '%PERCEPTUAL_DOMINANT'", eye), "Visual")
+        # a zero is a value, not a missing value
+        self.assertEqual(self.value("SELECT value_num FROM properties WHERE property = 'Speed-2021-Sensorimotor-DUTCH_VISUAL_MEAN'"), 0.0)
+        self.assertEqual(
+            self.rows("SELECT construct, statistic, language FROM property_types WHERE property = 'Kuperman-2012-AoA-ENGLISH_AOA_MEAN'"),
+            [("aoa", "mean", "stan1293")],
+        )
+        self.assertEqual(
+            sorted(self.rows("SELECT to_id, relation_type FROM relations WHERE from_id = ?", eye)),
+            [("norare:concept/1209", "expresses"), ("norare:dataset/Kuperman-2012-AoA", "in_list")],
+        )
+        self.assertEqual(self.value("SELECT to_id FROM mappings WHERE from_id = 'norare:concept/1209'"), "concepticon:1209")
+
+    def test_frequency_sources_describe_their_properties(self):
+        self.load("subtlex-nl")
+        self.assertEqual(
+            self.rows("SELECT property, construct FROM property_types WHERE source_id = 'subtlex-nl' AND property IN ('zipf', 'cd_count') ORDER BY property"),
+            [("cd_count", "contextual diversity"), ("zipf", "frequency")],
+        )
+
+
 class ManualSourceTest(LoaderTestCase):
     def test_missing_manual_file_explains_add_file(self):
         from semalingo.loaders import ManualSourceMissing

@@ -50,18 +50,23 @@ sources:
     wave: first
     unit: properties
     homepage: https://norare.clld.org
-    download: https://github.com/concepticon/norare-data
-    format: TSV with CSVW metadata (norare.tsv, datasets.tsv, one TSV per dataset)
-    version: "no release listed: pin the commit at download"
-    licence: "CC BY-NC 4.0 per the norare-data LICENSE file; the norare.clld.org footer says CC BY 4.0"
-    redistributable: TODO
+    download: https://github.com/concepticon/norare-cldf
+    format: CLDF Wordlist (norare-cldf; norare.csv zipped)
+    version: "v1.1 (norare-cldf release of 2025-02-25)"
+    licence: "CC BY 4.0 (norare-cldf LICENSE file and CLDF metadata); the curation repository norare-data is CC BY-NC 4.0"
+    redistributable: "yes"
     used_by: [Q1]
-    checked: false
+    checked: true
     notes: >-
-      Norms already mapped to Concepticon concept sets, including Kuperman-2012-AoA and
-      Brysbaert-2014-Concreteness. Open: the repository (non-commercial) and the web app
-      (CC BY) state different licences; ask the maintainers which applies to the data.
-
+      126 studies, 863 variables, 142,527 word entries in 39 languages, 677,593 values, all
+      mapped to Concepticon concept sets (Kuperman-2012-AoA, Brysbaert-2014-Concreteness,
+      Lynott-2020-Sensorimotor, Scott-2019-Ratings and more). The web app and the CLDF
+      release are CC BY 4.0; only the curation repository norare-data is CC BY-NC 4.0, so the
+      loader uses the CLDF release. The values come from the original studies; cite them
+      (datasets.csv, Citation). norare-data main already holds about 55 studies not in v1.1
+      (e.g. Brysbaert-2025-Familiarity, Green-2025 AoA, Dulay-2026 AoA,
+      Mochizuki-2026-Sensorimotor) and renames many existing ones; they arrive with the next
+      release.
   - id: subtlex-us
     name: SUBTLEX-US
     wave: first

@@ -20,6 +20,20 @@ from ..frequency import is_word, xlsx_rows, zipf_values
 from .base import Loader, ManualLoader, register
 
 
+# What the properties written by FrequencyTable measure (filled into property_types).
+PROPERTY_TYPES = {
+    "freq_count": dict(construct="frequency", statistic="count", description="Occurrences in the source corpus."),
+    "zipf": dict(
+        construct="frequency", statistic="zipf",
+        description="log10 of the frequency per billion words (Zipf scale, van Heuven et al. 2014), "
+        "computed by SEMALINGO from freq_count and the corpus size so every source has the same scale.",
+    ),
+    "cd_count": dict(construct="contextual diversity", statistic="count", description="Number of films or programmes the word occurs in."),
+    "dominant_pos": dict(construct="part of speech", statistic="dominant", description="The most frequent part of speech of the word."),
+    "dominant_lemma": dict(construct="lemma", statistic="dominant", description="The lemma of the word in its most frequent part of speech."),
+}
+
+
 def word_id(word: str) -> str:
     """A node-id-safe local id for a word (whitespace becomes '_')."""
     return "_".join(str(word).split())
@@ -44,6 +58,9 @@ class FrequencyTable:
         self.extra[word] = extra
 
     def write(self, writer, prefix: str = "") -> None:
+        used = {"freq_count", "zipf"} | {name for extra in self.extra.values() for name, v in extra.items() if v not in (None, "")}
+        for name in sorted(used):
+            writer.property_type(name, category="norms", method="corpus", language=self.language, **PROPERTY_TYPES[name])
         zipf = zipf_values(self.counts)
         for word, count in self.counts.items():
             node = self.loader.node(prefix + word_id(word))

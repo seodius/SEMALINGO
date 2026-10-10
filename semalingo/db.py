@@ -5,7 +5,7 @@ from __future__ import annotations
 from importlib import resources
 from pathlib import Path
 
-CORE_TABLES = ("sources", "languages", "forms", "concepts", "relations", "properties", "mappings")
+CORE_TABLES = ("sources", "languages", "forms", "concepts", "relations", "properties", "property_types", "mappings")
 
 
 def schema_sql() -> str:

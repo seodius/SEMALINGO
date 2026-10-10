@@ -124,6 +124,42 @@ def glottolog(folder: Path) -> None:
     ])
 
 
+def norare(folder: Path) -> None:
+    aoa = json.dumps({"datatype": {"base": "decimal", "minimum": 1, "maximum": 25}, "name": "ENGLISH_AOA_MEAN"})
+    label = json.dumps({"datatype": "string", "name": "ENGLISH_PERCEPTUAL_DOMINANT"})
+    visual = json.dumps({"datatype": "decimal", "name": "DUTCH_VISUAL_MEAN"})
+    write_cldf(folder, "Wordlist-metadata.json", [
+        (table_spec("glosses.csv", ["ID", "Language_ID", "Parameter_ID", "Form", "Segments", "Comment", "Source", "Dataset_ID"], "FormTable", {"Source": ";"}), [
+            {"ID": "Kuperman-2012-AoA-stan1293-1", "Language_ID": "eng", "Parameter_ID": "1209", "Form": "eye", "Dataset_ID": "Kuperman-2012-AoA"},
+            {"ID": "Kuperman-2012-AoA-stan1293-2", "Language_ID": "eng", "Parameter_ID": "1409", "Form": "see", "Dataset_ID": "Kuperman-2012-AoA"},
+            {"ID": "Speed-2021-Sensorimotor-dutc1256-1", "Language_ID": "nld", "Parameter_ID": "1209", "Form": "oog", "Dataset_ID": "Speed-2021-Sensorimotor"},
+        ], False),
+        (table_spec("concepticon.csv", ["ID", "Name", "Description", "ColumnSpec", "Concepticon_ID", "glosses", "count_datasets", "count_variables"], "ParameterTable"), [
+            {"ID": "1209", "Name": "EYE", "Concepticon_ID": "1209", "count_datasets": "40", "count_variables": "200"},
+            {"ID": "1409", "Name": "SEE", "Concepticon_ID": "1409", "count_datasets": "30", "count_variables": "150"},
+        ], False),
+        (table_spec("datasets.csv", ["ID", "Name", "Description", "Contributor", "Citation", "Year", "Source", "URL", "Alias"], "ContributionTable", {"Source": ";"}), [
+            {"ID": "Kuperman-2012-AoA", "Name": "Kuperman 2012 AoA", "Year": "2012", "Citation": "Kuperman et al. 2012", "URL": "https://doi.org/10.3758/s13428-012-0210-4"},
+            {"ID": "Speed-2021-Sensorimotor", "Name": "Speed 2021 Sensorimotor", "Year": "2021"},
+        ], False),
+        (table_spec("languages.csv", ["ID", "Name", "Macroarea", "Latitude", "Longitude", "Glottocode", "ISO639P3code"], "LanguageTable"), [
+            {"ID": "eng", "Name": "English", "Glottocode": "stan1293"},
+            {"ID": "nld", "Name": "Dutch", "Glottocode": "dutc1256"},
+        ], False),
+        (table_spec("variables.csv", ["ID", "Dataset_ID", "Language_ID", "Name", "Note", "Other", "Source", "Category", "Type", "Method", "Result", "Datatype"]), [
+            {"ID": "Kuperman-2012-AoA-ENGLISH_AOA_MEAN", "Dataset_ID": "Kuperman-2012-AoA", "Language_ID": "eng", "Note": "Mean AoA rating.", "Category": "ratings", "Type": "mean", "Method": "users", "Result": "AoA", "Datatype": aoa},
+            {"ID": "Kuperman-2012-AoA-ENGLISH_PERCEPTUAL_DOMINANT", "Dataset_ID": "Kuperman-2012-AoA", "Language_ID": "eng", "Other": "dominant", "Category": "ratings", "Type": "linguistic", "Method": "users", "Result": "sensory modality", "Datatype": label},
+            {"ID": "Speed-2021-Sensorimotor-DUTCH_VISUAL_MEAN", "Dataset_ID": "Speed-2021-Sensorimotor", "Language_ID": "nld", "Other": "visual", "Category": "ratings", "Type": "mean", "Method": "users", "Result": "sensory modality", "Datatype": visual},
+        ], False),
+        (table_spec("norare.csv", ["ID", "Unit_ID", "Variable_ID", "Value"]), [
+            {"ID": "1", "Unit_ID": "Kuperman-2012-AoA-stan1293-1", "Variable_ID": "Kuperman-2012-AoA-ENGLISH_AOA_MEAN", "Value": "3.6"},
+            {"ID": "2", "Unit_ID": "Kuperman-2012-AoA-stan1293-2", "Variable_ID": "Kuperman-2012-AoA-ENGLISH_AOA_MEAN", "Value": "3.1"},
+            {"ID": "3", "Unit_ID": "Kuperman-2012-AoA-stan1293-1", "Variable_ID": "Kuperman-2012-AoA-ENGLISH_PERCEPTUAL_DOMINANT", "Value": "Visual"},
+            {"ID": "4", "Unit_ID": "Speed-2021-Sensorimotor-dutc1256-1", "Variable_ID": "Speed-2021-Sensorimotor-DUTCH_VISUAL_MEAN", "Value": "0"},
+        ], True),
+    ])
+
+
 def xlsx(path: Path, header: list[str], rows: list[list]) -> None:
     import openpyxl
 
@@ -216,7 +252,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
         handle.write(OEWN_XML)
 
 
-BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn}
+BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn, "norare": norare}
 
 
 def install(raw_root: Path, source_id: str, ref: str) -> Path:

@@ -11,7 +11,7 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | Source | Licence | Raw data redistributable | Verified |
 | --- | --- | --- | --- |
 | Concepticon (`concepticon`) | CC BY 4.0 | yes | yes |
-| NoRaRe (Norms, Ratings and Relations) (`norare`) | CC BY-NC 4.0 per the norare-data LICENSE file; the norare.clld.org footer says CC BY 4.0 | TODO | no |
+| NoRaRe (Norms, Ratings and Relations) (`norare`) | CC BY 4.0 (norare-cldf LICENSE file and CLDF metadata); the curation repository norare-data is CC BY-NC 4.0 | yes | yes |
 | SUBTLEX-US (`subtlex-us`) | CC BY-SA, as stated in Open Lexicon's SUBTLEX-US readme | yes | no |
 | SUBTLEX-NL (`subtlex-nl`) | TODO | TODO | no |
 | Concreteness ratings for 40 thousand English lemmas (Brysbaert et al.) (`brysbaert-concreteness`) | TODO | TODO | no |
