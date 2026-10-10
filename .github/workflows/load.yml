@@ -32,6 +32,7 @@ jobs:
           mkdir -p data
           echo "RUN=docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data semalingo:load" >> "$GITHUB_ENV"
           echo "LISTS=basic-english wiktionary-1000-basic basic-english-combined voa-special-english simple-misspellings nsm-primes" >> "$GITHUB_ENV"
+          echo "NORMS=kuperman-aoa brysbaert-concreteness" >> "$GITHUB_ENV"
 
       - name: Fetch glottolog
         timeout-minutes: 10
@@ -97,12 +98,16 @@ jobs:
         timeout-minutes: 10
         run: $RUN build $LISTS
 
+      - name: Fetch and load the English norm lists
+        timeout-minutes: 10
+        run: $RUN build $NORMS
+
       - name: Match words to Concepticon by gloss
         timeout-minutes: 15
         shell: bash
         run: |
           set -o pipefail
-          $RUN match oewn $LISTS | tee match.txt
+          $RUN match oewn $LISTS $NORMS | tee match.txt
           grep -v -e '\.\.\.$' -e ' done in ' match.txt | sed 's/^/::notice title=match::/'
 
       - name: Word-list report
@@ -110,7 +115,7 @@ jobs:
         run: |
           set -o pipefail
           docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
-            --entrypoint python semalingo:load scripts/report_lists.py $LISTS | tee lists.txt
+            --entrypoint python semalingo:load scripts/report_lists.py $LISTS $NORMS | tee lists.txt
           sed 's/^/::notice title=lists::/' lists.txt
           docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
             --entrypoint python semalingo:load scripts/report_sumo.py | tee sumo.txt

@@ -120,37 +120,40 @@ sources:
       the OSF project is not machine-readable, so files and terms must be checked by hand.
 
   - id: brysbaert-concreteness
-    name: Concreteness ratings for 40 thousand English lemmas (Brysbaert et al.)
+    name: Concreteness ratings for 40 thousand English lemmas (Brysbaert et al. 2014)
     wave: first
     unit: forms
-    homepage: TODO
-    download: TODO
-    format: TODO
-    version: TODO
-    licence: TODO
+    homepage: https://doi.org/10.3758/s13428-013-0403-5
+    download: "https://huggingface.co/datasets/StephanAkkerman/concreteness-ratings/resolve/10f460a4d535800d89c579db7cd2664dbaf6b1d6/concreteness_ratings.csv"
+    format: CSV (Word, Bigram, Conc.M, Conc.SD, Unknown, Total, Percent_known, SUBTLEX, Dom_Pos)
+    version: "hf-10f460a (Hugging Face mirror, commit of 2024-09-29; sha256 dd0cbb72...)"
+    licence: "MIT according to the Hugging Face uploader; the ratings are Brysbaert et al.'s, whose own terms the mirror does not give"
     redistributable: TODO
     used_by: [Q1]
     checked: false
     notes: >-
-      Concreteness as its own axis, so stability can be judged separately for concrete and
-      abstract candidates. Also available inside NoRaRe as Brysbaert-2014-Concreteness, which
-      would put it under NoRaRe's licence; the original download location is not confirmed.
+      39,954 words and two-word expressions rated from 1 (abstract) to 5 (concrete), with
+      the share of raters who knew them. Concreteness as its own axis, so stability can be
+      judged separately for concrete and abstract candidates. NoRaRe has the 2,585 words it
+      links to Concepticon. The mirror's card points to the original data on OSF (kj76e).
 
   - id: kuperman-aoa
-    name: Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012)
+    name: Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012), 51,715-word edition
     wave: first
     unit: forms
-    homepage: https://macsphere.mcmaster.ca/handle/11375/22967
-    download: TODO
-    format: TODO
-    version: TODO
-    licence: TODO
+    homepage: https://doi.org/10.3758/s13428-012-0210-4
+    download: "https://huggingface.co/datasets/StephanAkkerman/English-Age-of-Acquisition/resolve/e3a18bb843650b0441de107a6c17373481c1b365/en.aoa.csv"
+    format: CSV (Word, Alternative.spelling, Freq_pm, Dom_PoS_SUBTLEX, Nletters, Nphon, Nsyll, Lemma_highest_PoS, AoA_Kup, Perc_known, AoA_Kup_lem, Perc_known_lem, AoA_Bird_lem, AoA_Bristol_lem, AoA_Cort_lem, AoA_Schock)
+    version: "hf-e3a18bb (Hugging Face mirror, commit of 2025-02-19; sha256 0f9e3ed9...)"
+    licence: "not stated on the Hugging Face mirror; the ratings are Kuperman et al.'s"
     redistributable: TODO
     used_by: [Q1, Q3a]
     checked: false
     notes: >-
-      Rated AoA for 30,121 English content words (nouns, verbs, adjectives). Also available
-      inside NoRaRe as Kuperman-2012-AoA; the original download location is not confirmed.
+      The 51,715-word edition of the Kuperman ratings: rated AoA for 30,121 words, lemma AoA
+      for their inflected forms, the share of raters who knew each word, SUBTLEX-US frequency,
+      length in letters, phonemes and syllables, and lemma AoA from four older norm sets
+      (Bird, Bristol, Cortese, Schock). NoRaRe has the 2,614 words it links to Concepticon.
 
   - id: test-based-aoa
     name: Test-based AoA norms for 44 thousand English word meanings (Brysbaert & Biemiller)

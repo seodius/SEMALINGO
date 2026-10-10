@@ -15,8 +15,8 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | NoRaRe (Norms, Ratings and Relations) (`norare`) | CC BY 4.0 (norare-cldf LICENSE file and CLDF metadata); the curation repository norare-data is CC BY-NC 4.0 | yes | yes |
 | SUBTLEX-US (`subtlex-us`) | CC BY-SA, as stated in Open Lexicon's SUBTLEX-US readme | yes | no |
 | SUBTLEX-NL (`subtlex-nl`) | TODO | TODO | no |
-| Concreteness ratings for 40 thousand English lemmas (Brysbaert et al.) (`brysbaert-concreteness`) | TODO | TODO | no |
-| Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012) (`kuperman-aoa`) | TODO | TODO | no |
+| Concreteness ratings for 40 thousand English lemmas (Brysbaert et al. 2014) (`brysbaert-concreteness`) | MIT according to the Hugging Face uploader; the ratings are Brysbaert et al.'s, whose own terms the mirror does not give | TODO | no |
+| Age-of-acquisition ratings for 30,000 English words (Kuperman et al. 2012), 51,715-word edition (`kuperman-aoa`) | not stated on the Hugging Face mirror; the ratings are Kuperman et al.'s | TODO | no |
 | Test-based AoA norms for 44 thousand English word meanings (Brysbaert & Biemiller) (`test-based-aoa`) | TODO | TODO | no |
 | BasiLex lexicon (`basilex`) | INT licence agreement for non-commercial personal research (free); a commercial edition exists | no | no |
 | Basic English word list (Ogden's 850) (`basic-english`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |

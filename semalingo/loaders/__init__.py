@@ -6,6 +6,6 @@ all loaders in LOADERS, keyed by source id.
 """
 
 from .base import LOADERS, CLDFLoader, Loader, ManualLoader, ManualSourceMissing, register  # noqa: F401
-from . import clics, concepticon, concepticon_maps, datsemshift, frequencies, glottolog, norare, oewn, sumo, wold, wordlists  # noqa: F401  (registers the loaders)
+from . import clics, concepticon, concepticon_maps, datsemshift, frequencies, glottolog, norare, norms, oewn, sumo, wold, wordlists  # noqa: F401  (registers the loaders)
 
 __all__ = ["LOADERS", "CLDFLoader", "Loader", "ManualLoader", "ManualSourceMissing", "register"]

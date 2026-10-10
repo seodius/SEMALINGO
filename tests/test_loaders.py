@@ -340,6 +340,30 @@ class SumoTest(LoaderTestCase):
         self.assertEqual(self.value("SELECT to_id FROM mappings WHERE from_id = 'cili:i64868'"), "pwn30:05311054-n")
 
 
+class EnglishNormsTest(LoaderTestCase):
+    def props(self, node):
+        return dict(self.rows("SELECT property, COALESCE(value_text, value_num) FROM properties WHERE node_id = ?", node))
+
+    def test_kuperman_aoa(self):
+        self.assertEqual(self.load("kuperman-aoa")["forms"], 4)
+        eye = self.props("kuperman-aoa:eye")
+        self.assertEqual((eye["aoa_mean"], eye["aoa_bird_lemma"], eye["syllables"]), (3.75, 4.14, 1.0))
+        self.assertNotIn("alternative_spelling", eye)  # same as the word
+        self.assertNotIn("aoa_schock", eye)  # empty
+        abacuses = self.props("kuperman-aoa:abacuses")
+        self.assertNotIn("aoa_mean", abacuses)  # "NA": not rated as a word
+        self.assertEqual((abacuses["aoa_mean_lemma"], abacuses["lemma"]), (8.69, "abacus"))
+        self.assertEqual(self.props("kuperman-aoa:colour")["alternative_spelling"], "color")
+        self.assertEqual(self.value("SELECT construct FROM property_types WHERE source_id = 'kuperman-aoa' AND property = 'aoa_mean'"), "aoa")
+
+    def test_brysbaert_concreteness(self):
+        self.assertEqual(self.load("brysbaert-concreteness")["forms"], 3)
+        self.assertEqual(self.props("brysbaert-concreteness:unhappiness")["concreteness_mean"], 1.52)
+        soda = self.props("brysbaert-concreteness:baking_soda")
+        self.assertEqual(soda["bigram"], 1.0)
+        self.assertNotIn("dominant_pos", soda)  # "0" means none
+
+
 class ManualSourceTest(LoaderTestCase):
     def test_missing_manual_file_explains_add_file(self):
         from semalingo.loaders import ManualSourceMissing

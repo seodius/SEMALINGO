@@ -208,6 +208,29 @@ def cili(folder: Path) -> None:
     (folder / "ili-map-pwn30.tab").write_text(CILI_MAP, encoding="utf-8")
 
 
+def kuperman_aoa(folder: Path) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    rows = [
+        "Word,Alternative.spelling,Freq_pm,Dom_PoS_SUBTLEX,Nletters,Nphon,Nsyll,Lemma_highest_PoS,AoA_Kup,Perc_known,AoA_Kup_lem,Perc_known_lem,AoA_Bird_lem,AoA_Bristol_lem,AoA_Cort_lem,AoA_Schock",
+        "eye,eye,111.78,Noun,3,1,1,eye,3.75,1.00,3.75,1.00,4.14,3.58,3.33,",
+        "eyes,eyes,221.55,Noun,4,2,1,eye,3.44,1.00,3.44,1.00,,,,",
+        "abacuses,abacuses,0.02,Noun,8,9,4,abacus,NA,NA,8.69,0.65,,,,",
+        "colour,color,40.0,Noun,6,4,2,colour,4.5,1.00,4.5,1.00,,,,",
+    ]
+    (folder / "en.aoa.csv").write_bytes(("\r\n".join(rows) + "\r\n").encode("utf-8"))
+
+
+def brysbaert_concreteness(folder: Path) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    rows = [
+        "Word,Bigram,Conc.M,Conc.SD,Unknown,Total,Percent_known,SUBTLEX,Dom_Pos",
+        "eye,0,4.9,0.41,0,29,1.0,5701,Noun",
+        "unhappiness,0,1.52,0.78,0,29,1.0,59,Noun",
+        "baking soda,1,5.0,0.0,0,27,1.0,0,0",
+    ]
+    (folder / "concreteness_ratings.csv").write_bytes(("\r\n".join(rows) + "\r\n").encode("utf-8"))
+
+
 def xlsx(path: Path, header: list[str], rows: list[list]) -> None:
     import openpyxl
 
@@ -301,7 +324,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
 
 
 BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn, "norare": norare, "concepticon-maps": concepticon_maps}
-BUILDERS.update({"sumo": sumo, "cili": cili})
+BUILDERS.update({"sumo": sumo, "cili": cili, "kuperman-aoa": kuperman_aoa, "brysbaert-concreteness": brysbaert_concreteness})
 BUILDERS.update({sid: wiki_page(sid) for sid in ("basic-english", "wiktionary-1000-basic", "basic-english-combined", "voa-special-english", "simple-misspellings", "nsm-primes")})
 
 
