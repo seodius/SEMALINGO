@@ -323,7 +323,10 @@ class SumoTest(LoaderTestCase):
         self.assertIn(("sumo:Sun", "sumo:Star", "instance_of"), relations)
         self.assertIn(("sumo:part", "sumo:located", "subrelation_of"), relations)
         self.assertIn(("sumo:Blind", "sumo:Disabled", "subattribute_of"), relations)
-        self.assertEqual(len(relations), 9)  # the subclass inside the rule and the commented-out one do not count
+        self.assertIn(("sumo:Seeing", "sumo:Looking", "relatedInternalConcept"), relations)  # SUMO's own relation name
+        self.assertIn(("sumo:Ear", "sumo:Organ", "partition"), relations)  # one per part of the decomposition
+        self.assertIn(("sumo:Eye", "sumo:Organ", "rule_mentions"), relations)  # both named in one rule
+        self.assertEqual(len(relations), 14)  # the subclass inside the rule, the commented-out one and the ternary fact do not count
         self.assertEqual(self.value("SELECT value_text FROM properties WHERE node_id = 'sumo:Eye' AND property = 'documentation'"), 'The Organ of sight; see "Seeing".')
         self.assertEqual(self.value("SELECT gloss FROM concepts WHERE concept_id = 'sumo:Eye'"), "eye")
         mappings = dict(((f, t), m) for f, t, m in self.rows("SELECT from_id, to_id, mapping_type FROM mappings"))

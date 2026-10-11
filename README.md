@@ -107,6 +107,12 @@ semalingo load-lists && semalingo link-wordnet            # lists and new concep
 semalingo review-queue queue.json                          # the queue now includes your lists
 ```
 
+For every concept set and candidate synset the page shows where it sits (`semalingo.context`):
+the full SUMO path up to Entity with SUMO's documentation, ground facts and the classes its
+rules name together with the term; the WordNet hypernym path and the synset's part, member,
+substance, entailment, cause and similarity relations; and Concepticon's own relations between
+concept sets (has part, part of, broader, narrower, ...).
+
 The review page also shows how languages express each concept set (`semalingo.usage`): the
 words concept lists use for it in 56 languages (Concepticon, with SUBTLEX Zipf frequencies),
 Lexibank's forms, forms that stand for several concept sets in one word list, how many

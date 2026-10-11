@@ -85,3 +85,34 @@ class MappingLayerTest(LoaderTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ContextTest(LoaderTestCase):
+    def setUp(self):
+        super().setUp()
+        for source in ("concepticon", "oewn", "sumo"):
+            self.load(source)
+
+    def test_sumo_hierarchy_facts_and_rule_mentions(self):
+        from semalingo.context import sumo_context
+
+        sumo = sumo_context(self.conn, ["Eye", "Seeing"])
+        self.assertEqual(sumo["Eye"]["p"], ["Organ"])
+        self.assertEqual(sumo["Organ"]["p"], ["AnimalAnatomicalStructure"])  # ancestors come along
+        self.assertIn("AnimalAnatomicalStructure", sumo)
+        self.assertEqual(sumo["Eye"]["d"], 'The Organ of sight; see "Seeing".')
+        self.assertIn(["partition", "Organ", 1], sumo["Eye"]["f"])
+        self.assertIn(["relatedInternalConcept", "Looking", 1], sumo["Seeing"]["f"])
+        self.assertEqual(sumo["Eye"]["m"], [["Organ", 1]])
+        self.assertNotIn("f", sumo["Organ"])  # facts only for the terms asked for
+
+    def test_wordnet_hierarchy_and_concepticon_relations(self):
+        from semalingo.context import concept_relations, wordnet_context
+
+        synset = self.value("SELECT from_id FROM relations WHERE source_id = 'oewn' AND relation_type = 'hypernym' LIMIT 1")
+        parent = self.value("SELECT to_id FROM relations WHERE source_id = 'oewn' AND relation_type = 'hypernym' AND from_id = ?", synset)
+        wordnet = wordnet_context(self.conn, [synset])
+        self.assertEqual(wordnet[synset]["p"], [parent])
+        self.assertIn(parent, wordnet)
+        self.assertTrue(wordnet[parent]["l"])
+        self.assertEqual(concept_relations(self.conn, ["concepticon:1409"]), {"concepticon:1409": [["narrower", "concepticon:1819", "LOOK"]]})

@@ -11,6 +11,9 @@ MERGE_KIF = '''; ; The SUMO is freely available, subject to the following IEEE l
 (instance Sun Star)
 (subrelation part located)
 (subAttribute Blind Disabled)
+(relatedInternalConcept Seeing Looking)
+(partition Organ Eye Ear)
+(capability Seeing agent Eye)
 (=>
   (instance ?X Eye)
   (subclass ?Y Organ))

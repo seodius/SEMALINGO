@@ -3,7 +3,8 @@
 - `review_queue`: the proposals for a priority set of Concepticon concept sets, with what a
   reviewer needs to decide (definitions, lemmas, the SUMO term behind each synset).
 - `review_payload`: the queue plus, per concept set, how other languages express it
-  (semalingo.usage), and a catalogue of all Concepticon concept sets to add to custom lists
+  (semalingo.usage), the SUMO and WordNet hierarchies and relations around it
+  (semalingo.context), and a catalogue of all Concepticon concept sets to add to custom lists
   (semalingo.lists): what the review page shows.
 - `load_reviewed`: reviewed decisions from mappings/*.tsv become "manual" mappings that name
   their reviewer. The TSV files are the source of truth for reviewed edges; they live in the
@@ -225,14 +226,31 @@ def review_queue(conn, concept_lists=DEFAULT_LISTS, top: int = 5) -> list[dict]:
 
 
 def review_payload(conn, concept_lists=DEFAULT_LISTS, top: int = 5) -> dict:
-    """The review queue with each concept set's words in other languages, as the review page reads it."""
+    """The review queue as the review page reads it: each concept set with its words in other
+    languages and its Concepticon relations, the SUMO and WordNet hierarchies and relations of
+    every candidate synset, and the catalogue of concept sets."""
+    from .context import concept_relations, sumo_context, wordnet_context
     from .usage import concept_usage
 
     queue = review_queue(conn, concept_lists, top)
-    usage = concept_usage(conn, [item["concept"] for item in queue])
+    concepts = [item["concept"] for item in queue]
+    usage = concept_usage(conn, concepts)
+    relations = concept_relations(conn, concepts)
+    synsets, terms = set(), set()
     for item in queue:
         item["usage"] = usage["concepts"][item["concept"]]
-    return {"languages": usage["languages"], "items": queue, "catalog": catalog(conn)}
+        if relations.get(item["concept"]):
+            item["relations"] = relations[item["concept"]]
+        for candidate in item["candidates"]:
+            synsets.add(candidate["synset"])
+            terms.update(term[:-1] for term in candidate["sumo"])  # "Eye=" -> Eye
+    return {
+        "languages": usage["languages"],
+        "items": queue,
+        "catalog": catalog(conn),
+        "sumo": sumo_context(conn, terms),
+        "wordnet": wordnet_context(conn, synsets),
+    }
 
 
 def catalog(conn, definition_length: int = 160) -> list[list[str]]:

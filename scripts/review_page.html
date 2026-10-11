@@ -165,6 +165,27 @@ button.chip:hover { border-color: var(--accent); }
 .conf { display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
 .conf i { display: inline-block; width: 60px; height: 4px; background: var(--rule); border-radius: 2px; position: relative; overflow: hidden; }
 .conf i b { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.hier { grid-column: 2; display: flex; gap: 8px; align-items: baseline; font-size: 0.8rem; color: var(--muted); min-width: 0; }
+.hier .hl { flex: 0 0 62px; font: 500 0.66rem var(--mono); letter-spacing: .05em; text-transform: uppercase; padding-top: 1px; }
+.hier .paths { display: grid; gap: 2px; min-width: 0; }
+.path { overflow-wrap: break-word; line-height: 1.5; }
+.path .node { color: var(--ink); }
+.path .node.top { font-weight: 600; }
+.path .sep { opacity: .55; }
+.path .mk { font: 0.7rem var(--mono); color: var(--accent); margin-left: 2px; }
+.path .also { opacity: .8; }
+details.rels { grid-column: 2; font-size: 0.82rem; }
+details.rels > summary { cursor: pointer; color: var(--accent); font-size: 0.8rem; width: max-content; }
+.relgrid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; margin: 6px 0 2px; }
+.relgrid dt { color: var(--muted); font-size: 0.76rem; padding-top: 1px; }
+.relgrid dd { margin: 0; overflow-wrap: anywhere; }
+.relgrid .doc { font-family: var(--serif); font-size: 0.92rem; }
+.relgrid .n { font: 0.68rem var(--mono); color: var(--muted); }
+.crel { display: grid; gap: 6px; }
+.crel .row2 { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.crel .lab { font-size: 0.78rem; color: var(--muted); min-width: 70px; }
+.crel .row2 .paths { flex: 1 1 320px; min-width: 0; display: grid; gap: 2px; }
+@media (max-width: 560px) { .hier { flex-direction: column; gap: 0; } .hier .hl { flex: none; } .relgrid { grid-template-columns: minmax(0, 1fr); } }
 .actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .btn { border: 1px solid var(--rule); background: var(--sheet); padding: 5px 11px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
 .btn:hover { border-color: var(--accent); }
@@ -333,6 +354,8 @@ button.chip:hover { border-color: var(--accent); }
   var DATA = JSON.parse(document.getElementById("queueData").textContent);
   var QUEUE = Array.isArray(DATA) ? DATA : DATA.items;
   var LANGS = (!Array.isArray(DATA) && DATA.languages) || {};
+  var SUMO = (!Array.isArray(DATA) && DATA.sumo) || {};       // term -> {n, d, p: parents, f: facts, m: rule mentions}
+  var WORDNET = (!Array.isArray(DATA) && DATA.wordnet) || {}; // synset -> {l: label, p: hypernyms, r: relations}
   // Languages shown side by side under the chosen one (when the concept has a word there).
   var STRIP = ["stan1293", "stan1295", "stan1290", "stan1288", "russ1263", "mand1415", "stan1318", "nucl1643", "nucl1301", "finn1318", "haus1257", "indo1316"];
   function stored(key, fallback) { try { var v = localStorage.getItem(key); return v == null ? fallback : v; } catch (e) { return fallback; } }
@@ -516,6 +539,8 @@ button.chip:hover { border-color: var(--accent); }
     if (tags.childNodes.length) box.appendChild(tags);
     box.appendChild(renderMine(item));
     var d = decisions[item.concept];
+    var ctx = conceptContext(item, d);
+    if (ctx) box.appendChild(ctx);
     var status = el("p", { class: "status" });
     if (d) {
       status.appendChild(document.createTextNode("Decision: "));
@@ -556,9 +581,13 @@ button.chip:hover { border-color: var(--accent); }
       var bar = el("i"); var fill = el("b"); fill.style.width = Math.round(100 * c.confidence) + "%"; bar.appendChild(fill);
       conf.appendChild(bar); conf.appendChild(document.createTextNode(Math.round(100 * c.confidence) + "%"));
       meta.appendChild(conf);
-      if (c.sumo && c.sumo.length) meta.appendChild(el("span", null, "SUMO " + c.sumo.join(", ")));
+
       meta.appendChild(el("code", null, c.synset.replace("oewn:", "")));
       card.appendChild(meta);
+      card.appendChild(hierRow("SUMO", c.sumo && c.sumo.length ? c.sumo.map(sumoPath) : [el("div", { class: "path" }, "no SUMO term for this synset")]));
+      card.appendChild(hierRow("WordNet", [wordnetPath(c.synset)]));
+      var rels = relationsPanel(c.sumo || [], c.synset);
+      if (rels) card.appendChild(rels);
       var actions = el("div", { class: "actions" });
       [["exact", "Same meaning"], ["broader", "Synset is broader"], ["narrower", "Synset is narrower"], ["related", "Related"]].forEach(function (pair) {
         var pressed = chosen && d.type === pair[0];
@@ -571,6 +600,115 @@ button.chip:hover { border-color: var(--accent); }
       cands.appendChild(card);
     });
     ["noneBtn", "clearBtn", "manualBtn"].forEach(function (id) { document.getElementById(id).disabled = readOnly; });
+  }
+
+  // --- hierarchies and relations ---
+  // The path from a node up to a root, through each node's first parent (the deepest one).
+  function chainOf(start, dict) {
+    var out = [start], seen = {};
+    seen[start] = true;
+    while (out.length < 30) {
+      var e = dict[out[out.length - 1]];
+      if (!e || !e.p || !e.p.length || seen[e.p[0]]) break;
+      seen[e.p[0]] = true; out.push(e.p[0]);
+    }
+    return out;
+  }
+  var SUMO_MARK = { "=": "same as this term", "+": "falls under this term" };
+  function sumoPath(mark) {
+    var term = mark.slice(0, -1), sign = mark.slice(-1), line = el("div", { class: "path" });
+    chainOf(term, SUMO).forEach(function (t, i) {
+      if (i) line.appendChild(el("span", { class: "sep" }, " › "));
+      var e = SUMO[t] || {};
+      var node = el("span", { class: "node" + (i === 0 ? " top" : ""), title: (e.n ? e.n + ": " : "") + (e.d || "") }, t);
+      line.appendChild(node);
+      if (i === 0) line.appendChild(el("span", { class: "mk", title: "The synset is " + (SUMO_MARK[sign] || sign) }, sign === "=" ? "=" : "⊂"));
+    });
+    var others = ((SUMO[term] || {}).p || []).slice(1);
+    if (others.length) line.appendChild(el("span", { class: "also" }, "  (also under " + others.join(", ") + ")"));
+    return line;
+  }
+  function wordnetPath(synset) {
+    var line = el("div", { class: "path" });
+    chainOf(synset, WORDNET).slice(1).forEach(function (s, i) {
+      if (i) line.appendChild(el("span", { class: "sep" }, " › "));
+      line.appendChild(el("span", { class: "node", title: s.replace("oewn:", "") }, (WORDNET[s] || {}).l || s));
+    });
+    if (!line.childNodes.length) line.appendChild(el("span", null, "top of the hierarchy"));
+    return line;
+  }
+  function hierRow(label, lines) {
+    var row = el("div", { class: "hier" });
+    row.appendChild(el("span", { class: "hl" }, label));
+    var box = el("div", { class: "paths" });
+    lines.forEach(function (l) { box.appendChild(l); });
+    row.appendChild(box);
+    return row;
+  }
+  function relGroup(dl, label, values, cls) {
+    if (!values.length) return;
+    dl.appendChild(el("dt", null, label));
+    var dd = el("dd", cls ? { class: cls } : null);
+    values.forEach(function (v, i) { if (i) dd.appendChild(document.createTextNode(", ")); dd.appendChild(typeof v === "string" ? document.createTextNode(v) : v); });
+    dl.appendChild(dd);
+  }
+  // SUMO documentation, facts and rule mentions of the mapped terms, and WordNet relations of the synset.
+  function relationsPanel(marks, synset) {
+    var det = el("details", { class: "rels" });
+    det.appendChild(el("summary", null, "Relations"));
+    var dl = el("dl", { class: "relgrid" });
+    marks.forEach(function (mark) {
+      var term = mark.slice(0, -1), e = SUMO[term];
+      if (!e) return;
+      if (e.d) relGroup(dl, "SUMO " + term, ["“" + e.d + "”"], "doc");
+      var groups = {};
+      (e.f || []).forEach(function (f) {
+        var key = f[2] > 0 ? f[0] + " →" : "← " + f[0];
+        (groups[key] = groups[key] || []).push(f[1]);
+      });
+      Object.keys(groups).forEach(function (k) { relGroup(dl, k, groups[k]); });
+      if (e.m && e.m.length) relGroup(dl, "in rules with", e.m.map(function (m) {
+        var s = el("span", null, m[0]); s.appendChild(el("span", { class: "n" }, " " + m[1])); return s;
+      }));
+    });
+    var w = WORDNET[synset];
+    if (w && w.r) {
+      var wg = {};
+      w.r.forEach(function (r) { (wg[r[0]] = wg[r[0]] || []).push(r[1]); });
+      Object.keys(wg).forEach(function (k) { relGroup(dl, "WordNet " + k, wg[k]); });
+    }
+    if (!dl.childNodes.length) return null;
+    det.appendChild(dl);
+    return det;
+  }
+  // Concepticon's relations of a concept set, and its place in SUMO through the chosen (or suggested) synset.
+  function conceptContext(item, d) {
+    var box = el("div", { class: "crel" });
+    var groups = {}, order = [];
+    (item.relations || []).forEach(function (r) {
+      if (!groups[r[0]]) { groups[r[0]] = []; order.push(r[0]); }
+      groups[r[0]].push(r);
+    });
+    order.forEach(function (k) {
+      var row = el("div", { class: "row2" });
+      row.appendChild(el("span", { class: "lab" }, k));
+      groups[k].forEach(function (r) { row.appendChild(conceptChip(r[2], r[1], null, "Concepticon " + localId(r[1]))); });
+      box.appendChild(row);
+    });
+    var pick = null, how = "";
+    if (d && d.synset) { pick = item.candidates.filter(function (c) { return c.synset === d.synset; })[0]; how = "the chosen synset"; }
+    if (!pick && !(d && d.synset)) { pick = item.candidates.filter(function (c) { return c.sumo && c.sumo.length; })[0]; how = "the first proposal with a SUMO term"; }
+    if (pick && pick.sumo && pick.sumo.length) {
+      var row = el("div", { class: "row2" });
+      row.appendChild(el("span", { class: "lab" }, "in SUMO"));
+      var paths = el("div", { class: "paths" });
+      pick.sumo.forEach(function (m) { paths.appendChild(sumoPath(m)); });
+      row.appendChild(paths);
+      row.title = "Through " + how + ": " + pick.lemmas.slice(0, 2).join(", ");
+      box.appendChild(row);
+      box.appendChild(el("p", { class: "status", style: "margin:0" }, "Through " + how + " (" + pick.lemmas.slice(0, 2).join(", ") + ")."));
+    }
+    return box.childNodes.length ? box : null;
   }
 
   // The "My lists" row on a concept: the lists it is in (× removes) and a picker to add it to another.
