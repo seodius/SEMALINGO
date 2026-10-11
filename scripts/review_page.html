@@ -1,0 +1,451 @@
+<title>Concepticon–WordNet Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reviewer's desk. Queue on the left, one concept and its WordNet candidates on the right, like index cards. */
+:root {
+  --paper: #f4f5f2;
+  --sheet: #ffffff;
+  --ink: #1d2430;
+  --muted: #5d6675;
+  --rule: #d9ddd6;
+  --accent: #2c4f8f;
+  --accent-soft: #e3e9f5;
+  --exact: #1f7a52;
+  --exact-soft: #e1f2e9;
+  --partial: #9a6412;
+  --partial-soft: #f6ecd9;
+  --none: #6b6f78;
+  --none-soft: #ebecee;
+  --focus: #2c4f8f;
+  --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #14171c; --sheet: #1c2027; --ink: #e6e8ec; --muted: #9aa3b2; --rule: #2e343d;
+    --accent: #8fb0ee; --accent-soft: #243450; --exact: #6fcf9f; --exact-soft: #18352a;
+    --partial: #e0b46a; --partial-soft: #3a2f1a; --none: #a3a7b0; --none-soft: #2a2e35; --focus: #8fb0ee;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #14171c; --sheet: #1c2027; --ink: #e6e8ec; --muted: #9aa3b2; --rule: #2e343d;
+  --accent: #8fb0ee; --accent-soft: #243450; --exact: #6fcf9f; --exact-soft: #18352a;
+  --partial: #e0b46a; --partial-soft: #3a2f1a; --none: #a3a7b0; --none-soft: #2a2e35; --focus: #8fb0ee;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.5 var(--sans); padding-inline: 16px; padding-block: 16px; }
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.app { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; }
+header.top { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; }
+h1 { font: 600 1.55rem/1.2 var(--serif); margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); font-size: 0.88rem; margin: 2px 0 0; max-width: 62ch; }
+.progress { min-width: 220px; flex: 1 1 220px; max-width: 360px; }
+.progress .bar { height: 6px; background: var(--rule); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.progress .bar i { display: block; height: 100%; background: var(--exact); width: 0; transition: width .3s; }
+.progress .label { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.banner { grid-column: 1 / -1; border: 1px solid var(--rule); background: var(--partial-soft); color: var(--ink); padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; }
+
+aside.queue { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.filters { display: flex; gap: 4px; flex-wrap: wrap; }
+.filters button { border: 1px solid var(--rule); background: var(--sheet); padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--sheet); }
+#search { width: 100%; padding: 7px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); }
+#listFilter { width: 100%; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); font-size: 0.85rem; }
+.items { position: relative; list-style: none; margin: 0; padding: 0; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); max-height: calc(100vh - 230px); min-height: 200px; overflow-y: auto; }
+.items li button { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; align-items: center; gap: 8px; width: 100%; padding: 7px 12px; border: 0; border-bottom: 1px solid var(--rule); background: none; text-align: left; cursor: pointer; }
+.items li:last-child button { border-bottom: 0; }
+.items li button[aria-current="true"] { background: var(--accent-soft); }
+.items .dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--muted); }
+.items .dot.exact { background: var(--exact); border-color: var(--exact); }
+.items .dot.partial { background: var(--partial); border-color: var(--partial); }
+.items .dot.none { background: var(--none); border-color: var(--none); }
+.items .g { font-family: var(--serif); font-size: 0.98rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.items .n { font: 0.72rem var(--mono); color: var(--muted); }
+.empty { padding: 14px; color: var(--muted); font-size: 0.88rem; }
+
+main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.concept { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 20px; display: grid; gap: 8px; }
+.concept .eyebrow { font: 500 0.72rem var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.concept h2 { font: 600 2rem/1.15 var(--serif); margin: 0; letter-spacing: .01em; overflow-wrap: anywhere; }
+.concept .def { font: 1.08rem/1.5 var(--serif); margin: 0; max-width: 68ch; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
+.status { font-size: 0.85rem; color: var(--muted); }
+.status strong { color: var(--ink); }
+
+.cands { display: grid; gap: 10px; }
+.cand { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 4px 12px; }
+.cand.chosen-exact { border-color: var(--exact); box-shadow: inset 4px 0 0 var(--exact); }
+.cand.chosen-partial { border-color: var(--partial); box-shadow: inset 4px 0 0 var(--partial); }
+.cand .key { grid-row: span 3; font: 500 0.85rem var(--mono); color: var(--muted); border: 1px solid var(--rule); border-radius: 6px; height: 28px; display: grid; place-items: center; }
+.cand .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+.cand .lemmas { font: 600 1.1rem var(--serif); overflow-wrap: anywhere; }
+.cand .lemmas span { font-weight: 400; color: var(--muted); }
+.cand .pos { font: 0.72rem var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.cand .sugg { font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.cand .cdef { margin: 0; font: 1rem/1.45 var(--serif); }
+.cand .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--muted); align-items: center; }
+.cand .meta code { font: 0.76rem var(--mono); }
+.conf { display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.conf i { display: inline-block; width: 60px; height: 4px; background: var(--rule); border-radius: 2px; position: relative; overflow: hidden; }
+.conf i b { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.btn { border: 1px solid var(--rule); background: var(--sheet); padding: 5px 11px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+.btn:hover { border-color: var(--accent); }
+.btn.exact { border-color: var(--exact); color: var(--exact); font-weight: 600; }
+.btn.exact[aria-pressed="true"] { background: var(--exact); color: var(--sheet); }
+.btn.partial[aria-pressed="true"] { background: var(--partial); border-color: var(--partial); color: var(--sheet); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.panel { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row label { font-size: 0.85rem; color: var(--muted); }
+#manualId { font: 0.85rem var(--mono); padding: 5px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); width: 230px; max-width: 100%; }
+#manualType { padding: 5px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); }
+#note { width: 100%; min-height: 56px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); resize: vertical; }
+.btn.none[aria-pressed="true"] { background: var(--none); border-color: var(--none); color: var(--sheet); }
+.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center; }
+.keys { font-size: 0.78rem; color: var(--muted); }
+.keys kbd { font: 0.74rem var(--mono); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--paper); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--paper); padding: 8px 14px; border-radius: 6px; font-size: 0.88rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+@media (max-width: 820px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  aside.queue { order: 2; }
+  .items { max-height: 320px; }
+  .concept h2 { font-size: 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <h1>Concepticon–WordNet Review</h1>
+      <p class="sub">Pick the WordNet synset that means the same as each Concepticon concept set, or say how they differ. Every decision is saved with you as reviewer and becomes a reviewed mapping in SEMALINGO.</p>
+    </div>
+    <div class="progress" aria-live="polite">
+      <div class="label" id="progressLabel">0 of 0 reviewed</div>
+      <div class="bar"><i id="progressBar"></i></div>
+    </div>
+  </header>
+  <div class="banner" id="banner" hidden></div>
+
+  <aside class="queue" aria-label="Review queue">
+    <div class="filters" role="group" aria-label="Show">
+      <button type="button" data-filter="todo" aria-pressed="true">To review</button>
+      <button type="button" data-filter="done" aria-pressed="false">Reviewed</button>
+      <button type="button" data-filter="all" aria-pressed="false">All</button>
+    </div>
+    <input id="search" type="search" placeholder="Find a concept (EYE, SEE…)" autocomplete="off">
+    <select id="listFilter" aria-label="Concept list"></select>
+    <ul class="items" id="items"></ul>
+  </aside>
+
+  <main>
+    <section class="concept" id="concept" aria-live="polite"></section>
+    <div class="cands" id="cands"></div>
+    <section class="panel">
+      <div class="row">
+        <button type="button" class="btn none" id="noneBtn">None of these fits <span class="keys"><kbd>0</kbd></span></button>
+        <button type="button" class="btn" id="clearBtn">Clear decision</button>
+      </div>
+      <div class="row">
+        <label for="manualId">Another synset</label>
+        <input id="manualId" placeholder="oewn-05318579-n" autocomplete="off" spellcheck="false">
+        <select id="manualType" aria-label="Relation">
+          <option value="exact">same meaning</option>
+          <option value="broader">synset is broader</option>
+          <option value="narrower">synset is narrower</option>
+          <option value="related">related</option>
+        </select>
+        <button type="button" class="btn" id="manualBtn">Save</button>
+      </div>
+      <div>
+        <label for="note" class="keys">Note (saved with the decision)</label>
+        <textarea id="note" placeholder="Why this choice, or what is missing in WordNet"></textarea>
+      </div>
+      <div class="nav">
+        <div class="keys"><kbd>1</kbd>–<kbd>5</kbd> same meaning · <kbd>0</kbd> none fits · <kbd>J</kbd>/<kbd>K</kbd> next/previous</div>
+        <div class="row">
+          <button type="button" class="btn" id="prevBtn">Previous</button>
+          <button type="button" class="btn" id="nextBtn">Next</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script type="application/json" id="queueData">/*QUEUE*/</script>
+<script>
+(function () {
+  "use strict";
+  var QUEUE = JSON.parse(document.getElementById("queueData").textContent);
+  var LIST_NAMES = {
+    "Goddard-2011-63": "NSM primes (2011)",
+    "Swadesh-1955-100": "Swadesh 100",
+    "Tadmor-2009-100": "Leipzig–Jakarta",
+    "Ogden-1930-100": "Basic English operations",
+    "Ogden-1930-200": "Basic English picturable",
+    "Swadesh-1952-200": "Swadesh 200",
+    "Luniewska-2019-299": "Early words (Łuniewska)"
+  };
+  var POS = { n: "noun", v: "verb", a: "adjective", s: "adjective", r: "adverb" };
+  var TYPE_LABEL = { exact: "same meaning", broader: "synset is broader", narrower: "synset is narrower", related: "related", none: "none fits" };
+
+  var state = { filter: "todo", query: "", list: "", current: QUEUE.length ? QUEUE[0].concept : null };
+  var decisions = {};          // concept id -> decision body
+  var db = null, user = null, myId = null, amOwner = false, readOnly = false;
+  var byId = {};
+  QUEUE.forEach(function (item, i) { item.index = i; byId[item.concept] = item; });
+
+  function localId(concept) { return concept.split(":")[1]; }
+  function el(tag, attrs, text) {
+    var node = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function kind(d) { return !d ? "" : d.type === "exact" ? "exact" : d.type === "none" ? "none" : "partial"; }
+  function toast(text) {
+    var t = document.getElementById("toast");
+    t.textContent = text; t.classList.add("show");
+    clearTimeout(toast.timer); toast.timer = setTimeout(function () { t.classList.remove("show"); }, 1800);
+  }
+  function banner(text) { var b = document.getElementById("banner"); b.textContent = text; b.hidden = !text; }
+
+  function visible() {
+    var q = state.query.trim().toUpperCase();
+    return QUEUE.filter(function (item) {
+      var done = !!decisions[item.concept];
+      if (state.filter === "todo" && done) return false;
+      if (state.filter === "done" && !done) return false;
+      if (state.list && item.lists.indexOf(state.list) < 0) return false;
+      if (q && item.gloss.toUpperCase().indexOf(q) < 0) return false;
+      return true;
+    });
+  }
+
+  function renderProgress() {
+    var done = QUEUE.filter(function (i) { return decisions[i.concept]; }).length;
+    document.getElementById("progressLabel").textContent = done + " of " + QUEUE.length + " reviewed";
+    document.getElementById("progressBar").style.width = (QUEUE.length ? (100 * done / QUEUE.length) : 0) + "%";
+  }
+
+  function renderList() {
+    var ul = document.getElementById("items");
+    ul.textContent = "";
+    var items = visible();
+    if (!items.length) {
+      var li = el("li", { class: "empty" }, state.filter === "todo" ? "Nothing left to review here." : "No concept sets match.");
+      ul.appendChild(li); return;
+    }
+    items.forEach(function (item) {
+      var li = el("li");
+      var b = el("button", { type: "button", "aria-current": String(item.concept === state.current) });
+      b.appendChild(el("span", { class: "dot " + kind(decisions[item.concept]) }));
+      b.appendChild(el("span", { class: "g" }, item.gloss));
+      b.appendChild(el("span", { class: "n" }, localId(item.concept)));
+      b.addEventListener("click", function () { select(item.concept); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    var cur = ul.querySelector('[aria-current="true"]');
+    if (cur) {  // scroll the list only, never the page
+      var top = cur.parentNode.offsetTop;
+      if (top < ul.scrollTop || top > ul.scrollTop + ul.clientHeight - cur.offsetHeight) ul.scrollTop = Math.max(0, top - ul.clientHeight / 2);
+    }
+  }
+
+  function renderConcept() {
+    var box = document.getElementById("concept");
+    var cands = document.getElementById("cands");
+    box.textContent = ""; cands.textContent = "";
+    var item = byId[state.current];
+    if (!item) { box.appendChild(el("p", { class: "status" }, "Choose a concept set from the queue.")); return; }
+    var eyebrow = el("div", { class: "eyebrow" });
+    eyebrow.appendChild(el("span", null, "Concepticon " + localId(item.concept)));
+    if (item.category) eyebrow.appendChild(el("span", null, item.category));
+    if (item.field) eyebrow.appendChild(el("span", null, item.field));
+    box.appendChild(eyebrow);
+    box.appendChild(el("h2", null, item.gloss));
+    box.appendChild(el("p", { class: "def" }, item.definition || "No definition in Concepticon."));
+    var tags = el("div", { class: "tags" });
+    item.lists.forEach(function (l) { tags.appendChild(el("span", { class: "tag" }, LIST_NAMES[l] || l)); });
+    box.appendChild(tags);
+    var d = decisions[item.concept];
+    var status = el("p", { class: "status" });
+    if (d) {
+      status.appendChild(document.createTextNode("Decision: "));
+      status.appendChild(el("strong", null, TYPE_LABEL[d.type] || d.type));
+      if (d.synset) status.appendChild(document.createTextNode(" · " + d.synset.replace("oewn:", "")));
+      if (d.by && user) {
+        user.profiles([d.by]).then(function (ps) {
+          var who = d.by === myId ? "you" : (ps[d.by] && ps[d.by].name) || "someone";
+          status.appendChild(document.createTextNode(" · by " + who));
+        });
+      }
+    } else {
+      status.textContent = item.candidates.length ? "Not reviewed yet." : "Not reviewed yet. WordNet offers no candidate: pronouns and function words usually have no synset.";
+    }
+    box.appendChild(status);
+    document.getElementById("note").value = d && d.note ? d.note : "";
+    document.getElementById("noneBtn").setAttribute("aria-pressed", String(!!d && d.type === "none"));
+
+    item.candidates.forEach(function (c, i) {
+      var chosen = d && d.synset === c.synset;
+      var card = el("article", { class: "cand" + (chosen ? (d.type === "exact" ? " chosen-exact" : " chosen-partial") : "") });
+      card.appendChild(el("span", { class: "key", "aria-hidden": "true" }, String(i + 1)));
+      var head = el("div", { class: "head" });
+      var lem = el("span", { class: "lemmas" });
+      c.lemmas.forEach(function (l, j) {
+        if (j === 0) lem.appendChild(document.createTextNode(l));
+        else lem.appendChild(el("span", null, ", " + l));
+      });
+      head.appendChild(lem);
+      head.appendChild(el("span", { class: "pos" }, POS[c.pos] || c.pos));
+      if (i === 0) head.appendChild(el("span", { class: "sugg" }, "suggested"));
+      card.appendChild(head);
+      card.appendChild(el("p", { class: "cdef" }, c.definition));
+      var meta = el("div", { class: "meta" });
+      var conf = el("span", { class: "conf", title: "Share of the proposal score" });
+      var bar = el("i"); var fill = el("b"); fill.style.width = Math.round(100 * c.confidence) + "%"; bar.appendChild(fill);
+      conf.appendChild(bar); conf.appendChild(document.createTextNode(Math.round(100 * c.confidence) + "%"));
+      meta.appendChild(conf);
+      if (c.sumo && c.sumo.length) meta.appendChild(el("span", null, "SUMO " + c.sumo.join(", ")));
+      meta.appendChild(el("code", null, c.synset.replace("oewn:", "")));
+      card.appendChild(meta);
+      var actions = el("div", { class: "actions" });
+      [["exact", "Same meaning"], ["broader", "Synset is broader"], ["narrower", "Synset is narrower"], ["related", "Related"]].forEach(function (pair) {
+        var pressed = chosen && d.type === pair[0];
+        var b = el("button", { type: "button", class: "btn " + (pair[0] === "exact" ? "exact" : "partial"), "aria-pressed": String(!!pressed) }, pair[1]);
+        b.disabled = readOnly;
+        b.addEventListener("click", function () { decide(item, c.synset, pair[0]); });
+        actions.appendChild(b);
+      });
+      card.appendChild(actions);
+      cands.appendChild(card);
+    });
+    ["noneBtn", "clearBtn", "manualBtn"].forEach(function (id) { document.getElementById(id).disabled = readOnly; });
+  }
+
+  function render() { renderProgress(); renderList(); renderConcept(); }
+
+  function select(concept) { state.current = concept; render(); }
+
+  function step(dir) {
+    var items = visible();
+    if (!items.length) return;
+    var pos = items.findIndex(function (i) { return i.concept === state.current; });
+    var next = pos < 0 ? items[0] : items[Math.max(0, Math.min(items.length - 1, pos + dir))];
+    select(next.concept);
+  }
+
+  function nextOpen(after) {
+    var start = byId[after] ? byId[after].index : -1;
+    for (var k = 1; k <= QUEUE.length; k++) {
+      var item = QUEUE[(start + k) % QUEUE.length];
+      if (!decisions[item.concept]) return item.concept;
+    }
+    return after;
+  }
+
+  function decide(item, synset, type) {
+    if (readOnly || !db) { toast("Decisions can't be saved in this view."); return; }
+    var body = {
+      concept: item.concept, synset: synset, type: type,
+      note: document.getElementById("note").value.trim(),
+      by: myId, owner: amOwner, at: new Date().toISOString()
+    };
+    decisions[item.concept] = body;
+    var moveOn = state.filter !== "done";
+    if (moveOn) state.current = nextOpen(item.concept);
+    render();
+    db.collection("decisions").doc(localId(item.concept)).set(body).then(function () {
+      toast("Saved: " + item.gloss + " → " + (TYPE_LABEL[type] || type));
+    }).catch(function (e) {
+      delete decisions[item.concept];
+      if (e && e.code === "invalid_argument") { readOnly = true; banner("You can read this queue but not save decisions. Ask the owner for Contributor access."); }
+      else toast("Not saved. Try again in a moment.");
+      render();
+    });
+  }
+
+  function clearDecision() {
+    var item = byId[state.current];
+    if (!item || !decisions[item.concept] || !db || readOnly) return;
+    var old = decisions[item.concept];
+    delete decisions[item.concept];
+    render();
+    db.collection("decisions").doc(localId(item.concept)).delete().then(function () { toast("Cleared " + item.gloss); })
+      .catch(function () { decisions[item.concept] = old; render(); toast("Not cleared. Try again in a moment."); });
+  }
+
+  // --- controls ---
+  Array.prototype.forEach.call(document.querySelectorAll(".filters button"), function (b) {
+    b.addEventListener("click", function () {
+      state.filter = b.getAttribute("data-filter");
+      Array.prototype.forEach.call(document.querySelectorAll(".filters button"), function (o) { o.setAttribute("aria-pressed", String(o === b)); });
+      renderList();
+    });
+  });
+  document.getElementById("search").addEventListener("input", function (e) { state.query = e.target.value; renderList(); });
+  var lf = document.getElementById("listFilter");
+  lf.appendChild(el("option", { value: "" }, "All concept lists"));
+  Object.keys(LIST_NAMES).forEach(function (k) { lf.appendChild(el("option", { value: k }, LIST_NAMES[k])); });
+  lf.addEventListener("change", function () { state.list = lf.value; renderList(); });
+  document.getElementById("noneBtn").addEventListener("click", function () { var item = byId[state.current]; if (item) decide(item, null, "none"); });
+  document.getElementById("clearBtn").addEventListener("click", clearDecision);
+  document.getElementById("manualBtn").addEventListener("click", function () {
+    var item = byId[state.current]; if (!item) return;
+    var raw = document.getElementById("manualId").value.trim().replace(/^oewn:/, "");
+    if (!/^oewn-\d{8}-[nvars]$/.test(raw)) { toast("Write the synset as oewn-01234567-n."); return; }
+    decide(item, "oewn:" + raw, document.getElementById("manualType").value);
+    document.getElementById("manualId").value = "";
+  });
+  document.getElementById("prevBtn").addEventListener("click", function () { step(-1); });
+  document.getElementById("nextBtn").addEventListener("click", function () { step(1); });
+  document.addEventListener("keydown", function (e) {
+    var tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.metaKey || e.ctrlKey || e.altKey) return;
+    var item = byId[state.current];
+    if (/^[1-5]$/.test(e.key) && item) {
+      var c = item.candidates[Number(e.key) - 1];
+      if (c) { e.preventDefault(); decide(item, c.synset, "exact"); }
+    } else if (e.key === "0" && item) { e.preventDefault(); decide(item, null, "none"); }
+    else if (e.key === "j" || e.key === "J") { e.preventDefault(); step(1); }
+    else if (e.key === "k" || e.key === "K") { e.preventDefault(); step(-1); }
+  });
+
+  render();
+
+  // --- shared decisions ---
+  if (window.claude && typeof window.claude.use === "function") {
+    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (res) {
+      db = res[0]; user = res[1];
+      if (!db) { readOnly = true; banner("Decisions can't be saved in this view. Open the page signed in to claude.ai to review."); render(); return; }
+      var who = user ? Promise.all([user.id(), user.isOwner(), user.can("data.write")]) : Promise.resolve([null, false, null]);
+      who.then(function (w) {
+        myId = w[0]; amOwner = !!w[1];
+        if (w[2] === false) { readOnly = true; banner("You can read this queue but not save decisions. Ask the owner for Contributor access."); }
+        db.collection("decisions").limit(1000).onSnapshot(function (snap) {
+          var next = {};
+          snap.docs.forEach(function (doc) { var b = doc.data(); if (b && b.concept) next[b.concept] = b; });
+          decisions = next;
+          render();
+        }, function () { banner("Lost the connection to the saved decisions. Reload the page to see the latest."); });
+      });
+    });
+  } else {
+    readOnly = true;
+    banner("Decisions can't be saved in this view.");
+    render();
+  }
+})();
+</script>

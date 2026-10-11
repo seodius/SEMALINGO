@@ -13,6 +13,9 @@ on:
       - "semalingo/fetch.py"
       - "semalingo/writer.py"
       - "semalingo/matching.py"
+      - "semalingo/linking.py"
+      - "semalingo/review.py"
+      - "mappings/**"
       - "semalingo/wikitext.py"
       - "scripts/report_lists.py"
       - "scripts/report_sumo.py"
@@ -103,6 +106,16 @@ jobs:
       - name: Fetch and load SUMO and CILI
         timeout-minutes: 15
         run: $RUN build cili sumo
+
+      - name: Propose WordNet synsets for Concepticon and check the mapping layer
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -o pipefail
+          $RUN link-wordnet | tee link.txt
+          $RUN load-mappings
+          $RUN check-mappings | tee check.txt
+          grep -v -e '\.\.\.$' -e ' done in ' link.txt check.txt | cut -d: -f2- | sed 's/^/::notice title=mappings::/'
 
       - name: Fetch and load the word lists
         timeout-minutes: 10

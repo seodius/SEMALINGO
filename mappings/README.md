@@ -5,7 +5,10 @@ concept and a WordNet sense stay two nodes, joined by a typed edge that says how
 are and who decided.
 
 Reviewed mappings live here as versioned, tab-separated files, one file per pair of
-sources (for example `concepticon__oewn.tsv`), so every change shows up in review.
+sources (for example `concepticon__oewn.tsv`), so every change shows up in review. A
+companion file `<pair>.unmatched.tsv` lists the concepts a reviewer found no equivalent for
+(pronouns and function words usually have no WordNet synset): they are flagged as unmapped
+on purpose, not forgotten.
 
 ## Columns
 
@@ -26,3 +29,25 @@ Identity is transitive: if A = B and B = C, then A = C. A few sloppy identity li
 chain river banks into money banks across the whole graph. `exact` is a mapping
 between two nodes, not a merge, and the quality checks look for suspicious chains of
 `exact` edges.
+
+## How Concepticon–WordNet links are made
+
+1. `semalingo link-wordnet` proposes up to three Open English WordNet synsets for every
+   Concepticon concept set (method `gloss`, type `close`). Evidence: the concept's English
+   labels that are lemmas of the synset (weighted by how often concept lists use each label and
+   by WordNet's sense order), the fit between Concepticon's ontological category and the
+   synset's part of speech, and word overlap between the two definitions (the synset's
+   hypernyms included; a spade is a shovel).
+2. `semalingo review-queue queue.json` writes the proposals for a priority batch (by default
+   the NSM primes, Swadesh 100 and 200, Leipzig–Jakarta, Ogden's Basic English parts and
+   Łuniewska's early words: 654 concept sets) and `scripts/build_review_page.py` turns it into
+   the review page. Each decision there is stored with its reviewer.
+3. `semalingo export-review <folder> --reviewer <name>` writes the decisions to
+   `concepticon__oewn.tsv` and `concepticon__oewn.unmatched.tsv`; `semalingo load-mappings`
+   loads them as `manual` mappings; `semalingo check-mappings` reports coverage, unclear
+   proposals, crowded synsets and chains of `exact` edges.
+
+A spot check of 45 random concept sets found the right synset first for about 86% of
+them and among the top three for about 95%. NoRaRe's own automatic Concepticon–WordNet
+mapping (Bond-2013-OMW) agrees with the first proposal for 55% of its 1,406 concept sets;
+many of the disagreements are errors in that mapping (BULL as a policeman, HOOK as a verb).

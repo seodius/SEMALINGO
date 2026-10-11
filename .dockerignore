@@ -3,7 +3,6 @@
 data
 tests
 docs
-mappings
 **/__pycache__
 *.duckdb
 *.duckdb.wal

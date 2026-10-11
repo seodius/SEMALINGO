@@ -87,6 +87,16 @@ semalingo build concepticon concepticon-maps
 semalingo match subtlex-uk subtlex-nl childlex oewn
 ```
 
+Concepticon concept sets get WordNet proposals, which are reviewed on a review page and
+kept as reviewed mappings in `mappings/` (see [mappings/README.md](mappings/README.md)):
+
+```bash
+semalingo link-wordnet
+semalingo review-queue queue.json && python scripts/build_review_page.py queue.json review.html
+semalingo load-mappings
+semalingo check-mappings
+```
+
 `fetch` downloads only what a loader needs (selected CLDF tables at a pinned git tag, or a
 pinned release file) into `data/raw/<source>/<version>/`, with `SOURCE.json` and a
 `SHA256SUMS` manifest; `load` refuses raw files that no longer match their checksums.
@@ -108,6 +118,8 @@ semalingo/
   languages.py        language codes (forms carry Glottocodes)
   matching.py         gloss matching: words of any source -> Concepticon concept sets
   wikitext.py         reading word lists out of Wiktionary/Wikipedia wikitext
+  linking.py          WordNet proposals for Concepticon concept sets (step 4)
+  review.py           review queue, reviewed mappings and mapping checks (step 4)
   loaders/            one loader per source: glottolog, concepticon, wold, clics, datsemshift, oewn,
                       norare, concepticon-maps, subtlex-us/-nl/-uk and childlex (frequencies.py),
                       word lists from Wiktionary/Wikipedia (wordlists.py): Basic English, NSM

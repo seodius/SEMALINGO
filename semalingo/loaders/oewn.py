@@ -4,7 +4,8 @@ Node ids: synsets are "oewn:<synset id>" (kind "sense"), lexical entries "oewn:e
 (forms, language English, Glottocode stan1293). Relations: entry -> synset "sense_of"; synset -> synset by WordNet
 relation type (hypernym, part_holonym, ...); entry -> entry for sense relations such as
 derivation and antonym, so derivational families and opposites can be followed.
-Synsets with an ILI id get an imported "exact" mapping to "cili:<ili>", the bridge to WordNet 3.0
+The "sense_of" weight is the sense number within the entry (1 = listed first, the most
+frequent sense where WordNet has frequency data). Synsets with an ILI id get an imported "exact" mapping to "cili:<ili>", the bridge to WordNet 3.0
 synsets (which OEWN has renumbered) and to SUMO.
 """
 
@@ -43,11 +44,12 @@ class OewnLoader(Loader):
 
         with gzip.open(folder / self.filename, "rb") as handle:
             entry_id = lemma = None
+            rank = 0
             for event, element in ET.iterparse(handle, events=("start", "end")):
                 tag = element.tag
                 if event == "start":
                     if tag == "LexicalEntry":
-                        entry_id, lemma = element.get("id"), None
+                        entry_id, lemma, rank = element.get("id"), None, 0
                     continue
                 if tag == "Lemma":
                     lemma = element.get("writtenForm")
@@ -57,7 +59,8 @@ class OewnLoader(Loader):
                 elif tag == "Sense":
                     synset = element.get("synset")
                     sense_entry[element.get("id")] = entry_id
-                    writer.relation(self.node(f"entry/{entry_id}"), self.node(synset), "sense_of")
+                    rank += 1  # senses are listed most frequent first; the weight is the sense number
+                    writer.relation(self.node(f"entry/{entry_id}"), self.node(synset), "sense_of", float(rank))
                     first_lemma.setdefault(synset, lemma)
                     for rel in element.findall("SenseRelation"):
                         pending.append((entry_id, rel.get("target"), rel.get("relType")))

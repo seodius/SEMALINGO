@@ -10,8 +10,9 @@ COPY pyproject.toml README.md LICENSE ./
 COPY semalingo ./semalingo
 RUN pip install --no-cache-dir .
 
-# The registry is read from the working directory.
+# The registry and the reviewed mappings are read from the working directory.
 COPY sources.yaml DATA-LICENSES.md ./
+COPY mappings ./mappings
 
 RUN useradd --create-home --uid 1000 semalingo \
     && mkdir -p /app/data \

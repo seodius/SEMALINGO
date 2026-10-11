@@ -175,6 +175,82 @@ def cmd_match(args) -> int:
     return 0
 
 
+def cmd_link_wordnet(args) -> int:
+    from .db import init_db
+    from .linking import link
+
+    conn = init_db(args.db)
+    try:
+        result = timed("link concepticon -> oewn", lambda: link(conn, args.top))
+        print(f"  {result['linked']} of {result['concepts']} concept sets got WordNet proposals ({result['mappings']} mappings)")
+    finally:
+        conn.close()
+    return 0
+
+
+def cmd_review_queue(args) -> int:
+    import json
+
+    from .db import init_db
+    from .review import DEFAULT_LISTS, review_queue
+
+    conn = init_db(args.db)
+    try:
+        queue = review_queue(conn, args.lists or DEFAULT_LISTS)
+    finally:
+        conn.close()
+    args.out.write_text(json.dumps(queue, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"Wrote {len(queue)} concept sets to {args.out}")
+    return 0
+
+
+def cmd_load_mappings(args) -> int:
+    from .db import init_db
+    from .review import load_reviewed
+
+    paths = args.paths or [p for p in sorted(Path("mappings").glob("*__*.tsv")) if not p.name.endswith(".unmatched.tsv")]
+    conn = init_db(args.db)
+    try:
+        n = load_reviewed(conn, paths)
+    finally:
+        conn.close()
+    print(f"Loaded {n} reviewed mappings from {len(paths)} file(s)")
+    return 0
+
+
+def cmd_export_review(args) -> int:
+    import json
+
+    from .review import decisions_to_rows, write_review_file, write_unmatched_file
+
+    decisions = []
+    for path in sorted(Path(args.folder).rglob("*.json")):
+        body = json.loads(path.read_text(encoding="utf-8"))
+        body = body.get("data", body) if isinstance(body, dict) else body
+        if isinstance(body, dict) and body.get("concept"):
+            decisions.append(body)
+    edges, unmatched = decisions_to_rows(decisions, args.reviewer)
+    out = Path(args.out)
+    n = write_review_file(out, edges)
+    m = write_unmatched_file(out.with_name(out.name.replace(".tsv", ".unmatched.tsv")), unmatched)
+    print(f"{len(decisions)} decisions: {n} mappings in {out}, {m} concepts without an equivalent")
+    return 0
+
+
+def cmd_check_mappings(args) -> int:
+    from .db import init_db
+    from .review import check, read_unmatched
+
+    unmatched = read_unmatched(sorted(Path("mappings").glob("*.unmatched.tsv")))
+    conn = init_db(args.db)
+    try:
+        for line in check(conn, unmatched=unmatched):
+            print(line)
+    finally:
+        conn.close()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="semalingo", description=__doc__)
     parser.add_argument("--version", action="version", version=f"semalingo {__version__}")
@@ -227,6 +303,32 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--top", type=int, default=5, help="keep at most this many concept sets per word")
     p.add_argument("--db", type=Path, default=DEFAULT_DB)
     p.set_defaults(func=cmd_match)
+
+    p = sub.add_parser("link-wordnet", help="propose WordNet synsets for every Concepticon concept set (step 4, pass 1)")
+    p.add_argument("--top", type=int, default=3, help="proposals per concept set")
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_link_wordnet)
+
+    p = sub.add_parser("review-queue", help="write the proposals for a priority set of concept sets as JSON for review")
+    p.add_argument("out", type=Path)
+    p.add_argument("--lists", nargs="*", help="Concepticon concept lists that define the batch (default: NSM, Swadesh, Leipzig-Jakarta, Ogden, Luniewska)")
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_review_queue)
+
+    p = sub.add_parser("load-mappings", help="load reviewed mappings from mappings/*__*.tsv")
+    p.add_argument("paths", nargs="*", type=Path)
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_load_mappings)
+
+    p = sub.add_parser("export-review", help="turn review-page decisions (JSON files) into mappings/concepticon__oewn.tsv")
+    p.add_argument("folder", help="folder with one JSON file per decision")
+    p.add_argument("--reviewer", required=True, help="name recorded for the page owner's decisions")
+    p.add_argument("--out", default="mappings/concepticon__oewn.tsv")
+    p.set_defaults(func=cmd_export_review)
+
+    p = sub.add_parser("check-mappings", help="quality checks on the mapping layer")
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_check_mappings)
 
     p = sub.add_parser("stats", help="row counts per loaded source")
     p.add_argument("--db", type=Path, default=DEFAULT_DB)
