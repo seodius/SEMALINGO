@@ -121,6 +121,13 @@ jobs:
         timeout-minutes: 10
         run: $RUN build $LISTS
 
+      - name: Keep the Basic English page
+        uses: actions/upload-artifact@v4
+        with:
+          name: basic-english-page
+          path: data/raw/basic-english
+          retention-days: 3
+
       - name: Fetch and load the English norm lists
         timeout-minutes: 10
         run: $RUN build $NORMS
