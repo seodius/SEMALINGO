@@ -193,12 +193,16 @@ def cmd_review_queue(args) -> int:
 
     from .db import init_db
     from .lists import list_ids
-    from .review import DEFAULT_LISTS, review_payload
+    from .review import DEFAULT_LISTS, WORDS, review_payload, unmatched_words
 
     lists = list(args.lists or DEFAULT_LISTS) + list_ids(args.custom_lists)
     conn = init_db(args.db)
     try:
         payload = review_payload(conn, lists)
+        for list_id in lists:
+            if list_id.endswith(WORDS):
+                words = unmatched_words(conn, list_id[: -len(WORDS)])
+                print(f"{list_id}: {len(words)} words match no concept set" + (f" ({', '.join(words[:40])})" if words else ""))
     finally:
         conn.close()
     args.out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
@@ -342,7 +346,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("review-queue", help="write the proposals for a priority set of concept sets, with their words in other languages, as JSON for review")
     p.add_argument("out", type=Path)
-    p.add_argument("--lists", nargs="*", help="Concepticon concept lists that define the batch (default: NSM, Swadesh, Leipzig-Jakarta, Ogden, Luniewska)")
+    p.add_argument("--lists", nargs="*", help="lists that define the batch: Concepticon list ids, widely-used:<n>, <word-list source>:words (default: NSM, Swadesh, Leipzig-Jakarta, Ogden, Luniewska, widely-used:50, basic-english:words)")
     p.add_argument("--custom-lists", type=Path, default=Path("data/lists"), help="folder of custom lists to add to the batch (default: data/lists)")
     p.add_argument("--db", type=Path, default=DEFAULT_DB)
     p.set_defaults(func=cmd_review_queue)

@@ -76,6 +76,7 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 .concept h2 { font: 600 2rem/1.15 var(--serif); margin: 0; letter-spacing: .01em; overflow-wrap: anywhere; }
 .concept .def { font: 1.08rem/1.5 var(--serif); margin: 0; max-width: 68ch; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag .guess { color: var(--partial); font-weight: 600; }
 .tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
 .status { font-size: 0.85rem; color: var(--muted); }
 .status strong { color: var(--ink); }
@@ -343,7 +344,9 @@ button.chip:hover { border-color: var(--accent); }
     "Ogden-1930-100": "Basic English operations",
     "Ogden-1930-200": "Basic English picturable",
     "Swadesh-1952-200": "Swadesh 200",
-    "Luniewska-2019-299": "Early words (Łuniewska)"
+    "Luniewska-2019-299": "Early words (Łuniewska)",
+    "widely-used:50": "Widely used (50+ lists)",
+    "basic-english:words": "Basic English 850"
   };
   var POS = { n: "noun", v: "verb", a: "adjective", s: "adjective", r: "adverb" };
   var TYPE_LABEL = { exact: "same meaning", broader: "synset is broader", narrower: "synset is narrower", related: "related", none: "none fits" };
@@ -497,7 +500,19 @@ button.chip:hover { border-color: var(--accent); }
       box.appendChild(near);
     }
     var tags = el("div", { class: "tags" });
-    item.lists.forEach(function (l) { if (l.indexOf(":") < 0) tags.appendChild(el("span", { class: "tag" }, LIST_NAMES[l] || l)); });
+    item.lists.forEach(function (l) {
+      if (l.indexOf("custom:") === 0) return;  // your own lists are shown under "My lists"
+      var via = item.via && item.via[l];
+      var tag = el("span", { class: "tag" }, (LIST_NAMES[l] || l) + (via ? ": “" + via.word + "”" : ""));
+      if (via && via.share === 0) {  // no gloss match: the concept set is named by the word
+        tag.appendChild(el("span", { class: "guess" }, " · guess"));
+        tag.title = "No concept list uses “" + via.word + "” for this concept set; it is named by the word. Check that this is the sense meant";
+      } else if (via && via.share < 0.5) {  // matched from the word alone, and the word has other senses
+        tag.appendChild(el("span", { class: "guess" }, " · guess"));
+        tag.title = "Matched from the word “" + via.word + "” alone (" + Math.round(100 * via.share) + "% of its uses in concept lists); check that this is the sense meant";
+      } else if (via) tag.title = "Matched from the word “" + via.word + "”";
+      tags.appendChild(tag);
+    });
     if (tags.childNodes.length) box.appendChild(tags);
     box.appendChild(renderMine(item));
     var d = decisions[item.concept];

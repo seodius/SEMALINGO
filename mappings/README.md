@@ -39,8 +39,11 @@ between two nodes, not a merge, and the quality checks look for suspicious chain
    synset's part of speech, and word overlap between the two definitions (the synset's
    hypernyms included; a spade is a shovel).
 2. `semalingo review-queue queue.json` writes the proposals for a priority batch (by default
-   the NSM primes, Swadesh 100 and 200, Leipzig–Jakarta, Ogden's Basic English parts and
-   Łuniewska's early words: 654 concept sets) and `scripts/build_review_page.py` turns it into
+   the NSM primes, Swadesh 100 and 200, Leipzig–Jakarta, Ogden's Basic English parts,
+   Łuniewska's early words, every concept set that at least 50 Concepticon lists use
+   (`widely-used:50`), and Ogden's 850 Basic English words, each matched to the concept set
+   its gloss match and its Basic English category suit best (`basic-english:words`): about
+   1,100 concept sets) and `scripts/build_review_page.py` turns it into
    the review page. Each decision there is stored with its reviewer. Beside the proposals the
    page shows the concept set's words and forms in other languages and what CLICS finds it
    colexified with, which often settles which sense is meant (Dutch "groot" is both BIG and

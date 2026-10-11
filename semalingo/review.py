@@ -32,7 +32,122 @@ DEFAULT_LISTS = (
     "Ogden-1930-200",       # Basic English picturable things
     "Swadesh-1952-200",
     "Luniewska-2019-299",   # early-acquired words, 29 languages
+    "widely-used:50",       # concept sets that at least 50 Concepticon lists use
+    "basic-english:words",  # Ogden's 850 Basic English words, matched to concept sets by gloss
 )
+# Lists that are not Concepticon lists: "widely-used:<n>" and "<word-list source>:words".
+WIDELY_USED = "widely-used:"
+WORDS = ":words"
+
+
+def list_members(conn, list_id: str) -> dict[str, dict | None]:
+    """The concepts in a list: {concept: None}, or {concept: {"word", "share"}} for a word list.
+
+    - "Swadesh-1955-100": a Concepticon list; "custom:list/core": any list node;
+    - "widely-used:50": concept sets that at least 50 Concepticon concept lists use;
+    - "basic-english:words": the words of a loaded word list, each as the concept set it is
+      best matched to (a reviewed mapping first, else the gloss match with the largest share).
+    """
+    if list_id.startswith(WIDELY_USED):
+        least = int(list_id[len(WIDELY_USED):])
+        return {
+            concept: None
+            for concept, n in _rows(
+                conn,
+                "SELECT from_id, COUNT(*) FROM relations WHERE source_id = 'concepticon' AND relation_type = 'in_list' "
+                "AND from_id NOT LIKE 'concepticon:gloss/%' AND to_id LIKE 'concepticon:list/%' GROUP BY from_id",
+            )
+            if n >= least
+        }
+    if list_id.endswith(WORDS):
+        return word_list_choices(conn, list_id[: -len(WORDS)])[0]
+    return {
+        concept: None
+        for (concept,) in _rows(
+            conn,
+            "SELECT from_id FROM relations WHERE source_id IN ('concepticon', 'custom') AND relation_type = 'in_list' "
+            "AND to_id = ? AND from_id NOT LIKE '%:gloss/%'",
+            list_node(list_id),
+        )
+    }
+
+
+# Which ontological categories suit each category of a word list's words. A gloss match outside
+# them is set aside ("mine" is a pit, not MY), unless the concept set is named by the word itself.
+WORD_CATEGORY_FIT = {
+    "basic-english": {
+        "things (picturable)": {"Person/Thing", "Classifier"},
+        "things (general)": {"Person/Thing", "Action/Process"},
+        "qualities (general)": {"Property", "Number"},
+        "qualities (opposites)": {"Property", "Number"},
+    },
+}
+
+
+def word_list_choices(conn, source: str) -> tuple[dict[str, dict], list[str]]:
+    """Each word of a loaded word list as one concept set, and the words left without one.
+
+    A reviewed (manual) mapping comes first; otherwise the gloss match with the largest share
+    whose ontological category suits the word's category in the list (WORD_CATEGORY_FIT), or
+    whose name is the word itself; a word without any gloss match falls back on a suitable concept
+    set named by the word (share 0). Returns ({concept: {"word", "share"}}, [unmatched words]).
+    """
+    fit = WORD_CATEGORY_FIT.get(source, {})
+    category = dict(_rows(conn, "SELECT node_id, value_text FROM properties WHERE source_id = 'concepticon' AND property = 'ontological_category'"))
+    gloss = dict(_rows(conn, "SELECT concept_id, gloss FROM concepts WHERE source_id = 'concepticon'"))
+    words = {
+        form: (word, kind)
+        for form, word, kind in _rows(
+            conn,
+            "SELECT f.form_id, f.written_form, p.value_text FROM forms f LEFT JOIN properties p "
+            "ON p.node_id = f.form_id AND p.source_id = f.source_id AND p.property = 'category' WHERE f.source_id = ?",
+            source,
+        )
+    }
+    best: dict[str, tuple] = {}  # form -> (manual first, suits the word, share, concept, word)
+    for form, concept, confidence, method in _rows(
+        conn,
+        "SELECT m.from_id, m.to_id, m.confidence, m.method FROM mappings m JOIN forms f ON f.form_id = m.from_id "
+        "WHERE f.source_id = ? AND m.method IN ('gloss', 'manual') AND m.to_id LIKE 'concepticon:%'",
+        source,
+    ):
+        word, kind = words[form]
+        allowed = fit.get(kind)
+        fits = not allowed or category.get(concept) in allowed
+        named = (gloss.get(concept) or "").split(" (")[0] == word.upper()
+        if method != "manual" and not fits and not named:
+            continue
+        # a suitable category beats a mere name: "watch" (a thing) is WRISTWATCH before WATCH (look)
+        rank = (1 if method == "manual" else 0, 1 if fits else 0, confidence or 0.0, concept, word)
+        if form not in best or rank > best[form]:
+            best[form] = rank
+    # a word that no gloss matches may still name a concept set ("almost" is ALMOST); take the most listed
+    named: dict[str, list[str]] = defaultdict(list)
+    for concept, name in gloss.items():
+        named[name.split(" (")[0]].append(concept)
+    listed = dict(_rows(
+        conn,
+        "SELECT from_id, COUNT(*) FROM relations WHERE source_id = 'concepticon' AND relation_type = 'in_list' "
+        "AND from_id NOT LIKE 'concepticon:gloss/%' GROUP BY from_id",
+    ))
+    for form, (word, kind) in words.items():
+        if form in best:
+            continue
+        allowed = fit.get(kind)
+        options = [c for c in named.get(word.upper(), []) if not allowed or category.get(c) in allowed]
+        if options:
+            best[form] = (0, 1, 0.0, max(options, key=lambda c: listed.get(c, 0)), word)
+    members: dict[str, dict] = {}
+    for manual, _, share, concept, word in sorted(best.values(), key=lambda b: (-b[0], -b[1], -b[2], b[4])):
+        if concept not in members:
+            members[concept] = {"word": word, "share": 1.0 if manual else round(share, 3)}
+    unmatched = sorted(word for form, (word, _) in words.items() if form not in best)
+    return members, unmatched
+
+
+def unmatched_words(conn, source: str) -> list[str]:
+    """Words of a loaded word list that no suitable concept set is matched to."""
+    return word_list_choices(conn, source)[1]
 
 
 def _rows(conn, sql, *params):
@@ -47,16 +162,14 @@ def list_node(list_id: str) -> str:
 def review_queue(conn, concept_lists=DEFAULT_LISTS, top: int = 5) -> list[dict]:
     """Concepts in the given lists (Concepticon lists or custom lists) with their WordNet proposals."""
     order: dict[str, tuple[int, list[str]]] = {}
+    via: dict[str, dict] = defaultdict(dict)  # concept -> {word list: {"word", "share"}}
     for rank, list_id in enumerate(concept_lists):
-        for (concept,) in _rows(
-            conn,
-            "SELECT from_id FROM relations WHERE source_id IN ('concepticon', 'custom') AND relation_type = 'in_list' "
-            "AND to_id = ? AND from_id NOT LIKE '%:gloss/%'",
-            list_node(list_id),
-        ):
+        for concept, word in list_members(conn, list_id).items():
             first, lists = order.get(concept, (rank, []))
             lists.append(list_id)
             order[concept] = (min(first, rank), lists)
+            if word:
+                via[concept][list_id] = word
 
     gloss = dict(_rows(conn, "SELECT concept_id, gloss FROM concepts WHERE source_id IN ('concepticon', 'oewn', 'custom')"))
     props: dict[str, dict] = defaultdict(dict)
@@ -95,6 +208,7 @@ def review_queue(conn, concept_lists=DEFAULT_LISTS, top: int = 5) -> list[dict]:
             "category": props[concept].get("ontological_category", ""),
             "field": props[concept].get("semantic_field", ""),
             "lists": lists,
+            **({"via": via[concept]} if concept in via else {}),
             "candidates": [
                 {
                     "synset": synset,
@@ -285,9 +399,7 @@ def check(conn, concept_lists=DEFAULT_LISTS, unmatched: set[str] | None = None) 
     lines.append(f"reviewed exact edges that join two or more concept sets through one synset: {len(chains)}"
                  + ("" if not chains else " (" + "; ".join(f"{s}: {', '.join(cs)}" for s, cs in list(chains.items())[:5]) + ")"))
     for list_id in concept_lists:
-        members = {c for (c,) in _rows(
-            conn, "SELECT from_id FROM relations WHERE source_id = 'concepticon' AND relation_type = 'in_list' AND to_id = ? "
-            "AND from_id NOT LIKE 'concepticon:gloss/%'", f"concepticon:list/{list_id}")}
+        members = set(list_members(conn, list_id))
         if members:
             lines.append(f"{list_id}: {len(members)} concept sets, {len(members & decided)} reviewed, "
                          f"{len(members - set(best) - decided)} without any proposal")

@@ -116,3 +116,40 @@ class LoadListsTest(LoaderTestCase):
         cmd_export_review(args)
         self.assertNotIn("custom:", out.read_text())
         self.assertIn("custom:concept/see-on-purpose", (self.folder / "custom__oewn.tsv").read_text())
+
+
+class DerivedListsTest(LoaderTestCase):
+    def setUp(self):
+        super().setUp()
+        for source in ("concepticon", "concepticon-maps", "basic-english"):
+            self.load(source)
+
+    def test_widely_used_concept_sets(self):
+        from semalingo.review import list_members
+
+        self.assertEqual(set(list_members(self.conn, "widely-used:1")), {"concepticon:1209", "concepticon:1409"})
+        self.assertEqual(list_members(self.conn, "widely-used:2"), {})
+
+    def test_word_list_words_as_their_best_concept_set(self):
+        from semalingo.matching import build_index, match_source
+        from semalingo.review import list_members, review_queue, unmatched_words
+
+        match_source(self.conn, "basic-english", build_index(self.conn))
+        members = list_members(self.conn, "basic-english:words")
+        self.assertEqual(members["concepticon:1409"]["word"], "see")
+        self.assertIn("glass", unmatched_words(self.conn, "basic-english"))
+        see = [item for item in review_queue(self.conn, ["basic-english:words"]) if item["gloss"] == "SEE"][0]
+        self.assertEqual(see["lists"], ["basic-english:words"])
+        self.assertEqual(see["via"]["basic-english:words"]["word"], "see")
+
+    def test_a_match_that_does_not_suit_the_word_is_set_aside(self):
+        from semalingo.matching import build_index, match_source
+        from semalingo.review import word_list_choices
+
+        match_source(self.conn, "basic-english", build_index(self.conn))
+        eye = self.value("SELECT form_id FROM forms WHERE source_id = 'basic-english' AND written_form = 'eye'")
+        # a picturable thing matched to an action (SEE) with a larger share than its own concept set
+        self.conn.execute("INSERT INTO mappings (from_id, to_id, mapping_type, confidence, method) VALUES (?, 'concepticon:1409', 'close', 0.99, 'gloss')", [eye])
+        members, unmatched = word_list_choices(self.conn, "basic-english")
+        self.assertEqual(members["concepticon:1209"]["word"], "eye")
+        self.assertNotIn("eye", unmatched)
