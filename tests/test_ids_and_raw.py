@@ -52,9 +52,6 @@ class OperationsContractTest(unittest.TestCase):
         for name in ("lookup", "neighbours", "norms", "colexifications", "path", "compare"):
             self.assertTrue(callable(getattr(ops, name)))
 
-    def test_operations_are_not_implemented_yet(self):
-        with self.assertRaises(NotImplementedError):
-            ops.norms(None, "kuperman-aoa:eye")
 
 
 if __name__ == "__main__":

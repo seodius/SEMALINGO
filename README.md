@@ -123,6 +123,62 @@ of `glottolog`, `concepticon`, `lexibank`, `clics` and the frequency lists is lo
 pinned release file) into `data/raw/<source>/<version>/`, with `SOURCE.json` and a
 `SHA256SUMS` manifest; `load` refuses raw files that no longer match their checksums.
 
+## Asking questions
+
+The operations library (`semalingo.ops`) answers the questions every interface asks, each
+with provenance (the sources, versions and licences behind the answer, and how the mappings on
+the way were made):
+
+| Operation | Answers |
+| --- | --- |
+| `lookup` | nodes named or written like the query, in every source, and what the words mean; a node id gives its description |
+| `neighbours` | nodes linked to a node, up to four hops, by relation or mapping type (walk SUMO with `subclass_of`, WordNet with `hypernym`) |
+| `norms` | age of acquisition, frequency, concreteness, valence, ... of a concept and its words, per language and source |
+| `colexifications` | concepts expressed by the same word (CLICS, by number of families) and semantic shifts (DatSemShift) |
+| `path` | the shortest connections between two nodes, with every edge |
+| `compare` | two nodes side by side: norms, edges, shared neighbours, connection, colexification |
+| `words` | the words languages use for a concept, from every source |
+| `sources`, `sql` | the loaded sources; a read-only SQL query on the core tables |
+
+From the command line (options as `key=value`):
+
+```bash
+semalingo query lookup food language=nl
+semalingo query neighbours sumo:Eye hops=4 direction=out edge_types=subclass_of
+semalingo query words concepticon:256 language=nl
+semalingo golden        # the golden questions in tests/golden/questions.yaml
+```
+
+### From Claude: the MCP server
+
+`semalingo mcp` serves the operations as MCP tools over stdio. It opens the database
+read-only, and DuckDB gets no access to files or the network from SQL. Install the extra
+(`pip install "semalingo[mcp]"`, already in the Docker image), then register it, with the
+absolute path of your database:
+
+```bash
+# Claude Code
+claude mcp add --transport stdio --scope user semalingo -- semalingo mcp --db /path/to/data/semalingo.duckdb
+```
+
+```json
+// Claude Desktop: claude_desktop_config.json
+{
+  "mcpServers": {
+    "semalingo": {
+      "type": "stdio",
+      "command": "/full/path/to/semalingo",
+      "args": ["mcp", "--db", "/path/to/data/semalingo.duckdb"]
+    }
+  }
+}
+```
+
+Or from the Docker image, with the data folder mounted: command `docker`, args
+`["run", "-i", "--rm", "-v", "/path/to/data:/app/data", "semalingo", "mcp", "--db", "/app/data/semalingo.duckdb"]`.
+
+DuckDB lets one process write a database at a time: stop the MCP client before `semalingo load`.
+
 ## Repository layout
 
 ```
@@ -150,8 +206,9 @@ semalingo/
                       and Brysbaert concreteness (norms.py); Kaikki/Wiktionary morphology (kaikki.py)
   frequency.py        spreadsheet reading and Zipf values for frequency tables
   graph/              graph projection (step 5)
-  ops/                the six operations, with provenance on every result (step 6)
-  mcp_server/         MCP server over the operations (step 7)
+  ops/                the operations library, with provenance on every result (step 6)
+  mcp_server/         MCP server over the operations, stdio, read-only (step 7)
+  golden.py           golden questions with known answers, asked after every rebuild
   cli.py              the semalingo command
 mappings/             reviewed mapping edges as versioned TSV
 tests/                unit tests; tests/golden/ holds questions with known answers

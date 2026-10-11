@@ -17,10 +17,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+mcp = ["mcp>=1.10"]
+dev = ["pytest>=8", "mcp>=1.10"]
 
 [project.scripts]
 semalingo = "semalingo.cli:main"
+semalingo-mcp = "semalingo.mcp_server:main"
 
 [project.urls]
 Repository = "https://github.com/seodius/SEMALINGO"

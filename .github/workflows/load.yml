@@ -21,6 +21,11 @@ on:
       - "scripts/report_sumo.py"
       - "scripts/report_kaikki.py"
       - "scripts/report_stats.py"
+      - "scripts/mcp_smoke.py"
+      - "semalingo/ops/**"
+      - "semalingo/mcp_server/**"
+      - "semalingo/golden.py"
+      - "tests/golden/**"
       - "semalingo/schema/**"
       - "Dockerfile"
       - ".github/workflows/load.yml"
@@ -158,6 +163,29 @@ jobs:
           docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
             --entrypoint python semalingo:load scripts/report_kaikki.py | tee kaikki.txt
           sed 's/^/::notice title=kaikki::/' kaikki.txt
+
+      - name: Golden questions
+        shell: bash
+        run: |
+          set +e
+          docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/tests:/app/tests semalingo:load golden > golden.txt
+          status=$?
+          cat golden.txt
+          grep -A3 "^FAIL" golden.txt | sed 's/^/::error title=golden::/'
+          tail -1 golden.txt | sed 's/^/::notice title=golden::/'
+          exit $status
+
+      - name: MCP server over stdio
+        shell: bash
+        run: |
+          set +e
+          docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
+            --entrypoint python semalingo:load scripts/mcp_smoke.py data/semalingo.duckdb > mcp.txt 2> mcp.err
+          status=$?
+          cat mcp.txt; tail -20 mcp.err
+          sed 's/^/::notice title=mcp::/' mcp.txt
+          [ $status -eq 0 ] || tail -5 mcp.err | sed 's/^/::error title=mcp::/'
+          exit $status
 
       - name: Report
         if: always()

@@ -272,6 +272,58 @@ def cmd_load_lists(args) -> int:
     return 0
 
 
+OPERATIONS = ("lookup", "neighbours", "norms", "colexifications", "path", "compare", "words", "sources", "sql")
+LIST_OPTIONS = ("edge_types", "constructs")
+
+
+def _value(key: str, text: str):
+    if key in LIST_OPTIONS:
+        return [t for t in text.split(",") if t]
+    return int(text) if text.isdigit() else text
+
+
+def cmd_query(args) -> int:
+    import json
+
+    from .mcp_server import open_db
+    from .ops import Graph
+
+    positional, options = [], {}
+    for arg in args.args:
+        key, sep, value = arg.partition("=")
+        if sep and key.isidentifier() and not (args.operation == "sql" and not positional):
+            options[key] = _value(key, value)
+        else:
+            positional.append(arg)
+    graph = Graph(open_db(args.db))
+    result = getattr(graph, args.operation)(*positional, **options)
+    print(json.dumps(result, ensure_ascii=False, indent=1, default=str))
+    return 0
+
+
+def cmd_golden(args) -> int:
+    from .golden import read_questions, run
+    from .mcp_server import open_db
+    from .ops import Graph
+
+    results = run(Graph(open_db(args.db)), read_questions(args.file))
+    failed = 0
+    for question, problems in results:
+        print(("FAIL " if problems else "ok   ") + question["question"])
+        for problem in problems:
+            print(f"     {problem}")
+        failed += bool(problems)
+    print(f"{len(results) - failed} of {len(results)} golden questions pass")
+    return 1 if failed else 0
+
+
+def cmd_mcp(args) -> int:
+    from .mcp_server import serve
+
+    serve(args.db)
+    return 0
+
+
 def cmd_check_mappings(args) -> int:
     from .db import init_db
     from .review import check, read_unmatched
@@ -381,6 +433,21 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("stats", help="row counts per loaded source")
     p.add_argument("--db", type=Path, default=DEFAULT_DB)
     p.set_defaults(func=cmd_stats)
+
+    p = sub.add_parser("query", help="run one operation (lookup, neighbours, norms, colexifications, path, compare, words, sources, sql) and print JSON")
+    p.add_argument("operation", choices=OPERATIONS)
+    p.add_argument("args", nargs="*", help="positional arguments, then key=value options (hops=2, language=nl, edge_types=subclass_of,hypernym)")
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_query)
+
+    p = sub.add_parser("golden", help="ask the golden questions (tests/golden/questions.yaml) and report failures")
+    p.add_argument("--file", type=Path, default=Path("tests/golden/questions.yaml"))
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_golden)
+
+    p = sub.add_parser("mcp", help="serve the operations as an MCP server over stdio (read-only)")
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_mcp)
     return parser
 
 

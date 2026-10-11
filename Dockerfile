@@ -8,7 +8,7 @@ WORKDIR /app
 # Install the package first so this layer is cached until the code changes.
 COPY pyproject.toml README.md LICENSE ./
 COPY semalingo ./semalingo
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir ".[mcp]"
 
 # The registry and the reviewed mappings are read from the working directory.
 COPY sources.yaml DATA-LICENSES.md ./

@@ -1,0 +1,49 @@
+# Golden questions (see semalingo/golden.py): run after every rebuild with
+#   semalingo golden --db data/semalingo.duckdb
+# They need the downloadable sources and the WordNet proposals (semalingo link-wordnet).
+
+- question: Is EYE a Concepticon concept set, found by its English name?
+  operation: lookup
+  args: [eye]
+  expect:
+    - {at: "concepts[*].id", contains: "concepticon:1248"}
+
+- question: Do ARM and HAND share one word in many language families (CLICS)?
+  operation: colexifications
+  args: ["concepticon:1673"]
+  expect:
+    - {at: "clics[*].concept", contains: "concepticon:1277"}
+
+- question: How many language families use one word for ARM and HAND?
+  operation: compare
+  args: ["concepticon:1673", "concepticon:1277"]
+  expect:
+    - {at: "colexified_in_families", min: 20}
+
+- question: Is Eye an Organ, and an Organ a BodyPart, in SUMO?
+  operation: neighbours
+  args: ["sumo:Eye"]
+  options: {hops: 2, edge_types: [subclass_of], direction: out}
+  expect:
+    - {at: "nodes[*].id", contains: "sumo:Organ"}
+    - {at: "nodes[*].id", contains: "sumo:BodyPart"}
+
+- question: Does the concept set EYE reach SUMO's Eye through WordNet?
+  operation: path
+  args: ["concepticon:1248", "sumo:Eye"]
+  expect:
+    - {at: "paths", nonempty: true}
+
+- question: Is there an age of acquisition for EYE?
+  operation: norms
+  args: ["concepticon:1248"]
+  options: {constructs: [aoa]}
+  expect:
+    - {at: "values[*].source", contains: "norare"}
+
+- question: Is "oog" a Dutch word for EYE?
+  operation: words
+  args: ["concepticon:1248"]
+  options: {language: nl}
+  expect:
+    - {at: "languages[0].words[*].word", contains: "oog"}
