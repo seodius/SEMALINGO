@@ -17,6 +17,7 @@ on:
       - "scripts/report_lists.py"
       - "scripts/report_sumo.py"
       - "scripts/report_kaikki.py"
+      - "scripts/report_stats.py"
       - "semalingo/schema/**"
       - "Dockerfile"
       - ".github/workflows/load.yml"
@@ -129,6 +130,11 @@ jobs:
           docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
             --entrypoint python semalingo:load scripts/report_sumo.py | tee sumo.txt
           sed 's/^/::notice title=sumo::/' sumo.txt
+
+      - name: Kaikki report
+        shell: bash
+        run: |
+          set -o pipefail
           docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
             --entrypoint python semalingo:load scripts/report_kaikki.py | tee kaikki.txt
           sed 's/^/::notice title=kaikki::/' kaikki.txt
@@ -137,6 +143,7 @@ jobs:
         if: always()
         shell: bash
         run: |
-          $RUN stats | tee stats.txt || true
-          while IFS= read -r line; do echo "::notice title=stats::$line"; done < stats.txt
-          du -sh data/raw/* data/semalingo.duckdb 2>/dev/null | sed 's/^/::notice title=size::/' || true
+          docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
+            --entrypoint python semalingo:load scripts/report_stats.py | tee stats.txt || true
+          sed 's/^/::notice title=stats::/' stats.txt
+          du -sh data/raw data/semalingo.duckdb 2>/dev/null | sed 's/^/::notice title=size::/' || true
