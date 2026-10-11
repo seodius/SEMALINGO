@@ -2,6 +2,8 @@
 
 - `review_queue`: the proposals for a priority set of Concepticon concept sets, with what a
   reviewer needs to decide (definitions, lemmas, the SUMO term behind each synset).
+- `review_payload`: the queue plus, per concept set, how other languages express it
+  (semalingo.usage): what the review page shows.
 - `load_reviewed`: reviewed decisions from mappings/*.tsv become "manual" mappings that name
   their reviewer. The TSV files are the source of truth for reviewed edges; they live in the
   repository so others can see, reuse and correct them.
@@ -98,6 +100,17 @@ def review_queue(conn, concept_lists=DEFAULT_LISTS, top: int = 5) -> list[dict]:
             ],
         })
     return queue
+
+
+def review_payload(conn, concept_lists=DEFAULT_LISTS, top: int = 5) -> dict:
+    """The review queue with each concept set's words in other languages, as the review page reads it."""
+    from .usage import concept_usage
+
+    queue = review_queue(conn, concept_lists, top)
+    usage = concept_usage(conn, [item["concept"] for item in queue])
+    for item in queue:
+        item["usage"] = usage["concepts"][item["concept"]]
+    return {"languages": usage["languages"], "items": queue}
 
 
 def _sumo_terms(conn, synsets: set[str]) -> dict[str, list[str]]:

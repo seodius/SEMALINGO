@@ -10,6 +10,11 @@ from ..cldf import to_float
 from .base import CLDFLoader, register
 
 
+def joined(value):
+    """Glottolog lists several macroareas for some languages; pycldf returns them as a list."""
+    return "; ".join(value) if isinstance(value, list) else value
+
+
 @register
 class GlottologLoader(CLDFLoader):
     source_id = "glottolog"
@@ -30,7 +35,7 @@ class GlottologLoader(CLDFLoader):
                 family_id=family,
                 family_name=names.get(family) if family else None,
                 parent_language=row.get("Language_ID"),
-                macroarea=row.get("Macroarea"),
+                macroarea=joined(row.get("Macroarea")),
                 latitude=to_float(row.get("Latitude")),
                 longitude=to_float(row.get("Longitude")),
             )

@@ -97,6 +97,12 @@ semalingo load-mappings
 semalingo check-mappings
 ```
 
+The review page also shows how languages express each concept set (`semalingo.usage`): the
+words concept lists use for it in 56 languages (Concepticon, with SUBTLEX Zipf frequencies),
+Lexibank's forms, forms that stand for several concept sets in one word list, how many
+families have a word for it, and its most common colexifications (CLICS). It reads whatever
+of `glottolog`, `concepticon`, `lexibank`, `clics` and the frequency lists is loaded.
+
 `fetch` downloads only what a loader needs (selected CLDF tables at a pinned git tag, or a
 pinned release file) into `data/raw/<source>/<version>/`, with `SOURCE.json` and a
 `SHA256SUMS` manifest; `load` refuses raw files that no longer match their checksums.

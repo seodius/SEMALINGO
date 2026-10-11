@@ -15,11 +15,13 @@ TEMPLATE = Path(__file__).with_name("review_page.html")
 
 
 def main(queue_path: str, out_path: str) -> None:
-    queue = json.loads(Path(queue_path).read_text(encoding="utf-8"))
-    data = json.dumps(queue, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    payload = json.loads(Path(queue_path).read_text(encoding="utf-8"))
+    if isinstance(payload, list):  # a queue without words in other languages
+        payload = {"languages": {}, "items": payload}
+    data = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     page = TEMPLATE.read_text(encoding="utf-8").replace("/*QUEUE*/", data)
     Path(out_path).write_text(page, encoding="utf-8")
-    print(f"Wrote {out_path}: {len(queue)} concept sets, {len(page) // 1024} KB")
+    print(f"Wrote {out_path}: {len(payload['items'])} concept sets, {len(page) // 1024} KB")
 
 
 if __name__ == "__main__":

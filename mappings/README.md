@@ -41,7 +41,10 @@ between two nodes, not a merge, and the quality checks look for suspicious chain
 2. `semalingo review-queue queue.json` writes the proposals for a priority batch (by default
    the NSM primes, Swadesh 100 and 200, Leipzig–Jakarta, Ogden's Basic English parts and
    Łuniewska's early words: 654 concept sets) and `scripts/build_review_page.py` turns it into
-   the review page. Each decision there is stored with its reviewer.
+   the review page. Each decision there is stored with its reviewer. Beside the proposals the
+   page shows the concept set's words and forms in other languages and what CLICS finds it
+   colexified with, which often settles which sense is meant (Dutch "groot" is both BIG and
+   TALL; TREE and WOOD share a word in 58 families).
 3. `semalingo export-review <folder> --reviewer <name>` writes the decisions to
    `concepticon__oewn.tsv` and `concepticon__oewn.unmatched.tsv`; `semalingo load-mappings`
    loads them as `manual` mappings; `semalingo check-mappings` reports coverage, unclear

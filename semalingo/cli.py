@@ -192,15 +192,15 @@ def cmd_review_queue(args) -> int:
     import json
 
     from .db import init_db
-    from .review import DEFAULT_LISTS, review_queue
+    from .review import DEFAULT_LISTS, review_payload
 
     conn = init_db(args.db)
     try:
-        queue = review_queue(conn, args.lists or DEFAULT_LISTS)
+        payload = review_payload(conn, args.lists or DEFAULT_LISTS)
     finally:
         conn.close()
-    args.out.write_text(json.dumps(queue, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"Wrote {len(queue)} concept sets to {args.out}")
+    args.out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"Wrote {len(payload['items'])} concept sets ({len(payload['languages'])} languages) to {args.out}")
     return 0
 
 
@@ -309,7 +309,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--db", type=Path, default=DEFAULT_DB)
     p.set_defaults(func=cmd_link_wordnet)
 
-    p = sub.add_parser("review-queue", help="write the proposals for a priority set of concept sets as JSON for review")
+    p = sub.add_parser("review-queue", help="write the proposals for a priority set of concept sets, with their words in other languages, as JSON for review")
     p.add_argument("out", type=Path)
     p.add_argument("--lists", nargs="*", help="Concepticon concept lists that define the batch (default: NSM, Swadesh, Leipzig-Jakarta, Ogden, Luniewska)")
     p.add_argument("--db", type=Path, default=DEFAULT_DB)

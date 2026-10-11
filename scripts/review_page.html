@@ -79,6 +79,42 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 .status { font-size: 0.85rem; color: var(--muted); }
 .status strong { color: var(--ink); }
 
+.langs { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 0; }
+.langs > summary { cursor: pointer; padding: 10px 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; list-style: none; }
+.langs > summary::-webkit-details-marker { display: none; }
+.langs > summary::before { content: "▸"; color: var(--muted); font-size: 0.8rem; width: 10px; }
+.langs[open] > summary::before { content: "▾"; }
+.langs .lt { font: 600 1rem var(--serif); }
+.langs .spread { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lbody { padding: 0 16px 14px; display: grid; gap: 12px; }
+.lhead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.lhead label { font-size: 0.85rem; color: var(--muted); }
+#langPick { padding: 4px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); }
+.lhead .fam { font-size: 0.8rem; color: var(--muted); }
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 0; }
+.facts dt { font-size: 0.8rem; color: var(--muted); padding-top: 2px; }
+.facts dd { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; min-width: 0; }
+.w { font: 1.08rem var(--serif); overflow-wrap: anywhere; }
+.ipa { font: 0.92rem var(--mono); overflow-wrap: anywhere; }
+.z, .x { font: 0.7rem var(--mono); color: var(--muted); margin-left: 3px; }
+.nil { color: var(--muted); font-size: 0.85rem; }
+.also { font-size: 0.85rem; }
+.chip { border: 1px solid var(--rule); background: var(--paper); border-radius: 999px; padding: 1px 9px; font-size: 0.78rem; cursor: default; display: inline-flex; gap: 5px; align-items: baseline; }
+button.chip { cursor: pointer; }
+button.chip:hover { border-color: var(--accent); }
+.chip b { font: 500 0.68rem var(--mono); color: var(--muted); }
+.strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 14px; border-top: 1px solid var(--rule); padding-top: 10px; }
+.strip div { min-width: 0; }
+.strip .ln { display: block; font-size: 0.72rem; color: var(--muted); }
+.lsec { font-size: 0.8rem; color: var(--muted); margin: 0 0 4px; }
+.allx summary { cursor: pointer; font-size: 0.85rem; color: var(--accent); }
+.tablewrap { overflow-x: auto; margin-top: 8px; max-height: 360px; overflow-y: auto; border: 1px solid var(--rule); border-radius: 6px; }
+.alltab { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+.alltab th, .alltab td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.alltab th { font-weight: 500; color: var(--muted); position: sticky; top: 0; background: var(--sheet); }
+.alltab td:first-child { white-space: nowrap; color: var(--muted); }
+.srcs { font-size: 0.72rem; color: var(--muted); margin: 0; }
+
 .cands { display: grid; gap: 10px; }
 .cand { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 4px 12px; }
 .cand.chosen-exact { border-color: var(--exact); box-shadow: inset 4px 0 0 var(--exact); }
@@ -150,6 +186,24 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 
   <main>
     <section class="concept" id="concept" aria-live="polite"></section>
+    <details class="langs" id="langs" open>
+      <summary><span class="lt">Across languages</span><span class="spread" id="spread"></span></summary>
+      <div class="lbody">
+        <div class="lhead">
+          <label for="langPick">Language</label>
+          <select id="langPick"></select>
+          <span class="fam" id="langFam"></span>
+        </div>
+        <dl class="facts" id="langOne"></dl>
+        <div class="strip" id="langStrip"></div>
+        <div id="colex"></div>
+        <details class="allx" id="allx">
+          <summary id="allxLabel">All languages</summary>
+          <div class="tablewrap"><table class="alltab" id="langAll"></table></div>
+        </details>
+        <p class="srcs">Words: the concept lists in Concepticon, with Zipf frequency (SUBTLEX) where loaded. Forms: Lexibank word lists, mostly phonetic, ×n = number of lists. Same form: one form for several concept sets in one list. Colexified: CLICS, number of language families.</p>
+      </div>
+    </details>
     <div class="cands" id="cands"></div>
     <section class="panel">
       <div class="row">
@@ -187,7 +241,13 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 <script>
 (function () {
   "use strict";
-  var QUEUE = JSON.parse(document.getElementById("queueData").textContent);
+  var DATA = JSON.parse(document.getElementById("queueData").textContent);
+  var QUEUE = Array.isArray(DATA) ? DATA : DATA.items;
+  var LANGS = (!Array.isArray(DATA) && DATA.languages) || {};
+  // Languages shown side by side under the chosen one (when the concept has a word there).
+  var STRIP = ["stan1293", "stan1295", "stan1290", "stan1288", "russ1263", "mand1415", "stan1318", "nucl1643", "nucl1301", "finn1318", "haus1257", "indo1316"];
+  function stored(key, fallback) { try { var v = localStorage.getItem(key); return v == null ? fallback : v; } catch (e) { return fallback; } }
+  function store(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* storage may be unavailable */ } }
   var LIST_NAMES = {
     "Goddard-2011-63": "NSM primes (2011)",
     "Swadesh-1955-100": "Swadesh 100",
@@ -200,7 +260,8 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
   var POS = { n: "noun", v: "verb", a: "adjective", s: "adjective", r: "adverb" };
   var TYPE_LABEL = { exact: "same meaning", broader: "synset is broader", narrower: "synset is narrower", related: "related", none: "none fits" };
 
-  var state = { filter: "todo", query: "", list: "", current: QUEUE.length ? QUEUE[0].concept : null };
+  var state = { filter: "todo", query: "", list: "", current: QUEUE.length ? QUEUE[0].concept : null,
+                lang: LANGS[stored("review.lang", "dutc1256")] ? stored("review.lang", "dutc1256") : (Object.keys(LANGS)[0] || "") };
   var decisions = {};          // concept id -> decision body
   var db = null, user = null, myId = null, amOwner = false, readOnly = false;
   var byId = {};
@@ -335,7 +396,115 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
     ["noneBtn", "clearBtn", "manualBtn"].forEach(function (id) { document.getElementById(id).disabled = readOnly; });
   }
 
-  function render() { renderProgress(); renderList(); renderConcept(); }
+  function langName(code) { return (LANGS[code] && LANGS[code].name) || code; }
+  function fmt(n) { return Number(n || 0).toLocaleString("en-US"); }
+
+  function wordSpan(w) {
+    var s = el("span");
+    s.appendChild(el("span", { class: "w", dir: "auto" }, w.w));
+    if (w.z != null) s.appendChild(el("span", { class: "z", title: "Zipf frequency: 1 rare … 7 very common" }, w.z.toFixed(1)));
+    return s;
+  }
+  function formSpan(f) {
+    var s = el("span");
+    s.appendChild(el("span", { class: "ipa" }, f.f));
+    if (f.n > 1) s.appendChild(el("span", { class: "x", title: "word lists with this form" }, "×" + f.n));
+    return s;
+  }
+  function factRow(dl, label, nodes, empty) {
+    dl.appendChild(el("dt", null, label));
+    var dd = el("dd");
+    if (nodes.length) nodes.forEach(function (n) { dd.appendChild(n); });
+    else dd.appendChild(el("span", { class: "nil" }, empty));
+    dl.appendChild(dd);
+  }
+  function conceptChip(gloss, concept, count, title) {
+    var inQueue = concept && byId[concept];
+    var c = el(inQueue ? "button" : "span", { class: "chip", title: title + (inQueue ? " · open in the queue" : "") });
+    if (inQueue) { c.type = "button"; c.addEventListener("click", function () { select(concept); }); }
+    c.appendChild(document.createTextNode(gloss));
+    if (count != null) c.appendChild(el("b", null, String(count)));
+    return c;
+  }
+
+  function renderLanguages() {
+    var item = byId[state.current];
+    var box = document.getElementById("langs");
+    var u = item && item.usage;
+    box.hidden = !u || !Object.keys(LANGS).length;
+    if (box.hidden) return;
+    var sp = u.spread || {};
+    document.getElementById("spread").textContent = sp.varieties
+      ? "Lexibank: " + fmt(sp.varieties) + " word lists · " + fmt(sp.languages) + " languages · " + fmt(sp.families) + " families"
+      : "Not in Lexibank's word lists";
+
+    var code = state.lang;
+    document.getElementById("langPick").value = code;
+    document.getElementById("langFam").textContent = LANGS[code] && LANGS[code].family ? LANGS[code].family : "";
+    var one = document.getElementById("langOne");
+    one.textContent = "";
+    factRow(one, "Words", (u.words[code] || []).map(wordSpan), "No concept list gives a " + langName(code) + " word.");
+    factRow(one, "Forms", (u.forms[code] || []).map(formSpan), "No form in Lexibank.");
+    var shared = (u.shared[code] || []).map(function (s) {
+      var span = el("span", { class: "also" });
+      span.appendChild(el("span", { class: "ipa" }, s.f));
+      span.appendChild(document.createTextNode(" also "));
+      s.also.forEach(function (g, i) {
+        if (i) span.appendChild(document.createTextNode(", "));
+        span.appendChild(el("strong", null, g));
+      });
+      return span;
+    });
+    factRow(one, "Same form", shared, "Not shared with another concept set in these lists.");
+
+    var strip = document.getElementById("langStrip");
+    strip.textContent = "";
+    STRIP.filter(function (c) { return c !== code && LANGS[c] && ((u.words[c] || []).length || (u.forms[c] || []).length); }).slice(0, 10).forEach(function (c) {
+      var cell = el("div");
+      var pick = el("button", { type: "button", class: "chip", title: "Show " + langName(c) }, langName(c));
+      pick.style.marginBottom = "2px";
+      pick.addEventListener("click", function () { setLang(c); });
+      cell.appendChild(pick);
+      var words = u.words[c] || [];
+      var line = el("div");
+      if (words.length) words.slice(0, 2).forEach(function (w, i) { if (i) line.appendChild(document.createTextNode(" · ")); line.appendChild(el("span", { class: "w", dir: "auto" }, w.w)); });
+      else line.appendChild(el("span", { class: "ipa" }, u.forms[c][0].f));
+      cell.appendChild(line);
+      strip.appendChild(cell);
+    });
+    strip.hidden = !strip.childNodes.length;
+
+    var colex = document.getElementById("colex");
+    colex.textContent = "";
+    if (u.colexified && u.colexified.length) {
+      colex.appendChild(el("p", { class: "lsec" }, "Often the same word as (CLICS, language families)"));
+      var row = el("div", { class: "tags" });
+      u.colexified.forEach(function (x) { row.appendChild(conceptChip(x.g, x.c, x.fam, x.fam + " language families use one word for both")); });
+      colex.appendChild(row);
+    }
+
+    var codes = Object.keys(LANGS).filter(function (c) { return (u.words[c] || []).length || (u.forms[c] || []).length; })
+      .sort(function (a, b) { return langName(a).localeCompare(langName(b)); });
+    document.getElementById("allxLabel").textContent = "All languages (" + codes.length + ")";
+    var table = document.getElementById("langAll");
+    table.textContent = "";
+    var head = el("tr");
+    ["Language", "Words", "Forms"].forEach(function (h) { head.appendChild(el("th", { scope: "col" }, h)); });
+    var thead = el("thead"); thead.appendChild(head); table.appendChild(thead);
+    var tbody = el("tbody");
+    codes.forEach(function (c) {
+      var tr = el("tr");
+      tr.appendChild(el("td", null, langName(c)));
+      var tw = el("td"); (u.words[c] || []).forEach(function (w, i) { if (i) tw.appendChild(document.createTextNode(" · ")); tw.appendChild(wordSpan(w)); });
+      var tf = el("td"); (u.forms[c] || []).forEach(function (f, i) { if (i) tf.appendChild(document.createTextNode(" · ")); tf.appendChild(formSpan(f)); });
+      tr.appendChild(tw); tr.appendChild(tf); tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+  }
+
+  function setLang(code) { state.lang = code; store("review.lang", code); renderLanguages(); }
+
+  function render() { renderProgress(); renderList(); renderConcept(); renderLanguages(); }
 
   function select(concept) { state.current = concept; render(); }
 
@@ -409,6 +578,14 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
     decide(item, "oewn:" + raw, document.getElementById("manualType").value);
     document.getElementById("manualId").value = "";
   });
+  var lp = document.getElementById("langPick");
+  Object.keys(LANGS).sort(function (a, b) { return langName(a).localeCompare(langName(b)); }).forEach(function (c) {
+    lp.appendChild(el("option", { value: c }, langName(c)));
+  });
+  lp.addEventListener("change", function () { setLang(lp.value); });
+  var langsBox = document.getElementById("langs");
+  if (stored("review.langsOpen", "1") === "0") langsBox.open = false;
+  langsBox.addEventListener("toggle", function () { store("review.langsOpen", langsBox.open ? "1" : "0"); });
   document.getElementById("prevBtn").addEventListener("click", function () { step(-1); });
   document.getElementById("nextBtn").addEventListener("click", function () { step(1); });
   document.addEventListener("keydown", function (e) {
