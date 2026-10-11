@@ -211,6 +211,7 @@ semalingo/
   golden.py           golden questions with known answers, asked after every rebuild
   cli.py              the semalingo command
 mappings/             reviewed mapping edges as versioned TSV
+release/README.md     the README that ships with every data release ({{placeholders}} filled per release)
 tests/                unit tests; tests/golden/ holds questions with known answers
 docs/                 exit questions and design notes
 data/                 local working data, never committed
