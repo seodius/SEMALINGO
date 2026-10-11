@@ -1,4 +1,4 @@
-"""Link Concepticon concept sets to Open English WordNet synsets (step 4, pass 1).
+"""Link Concepticon concept sets (and new concepts from custom lists) to Open English WordNet synsets (step 4, pass 1).
 
 For every concept set this proposes up to a few synsets, each as a mapping with method
 "gloss", type "close" and a confidence. Evidence, per candidate synset:
@@ -114,6 +114,7 @@ def read_concepts(conn) -> dict[str, Concept]:
                 concepts[node].definition = value or ""
             else:
                 concepts[node].category = value or ""
+    concepts.update(read_custom_concepts(conn))
     for concept in concepts.values():
         for label in concepticon_gloss_labels(concept.gloss):
             concept.labels[label] += 3  # the concept's own name counts as several list uses
@@ -125,6 +126,33 @@ def read_concepts(conn) -> dict[str, Concept]:
         if concept_node in concepts:
             for label in gloss_keys(text, ENGLISH):
                 concepts[concept_node].labels[label] += 1
+    # A new concept also borrows the labels of the concept set it is closest to, together worth
+    # one use: "SEE ON PURPOSE" (closest: SEE) can then find "see" in WordNet
+    for node, closest in conn.execute(
+        "SELECT from_id, to_id FROM mappings WHERE method = 'imported' AND from_id LIKE 'custom:%' AND to_id LIKE 'concepticon:%'"
+    ).fetchall():
+        if node in concepts and closest in concepts:
+            borrowed = dict(concepts[closest].labels)
+            total = sum(borrowed.values()) or 1
+            for label, uses in borrowed.items():
+                concepts[node].labels[label] += uses / total
+    return concepts
+
+
+def read_custom_concepts(conn) -> dict[str, Concept]:
+    """New concepts from custom lists (semalingo.lists): their gloss, definition and category."""
+    concepts = {
+        node: Concept(node, gloss or "")
+        for node, gloss in conn.execute(
+            "SELECT concept_id, gloss FROM concepts WHERE source_id = 'custom' AND kind = 'concept'"
+        ).fetchall()
+    }
+    for node, prop, value in conn.execute(
+        "SELECT node_id, property, value_text FROM properties WHERE source_id = 'custom' "
+        "AND property IN ('definition', 'ontological_category')"
+    ).fetchall():
+        if node in concepts:
+            setattr(concepts[node], "definition" if prop == "definition" else "category", value or "")
     return concepts
 
 
@@ -227,7 +255,9 @@ def link(conn, top: int = 3) -> dict[str, int]:
         total = sum(c.score for c in found)
         for c in found:
             rows.append((concept.node, c.synset, "close", round(c.score / total, 4), "gloss", None))
-    conn.execute("DELETE FROM mappings WHERE method = 'gloss' AND from_id LIKE 'concepticon:%' AND to_id LIKE 'oewn:%'")
+    conn.execute(
+        "DELETE FROM mappings WHERE method = 'gloss' AND (from_id LIKE 'concepticon:%' OR from_id LIKE 'custom:%') AND to_id LIKE 'oewn:%'"
+    )
     bulk_insert(conn, "mappings", COLUMNS["mappings"], dedupe("mappings", rows))
     if not is_duckdb(conn):
         conn.commit()

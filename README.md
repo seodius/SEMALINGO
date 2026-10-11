@@ -97,6 +97,16 @@ semalingo load-mappings
 semalingo check-mappings
 ```
 
+Your own concept lists, made on the review page or written by hand in `data/lists/`, join the
+review queue and the core tables (source `custom`). A list can hold existing concept sets and new
+concepts with a gloss, a definition and the concept set they are closest to:
+
+```bash
+semalingo export-lists review-export/ --reviewer <name>   # the page's lists -> data/lists/*.tsv
+semalingo load-lists && semalingo link-wordnet            # lists and new concepts into the tables
+semalingo review-queue queue.json                          # the queue now includes your lists
+```
+
 The review page also shows how languages express each concept set (`semalingo.usage`): the
 words concept lists use for it in 56 languages (Concepticon, with SUBTLEX Zipf frequencies),
 Lexibank's forms, forms that stand for several concept sets in one word list, how many

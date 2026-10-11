@@ -45,6 +45,9 @@ between two nodes, not a merge, and the quality checks look for suspicious chain
    page shows the concept set's words and forms in other languages and what CLICS finds it
    colexified with, which often settles which sense is meant (Dutch "groot" is both BIG and
    TALL; TREE and WOOD share a word in 58 families).
+   Your own lists (made on the page or in `data/lists/`) can add concept sets and new concepts
+   to the queue: `semalingo export-lists`, `semalingo load-lists`, then link and build the queue
+   again. Decisions on new concepts go to `data/lists/custom__oewn.tsv`, not to this folder.
 3. `semalingo export-review <folder> --reviewer <name>` writes the decisions to
    `concepticon__oewn.tsv` and `concepticon__oewn.unmatched.tsv`; `semalingo load-mappings`
    loads them as `manual` mappings; `semalingo check-mappings` reports coverage, unclear

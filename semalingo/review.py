@@ -3,7 +3,8 @@
 - `review_queue`: the proposals for a priority set of Concepticon concept sets, with what a
   reviewer needs to decide (definitions, lemmas, the SUMO term behind each synset).
 - `review_payload`: the queue plus, per concept set, how other languages express it
-  (semalingo.usage): what the review page shows.
+  (semalingo.usage), and a catalogue of all Concepticon concept sets to add to custom lists
+  (semalingo.lists): what the review page shows.
 - `load_reviewed`: reviewed decisions from mappings/*.tsv become "manual" mappings that name
   their reviewer. The TSV files are the source of truth for reviewed edges; they live in the
   repository so others can see, reuse and correct them.
@@ -38,32 +39,39 @@ def _rows(conn, sql, *params):
     return conn.execute(sql, list(params)).fetchall()
 
 
+def list_node(list_id: str) -> str:
+    """A Concepticon list id ("Swadesh-1955-100") or any list's node id ("custom:list/core") as a node id."""
+    return list_id if ":" in list_id else f"concepticon:list/{list_id}"
+
+
 def review_queue(conn, concept_lists=DEFAULT_LISTS, top: int = 5) -> list[dict]:
-    """Concept sets in the given Concepticon lists with their WordNet proposals."""
+    """Concepts in the given lists (Concepticon lists or custom lists) with their WordNet proposals."""
     order: dict[str, tuple[int, list[str]]] = {}
     for rank, list_id in enumerate(concept_lists):
         for (concept,) in _rows(
             conn,
-            "SELECT from_id FROM relations WHERE source_id = 'concepticon' AND relation_type = 'in_list' "
-            "AND to_id = ? AND from_id NOT LIKE 'concepticon:gloss/%'",
-            f"concepticon:list/{list_id}",
+            "SELECT from_id FROM relations WHERE source_id IN ('concepticon', 'custom') AND relation_type = 'in_list' "
+            "AND to_id = ? AND from_id NOT LIKE '%:gloss/%'",
+            list_node(list_id),
         ):
             first, lists = order.get(concept, (rank, []))
             lists.append(list_id)
             order[concept] = (min(first, rank), lists)
 
-    gloss = dict(_rows(conn, "SELECT concept_id, gloss FROM concepts WHERE source_id IN ('concepticon', 'oewn')"))
+    gloss = dict(_rows(conn, "SELECT concept_id, gloss FROM concepts WHERE source_id IN ('concepticon', 'oewn', 'custom')"))
     props: dict[str, dict] = defaultdict(dict)
     for node, prop, value in _rows(
         conn,
-        "SELECT node_id, property, value_text FROM properties WHERE (source_id = 'concepticon' AND property IN "
+        "SELECT node_id, property, value_text FROM properties WHERE (source_id IN ('concepticon', 'custom') AND property IN "
         "('definition', 'ontological_category', 'semantic_field')) OR (source_id = 'oewn' AND property IN ('definition', 'pos') "
         "AND node_id NOT LIKE 'oewn:entry/%')",
     ):
         props[node][prop] = value
     proposals: dict[str, list[tuple[str, float]]] = defaultdict(list)
     for concept, synset, confidence in _rows(
-        conn, "SELECT from_id, to_id, confidence FROM mappings WHERE method = 'gloss' AND from_id LIKE 'concepticon:%' AND to_id LIKE 'oewn:%'"
+        conn,
+        "SELECT from_id, to_id, confidence FROM mappings WHERE method = 'gloss' AND (from_id LIKE 'concepticon:%' "
+        "OR from_id LIKE 'custom:%') AND to_id LIKE 'oewn:%'",
     ):
         proposals[concept].append((synset, confidence))
     wanted = {s for c in order for s, _ in proposals.get(c, [])}
@@ -110,7 +118,25 @@ def review_payload(conn, concept_lists=DEFAULT_LISTS, top: int = 5) -> dict:
     usage = concept_usage(conn, [item["concept"] for item in queue])
     for item in queue:
         item["usage"] = usage["concepts"][item["concept"]]
-    return {"languages": usage["languages"], "items": queue}
+    return {"languages": usage["languages"], "items": queue, "catalog": catalog(conn)}
+
+
+def catalog(conn, definition_length: int = 160) -> list[list[str]]:
+    """Every Concepticon concept set as [local id, gloss, category, definition], for finding one by name."""
+    props: dict[str, dict] = defaultdict(dict)
+    for node, prop, value in _rows(
+        conn,
+        "SELECT node_id, property, value_text FROM properties WHERE source_id = 'concepticon' "
+        "AND property IN ('definition', 'ontological_category')",
+    ):
+        props[node][prop] = value or ""
+    rows = []
+    for node, gloss in _rows(conn, "SELECT concept_id, gloss FROM concepts WHERE source_id = 'concepticon' AND kind = 'concept'"):
+        definition = props[node].get("definition", "")
+        if len(definition) > definition_length:
+            definition = definition[: definition_length - 1].rsplit(" ", 1)[0] + "…"
+        rows.append([node.split(":", 1)[1], gloss or "", props[node].get("ontological_category", ""), definition])
+    return sorted(rows, key=lambda r: r[1])
 
 
 def _sumo_terms(conn, synsets: set[str]) -> dict[str, list[str]]:

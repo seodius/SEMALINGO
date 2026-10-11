@@ -192,11 +192,13 @@ def cmd_review_queue(args) -> int:
     import json
 
     from .db import init_db
+    from .lists import list_ids
     from .review import DEFAULT_LISTS, review_payload
 
+    lists = list(args.lists or DEFAULT_LISTS) + list_ids(args.custom_lists)
     conn = init_db(args.db)
     try:
-        payload = review_payload(conn, args.lists or DEFAULT_LISTS)
+        payload = review_payload(conn, lists)
     finally:
         conn.close()
     args.out.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
@@ -208,7 +210,8 @@ def cmd_load_mappings(args) -> int:
     from .db import init_db
     from .review import load_reviewed
 
-    paths = args.paths or [p for p in sorted(Path("mappings").glob("*__*.tsv")) if not p.name.endswith(".unmatched.tsv")]
+    found = sorted(Path("mappings").glob("*__*.tsv")) + sorted(Path("data/lists").glob("*__*.tsv"))
+    paths = args.paths or [p for p in found if not p.name.endswith(".unmatched.tsv")]
     conn = init_db(args.db)
     try:
         n = load_reviewed(conn, paths)
@@ -227,13 +230,41 @@ def cmd_export_review(args) -> int:
     for path in sorted(Path(args.folder).rglob("*.json")):
         body = json.loads(path.read_text(encoding="utf-8"))
         body = body.get("data", body) if isinstance(body, dict) else body
-        if isinstance(body, dict) and body.get("concept"):
+        if isinstance(body, dict) and body.get("concept") and body.get("type"):
             decisions.append(body)
     edges, unmatched = decisions_to_rows(decisions, args.reviewer)
-    out = Path(args.out)
-    n = write_review_file(out, edges)
-    m = write_unmatched_file(out.with_name(out.name.replace(".tsv", ".unmatched.tsv")), unmatched)
-    print(f"{len(decisions)} decisions: {n} mappings in {out}, {m} concepts without an equivalent")
+    # decisions on new concepts from custom lists stay with those lists, outside the repository
+    private = Path(args.custom_lists) / "custom__oewn.tsv"
+    for out, keep in ((Path(args.out), lambda r: not r["from_id"].startswith("custom:")), (private, lambda r: r["from_id"].startswith("custom:"))):
+        mine, none = [r for r in edges if keep(r)], [r for r in unmatched if keep(r)]
+        if out == private and not mine and not none:
+            continue
+        n = write_review_file(out, mine)
+        m = write_unmatched_file(out.with_name(out.name.replace(".tsv", ".unmatched.tsv")), none)
+        print(f"{out}: {n} mappings, {m} concepts without an equivalent")
+    print(f"{len(decisions)} decisions")
+    return 0
+
+
+def cmd_export_lists(args) -> int:
+    from .lists import lists_from_page, write_lists
+
+    lists = lists_from_page(Path(args.folder), args.reviewer)
+    n = write_lists(Path(args.out), lists)
+    print(f"Wrote {len(lists)} lists with {n} entries to {args.out}")
+    return 0
+
+
+def cmd_load_lists(args) -> int:
+    from .db import init_db
+    from .lists import load_lists
+
+    conn = init_db(args.db)
+    try:
+        counts = load_lists(conn, args.folder)
+    finally:
+        conn.close()
+    print(f"Loaded custom lists from {args.folder}: {counts['concepts']} lists and new concepts, {counts['relations']} entries")
     return 0
 
 
@@ -312,6 +343,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("review-queue", help="write the proposals for a priority set of concept sets, with their words in other languages, as JSON for review")
     p.add_argument("out", type=Path)
     p.add_argument("--lists", nargs="*", help="Concepticon concept lists that define the batch (default: NSM, Swadesh, Leipzig-Jakarta, Ogden, Luniewska)")
+    p.add_argument("--custom-lists", type=Path, default=Path("data/lists"), help="folder of custom lists to add to the batch (default: data/lists)")
     p.add_argument("--db", type=Path, default=DEFAULT_DB)
     p.set_defaults(func=cmd_review_queue)
 
@@ -324,7 +356,19 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("folder", help="folder with one JSON file per decision")
     p.add_argument("--reviewer", required=True, help="name recorded for the page owner's decisions")
     p.add_argument("--out", default="mappings/concepticon__oewn.tsv")
+    p.add_argument("--custom-lists", default="data/lists", help="where decisions on new concepts from custom lists go")
     p.set_defaults(func=cmd_export_review)
+
+    p = sub.add_parser("export-lists", help="turn the review page's custom lists (JSON export) into data/lists/*.tsv")
+    p.add_argument("folder", help="folder with the exported lists/<id>.json and lists/<id>/entries/*.json")
+    p.add_argument("--reviewer", required=True, help="name recorded for the page owner's lists and entries")
+    p.add_argument("--out", default="data/lists")
+    p.set_defaults(func=cmd_export_lists)
+
+    p = sub.add_parser("load-lists", help="load custom concept lists (data/lists) into the core tables")
+    p.add_argument("--folder", type=Path, default=Path("data/lists"))
+    p.add_argument("--db", type=Path, default=DEFAULT_DB)
+    p.set_defaults(func=cmd_load_lists)
 
     p = sub.add_parser("check-mappings", help="quality checks on the mapping layer")
     p.add_argument("--db", type=Path, default=DEFAULT_DB)

@@ -37,6 +37,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body { background: var(--paper); color: var(--ink); font: 15px/1.5 var(--sans); padding-inline: 16px; padding-block: 16px; }
 button, input, textarea, select { font: inherit; color: inherit; }
@@ -78,6 +79,38 @@ main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 .tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); }
 .status { font-size: 0.85rem; color: var(--muted); }
 .status strong { color: var(--ink); }
+
+.listbar { display: flex; gap: 6px; }
+.listbar select { flex: 1 1 auto; min-width: 0; }
+.btn.small { padding: 4px 9px; font-size: 0.8rem; white-space: nowrap; }
+.card { border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); padding: 10px 12px; display: grid; gap: 8px; }
+.card input, .card textarea, .card select { width: 100%; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); font-size: 0.88rem; }
+.card textarea { min-height: 60px; resize: vertical; }
+.card .row .btn { flex: 0 0 auto; }
+.mlhead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.mlhead strong { font: 600 1.02rem var(--serif); overflow-wrap: anywhere; }
+.mlhead span, .mldesc { font-size: 0.8rem; color: var(--muted); }
+.mldesc { margin: 0; }
+.finder { position: relative; }
+.results { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 2px); list-style: none; margin: 0; padding: 4px 0; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.12); max-height: 300px; overflow-y: auto; }
+.results button { display: flex; justify-content: space-between; gap: 8px; width: 100%; border: 0; background: none; padding: 5px 10px; text-align: left; cursor: pointer; font-size: 0.86rem; }
+.results button:hover, .results button:focus-visible { background: var(--accent-soft); }
+.results .meta2 { color: var(--muted); font-size: 0.74rem; white-space: nowrap; }
+.results .newc { color: var(--accent); font-weight: 600; }
+.items li.outside .g { color: var(--muted); font-style: italic; }
+.items .dot.outside { border-style: dashed; }
+.mine { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.mine .lab { font-size: 0.78rem; color: var(--muted); }
+.tag.mylist { background: var(--exact-soft); display: inline-flex; align-items: center; gap: 4px; }
+.tag.mylist button { border: 0; background: none; padding: 0 2px; cursor: pointer; color: var(--muted); font-size: 0.85rem; line-height: 1; }
+.tag.mylist button:hover { color: var(--ink); }
+.mine select { padding: 3px 6px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); font-size: 0.8rem; max-width: 220px; }
+.newconcept h3 { margin: 0; font: 600 1.15rem var(--serif); }
+.newconcept .grid2 { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 12px; align-items: start; }
+.newconcept .grid2 > label { font-size: 0.85rem; color: var(--muted); padding-top: 6px; }
+.newconcept input, .newconcept textarea, .newconcept select { width: 100%; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); }
+.newconcept textarea { min-height: 64px; resize: vertical; }
+@media (max-width: 560px) { .newconcept .grid2 { grid-template-columns: minmax(0, 1fr); } .newconcept .grid2 > label { padding-top: 0; } }
 
 .langs { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 0; }
 .langs > summary { cursor: pointer; padding: 10px 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; list-style: none; }
@@ -180,11 +213,66 @@ button.chip:hover { border-color: var(--accent); }
       <button type="button" data-filter="all" aria-pressed="false">All</button>
     </div>
     <input id="search" type="search" placeholder="Find a concept (EYE, SEE…)" autocomplete="off">
-    <select id="listFilter" aria-label="Concept list"></select>
+    <div class="listbar">
+      <select id="listFilter" aria-label="Concept list"></select>
+      <button type="button" class="btn small" id="newListBtn" aria-expanded="false">New list</button>
+    </div>
+    <form class="card" id="newListForm" hidden>
+      <input id="newListName" placeholder="List name" maxlength="80" autocomplete="off" aria-label="List name">
+      <input id="newListDesc" placeholder="What is it for? (optional)" maxlength="300" autocomplete="off" aria-label="Description">
+      <div class="row"><button type="submit" class="btn exact">Create list</button><button type="button" class="btn" id="newListCancel">Cancel</button></div>
+    </form>
+    <section class="card" id="myList" hidden aria-label="Your list">
+      <div class="mlhead"><strong id="mlName"></strong><span id="mlCount"></span></div>
+      <p class="mldesc" id="mlDesc" hidden></p>
+      <div class="finder">
+        <input id="addSearch" type="search" placeholder="Add a concept: type a gloss" autocomplete="off" aria-label="Find a concept to add">
+        <ul class="results" id="addResults" hidden></ul>
+      </div>
+      <div class="row">
+        <button type="button" class="btn small" id="newConceptBtn">New concept…</button>
+        <button type="button" class="btn small" id="deleteListBtn">Delete list</button>
+      </div>
+    </section>
     <ul class="items" id="items"></ul>
   </aside>
 
   <main>
+    <form class="panel newconcept" id="newConcept" hidden>
+      <h3>New concept in <span id="ncList"></span></h3>
+      <div class="grid2">
+        <label for="ncGloss">Gloss</label>
+        <input id="ncGloss" maxlength="120" autocomplete="off" placeholder="SEE ON PURPOSE">
+        <label for="ncDef">Definition</label>
+        <textarea id="ncDef" maxlength="1000" placeholder="What the concept means, in plain words"></textarea>
+        <label for="ncCat">Category</label>
+        <select id="ncCat">
+          <option value="">unknown</option>
+          <option>Person/Thing</option>
+          <option>Action/Process</option>
+          <option>Property</option>
+          <option>Number</option>
+          <option>Classifier</option>
+          <option>Other</option>
+        </select>
+        <label for="ncClosest">Closest concept set</label>
+        <div class="finder">
+          <input id="ncClosest" type="search" autocomplete="off" placeholder="Type a Concepticon gloss (optional)">
+          <ul class="results" id="ncResults" hidden></ul>
+          <div class="mine" id="ncPicked" style="margin-top:6px"></div>
+        </div>
+        <label for="ncRel">That one is</label>
+        <select id="ncRel">
+          <option value="exact">the same</option>
+          <option value="broader" selected>broader</option>
+          <option value="narrower">narrower</option>
+          <option value="related">related</option>
+        </select>
+        <label for="ncNote">Note</label>
+        <input id="ncNote" maxlength="300" autocomplete="off" placeholder="Optional">
+      </div>
+      <div class="row"><button type="submit" class="btn exact">Add to list</button><button type="button" class="btn" id="ncCancel">Cancel</button></div>
+    </form>
     <section class="concept" id="concept" aria-live="polite"></section>
     <details class="langs" id="langs" open>
       <summary><span class="lt">Across languages</span><span class="spread" id="spread"></span></summary>
@@ -267,7 +355,59 @@ button.chip:hover { border-color: var(--accent); }
   var byId = {};
   QUEUE.forEach(function (item, i) { item.index = i; byId[item.concept] = item; });
 
-  function localId(concept) { return concept.split(":")[1]; }
+  // Custom lists (stored in lists/<id> and lists/<id>/entries/<key>)
+  var lists = {};              // list id -> {id, name, description, by, owner, at}
+  var entries = {};            // list id -> {key -> entry}
+  var listSubs = {};           // list id -> unsubscribe
+  var MAX_LISTS = 50;
+  // Every Concepticon concept set, for adding to a list: [local id, gloss, category, definition]
+  var POOL = ((!Array.isArray(DATA) && DATA.catalog) || []).map(function (r) {
+    return { concept: "concepticon:" + r[0], gloss: r[1], category: r[2], definition: r[3] };
+  });
+  var byConcept = {};
+  POOL.forEach(function (p) { byConcept[p.concept] = p; });
+  QUEUE.forEach(function (item) {  // new concepts already in the queue can be added to other lists too
+    if (!byConcept[item.concept]) { var p = { concept: item.concept, gloss: item.gloss, category: item.category, definition: item.definition }; POOL.push(p); byConcept[item.concept] = p; }
+  });
+
+  function isMine(list) { return list.indexOf("my:") === 0; }
+  function myListId(list) { return list.slice(3); }
+  function localId(concept) {
+    if (concept.indexOf("concepticon:") === 0) return concept.slice(12);
+    return concept.indexOf("custom:concept/") === 0 ? "new" : concept;
+  }
+  // Document id for a concept: the Concepticon number, else the node id with "/" and ":" as "~"
+  function keyFor(concept) { return concept.indexOf("concepticon:") === 0 ? concept.slice(12) : concept.replace(/[:/]/g, "~"); }
+  function slug(text) {
+    var s = String(text || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+    return /^[0-9]/.test(s) ? "c-" + s : s;
+  }
+  function entryNode(e) { return e.concept || ("custom:concept/" + e.key); }
+  function listsOf(concept) {
+    return Object.keys(entries).filter(function (id) {
+      return Object.keys(entries[id]).some(function (k) { return entryNode(entries[id][k]) === concept; });
+    });
+  }
+  function entryFor(concept) {
+    for (var id in entries) for (var k in entries[id]) if (entryNode(entries[id][k]) === concept) return entries[id][k];
+    return null;
+  }
+  function listNodes(listId) {
+    var e = entries[listId] || {};
+    return Object.keys(e).map(function (k) { return entryNode(e[k]); });
+  }
+  // A concept outside the review queue (added to a list from the catalogue, or a new concept)
+  function itemFor(concept) {
+    if (byId[concept]) return byId[concept];
+    var p = byConcept[concept], e = entryFor(concept);
+    if (!p && !e) return null;
+    return {
+      concept: concept, outside: true, lists: [], candidates: [], usage: null,
+      gloss: (p && p.gloss) || (e && e.gloss) || concept,
+      definition: (p && p.definition) || (e && e.definition) || "",
+      category: (p && p.category) || (e && e.category) || "", field: ""
+    };
+  }
   function el(tag, attrs, text) {
     var node = document.createElement(tag);
     if (attrs) Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
@@ -284,11 +424,19 @@ button.chip:hover { border-color: var(--accent); }
 
   function visible() {
     var q = state.query.trim().toUpperCase();
-    return QUEUE.filter(function (item) {
+    var mine = isMine(state.list) ? listNodes(myListId(state.list)) : null;
+    var pool = QUEUE;
+    if (mine) {  // the list's concepts that are in the queue, then the ones that are not (yet)
+      var inQueue = QUEUE.filter(function (item) { return mine.indexOf(item.concept) >= 0; });
+      var outside = mine.filter(function (c) { return !byId[c]; }).map(itemFor).filter(Boolean)
+        .sort(function (a, b) { return a.gloss.localeCompare(b.gloss); });
+      pool = inQueue.concat(outside);
+    }
+    return pool.filter(function (item) {
       var done = !!decisions[item.concept];
       if (state.filter === "todo" && done) return false;
       if (state.filter === "done" && !done) return false;
-      if (state.list && item.lists.indexOf(state.list) < 0) return false;
+      if (!mine && state.list && item.lists.indexOf(state.list) < 0) return false;
       if (q && item.gloss.toUpperCase().indexOf(q) < 0) return false;
       return true;
     });
@@ -305,13 +453,14 @@ button.chip:hover { border-color: var(--accent); }
     ul.textContent = "";
     var items = visible();
     if (!items.length) {
-      var li = el("li", { class: "empty" }, state.filter === "todo" ? "Nothing left to review here." : "No concept sets match.");
-      ul.appendChild(li); return;
+      var empty = isMine(state.list) && !listNodes(myListId(state.list)).length ? "This list is empty. Add concepts with the search box above, or with “Add to list” on any concept."
+        : state.filter === "todo" ? "Nothing left to review here." : "No concept sets match.";
+      ul.appendChild(el("li", { class: "empty" }, empty)); return;
     }
     items.forEach(function (item) {
-      var li = el("li");
+      var li = el("li", item.outside ? { class: "outside", title: "Not in the review queue yet" } : null);
       var b = el("button", { type: "button", "aria-current": String(item.concept === state.current) });
-      b.appendChild(el("span", { class: "dot " + kind(decisions[item.concept]) }));
+      b.appendChild(el("span", { class: "dot " + (kind(decisions[item.concept]) || (item.outside ? "outside" : "")) }));
       b.appendChild(el("span", { class: "g" }, item.gloss));
       b.appendChild(el("span", { class: "n" }, localId(item.concept)));
       b.addEventListener("click", function () { select(item.concept); });
@@ -328,18 +477,29 @@ button.chip:hover { border-color: var(--accent); }
     var box = document.getElementById("concept");
     var cands = document.getElementById("cands");
     box.textContent = ""; cands.textContent = "";
-    var item = byId[state.current];
+    var item = state.current && itemFor(state.current);
     if (!item) { box.appendChild(el("p", { class: "status" }, "Choose a concept set from the queue.")); return; }
+    var isNew = item.concept.indexOf("custom:") === 0;
     var eyebrow = el("div", { class: "eyebrow" });
-    eyebrow.appendChild(el("span", null, "Concepticon " + localId(item.concept)));
+    eyebrow.appendChild(el("span", null, isNew ? "New concept" : "Concepticon " + localId(item.concept)));
     if (item.category) eyebrow.appendChild(el("span", null, item.category));
     if (item.field) eyebrow.appendChild(el("span", null, item.field));
     box.appendChild(eyebrow);
     box.appendChild(el("h2", null, item.gloss));
-    box.appendChild(el("p", { class: "def" }, item.definition || "No definition in Concepticon."));
+    box.appendChild(el("p", { class: "def" }, item.definition || (isNew ? "No definition yet." : "No definition in Concepticon.")));
+    var own = isNew ? entryFor(item.concept) : null;
+    if (own && own.closest) {
+      var near = el("p", { class: "status" });
+      var nearItem = itemFor(own.closest);
+      near.appendChild(document.createTextNode("Closest concept set: "));
+      near.appendChild(conceptChip(nearItem ? nearItem.gloss : own.closest, own.closest, null, "Concepticon " + localId(own.closest)));
+      near.appendChild(document.createTextNode(" — " + ({ exact: "the same", broader: "broader", narrower: "narrower", related: "related" }[own.relation] || own.relation)));
+      box.appendChild(near);
+    }
     var tags = el("div", { class: "tags" });
-    item.lists.forEach(function (l) { tags.appendChild(el("span", { class: "tag" }, LIST_NAMES[l] || l)); });
-    box.appendChild(tags);
+    item.lists.forEach(function (l) { if (l.indexOf(":") < 0) tags.appendChild(el("span", { class: "tag" }, LIST_NAMES[l] || l)); });
+    if (tags.childNodes.length) box.appendChild(tags);
+    box.appendChild(renderMine(item));
     var d = decisions[item.concept];
     var status = el("p", { class: "status" });
     if (d) {
@@ -352,6 +512,8 @@ button.chip:hover { border-color: var(--accent); }
           status.appendChild(document.createTextNode(" · by " + who));
         });
       }
+    } else if (item.outside) {
+      status.textContent = "Not in the review queue yet. It gets WordNet proposals and words in other languages when the queue is rebuilt from your lists; you can already enter a synset below.";
     } else {
       status.textContent = item.candidates.length ? "Not reviewed yet." : "Not reviewed yet. WordNet offers no candidate: pronouns and function words usually have no synset.";
     }
@@ -394,6 +556,218 @@ button.chip:hover { border-color: var(--accent); }
       cands.appendChild(card);
     });
     ["noneBtn", "clearBtn", "manualBtn"].forEach(function (id) { document.getElementById(id).disabled = readOnly; });
+  }
+
+  // The "My lists" row on a concept: the lists it is in (× removes) and a picker to add it to another.
+  function renderMine(item) {
+    var row = el("div", { class: "mine" });
+    var ids = Object.keys(lists).sort(function (a, b) { return lists[a].name.localeCompare(lists[b].name); });
+    if (!ids.length && (readOnly || !db)) return row;
+    row.appendChild(el("span", { class: "lab" }, "My lists:"));
+    var inLists = listsOf(item.concept);
+    inLists.forEach(function (id) {
+      var tag = el("span", { class: "tag mylist" });
+      var open = el("button", { type: "button", title: "Show this list" }, lists[id] ? lists[id].name : id);
+      open.style.color = "inherit"; open.style.fontSize = "inherit";
+      open.addEventListener("click", function () { setList("my:" + id); });
+      tag.appendChild(open);
+      if (!readOnly && db) {
+        var x = el("button", { type: "button", "aria-label": "Remove from " + (lists[id] ? lists[id].name : id), title: "Remove from this list" }, "×");
+        x.addEventListener("click", function () { removeFromList(id, item.concept); });
+        tag.appendChild(x);
+      }
+      row.appendChild(tag);
+    });
+    if (!inLists.length) row.appendChild(el("span", { class: "lab" }, "none"));
+    var others = ids.filter(function (id) { return inLists.indexOf(id) < 0; });
+    if (!readOnly && db && others.length) {
+      var pick = el("select", { "aria-label": "Add to list" });
+      pick.appendChild(el("option", { value: "" }, "Add to list…"));
+      others.forEach(function (id) { pick.appendChild(el("option", { value: id }, lists[id].name)); });
+      pick.addEventListener("change", function () {
+        if (!pick.value) return;
+        var e = entryFor(item.concept);
+        addToList(pick.value, e && !e.concept ? newEntryFrom(e) : { concept: item.concept, gloss: item.gloss });
+      });
+      row.appendChild(pick);
+    }
+    return row;
+  }
+
+  // --- custom lists: writes ---
+  function stamp(body) { body.by = myId; body.owner = amOwner; body.at = new Date().toISOString(); return body; }
+  function failed(e, what) {
+    if (e && e.code === "quota_exceeded") toast("The page's storage is full; " + what + " was not saved.");
+    else if (e && e.code === "invalid_argument") { readOnly = true; banner("You can read these lists but not change them. Ask the owner for Contributor access."); render(); }
+    else toast(what.charAt(0).toUpperCase() + what.slice(1) + " was not saved. Try again in a moment.");
+  }
+  function entriesRef(listId) { return db.collection("lists").doc(listId).collection("entries"); }
+  function newEntryFrom(e) {
+    return { key: e.key, concept: null, gloss: e.gloss, definition: e.definition || "", category: e.category || "",
+             closest: e.closest || null, relation: e.relation || null, note: "" };
+  }
+  function addToList(listId, entry) {
+    if (!db || readOnly || !lists[listId]) return;
+    var body = stamp({
+      key: entry.key || keyFor(entry.concept), concept: entry.concept || null, gloss: entry.gloss || "",
+      definition: entry.definition || "", category: entry.category || "", closest: entry.closest || null,
+      relation: entry.closest ? (entry.relation || "exact") : null, note: entry.note || ""
+    });
+    var mine = entries[listId] || (entries[listId] = {});
+    if (mine[body.key]) { toast(body.gloss + " is already in " + lists[listId].name); return; }
+    mine[body.key] = body;
+    render();
+    entriesRef(listId).doc(body.key).set(body).then(function () {
+      toast("Added " + body.gloss + " to " + lists[listId].name);
+    }).catch(function (e) { delete mine[body.key]; render(); failed(e, "the concept"); });
+  }
+  function removeFromList(listId, concept) {
+    var mine = entries[listId] || {};
+    var key = Object.keys(mine).filter(function (k) { return entryNode(mine[k]) === concept; })[0];
+    if (!key || !db || readOnly) return;
+    var old = mine[key];
+    delete mine[key];
+    render();
+    entriesRef(listId).doc(key).delete().then(function () { toast("Removed " + old.gloss + " from " + lists[listId].name); })
+      .catch(function (e) { mine[key] = old; render(); failed(e, "the removal"); });
+  }
+  function createList(name, description) {
+    if (!db || readOnly) return;
+    if (Object.keys(lists).length >= MAX_LISTS) { toast("This page holds at most " + MAX_LISTS + " lists."); return; }
+    var base = slug(name) || "list", id = base, n = 2;
+    while (lists[id]) id = base + "-" + n++;
+    var body = stamp({ id: id, name: name, description: description || "" });
+    lists[id] = body; entries[id] = entries[id] || {};
+    setList("my:" + id);
+    db.collection("lists").doc(id).set(body).then(function () { toast("Created " + name); watchList(id); })
+      .catch(function (e) { delete lists[id]; setList(""); failed(e, "the list"); });
+  }
+  function deleteList(listId) {
+    if (!db || readOnly || !lists[listId]) return;
+    var keys = Object.keys(entries[listId] || {});
+    var name = lists[listId].name;
+    Promise.all(keys.map(function (k) { return entriesRef(listId).doc(k).delete(); }))
+      .then(function () { return db.collection("lists").doc(listId).delete(); })
+      .then(function () { toast("Deleted " + name); })
+      .catch(function (e) { failed(e, "the deletion"); });
+    if (listSubs[listId]) { listSubs[listId](); delete listSubs[listId]; }
+    delete lists[listId]; delete entries[listId];
+    setList("");
+  }
+
+  // --- custom lists: sidebar ---
+  function setList(value) {
+    state.list = value;
+    document.getElementById("newConcept").hidden = true;
+    renderListOptions();
+    render();
+  }
+  function renderListOptions() {
+    var lf = document.getElementById("listFilter");
+    lf.textContent = "";
+    lf.appendChild(el("option", { value: "" }, "All concept lists"));
+    var cg = el("optgroup", { label: "Concepticon lists" });
+    Object.keys(LIST_NAMES).forEach(function (k) { cg.appendChild(el("option", { value: k }, LIST_NAMES[k])); });
+    lf.appendChild(cg);
+    var ids = Object.keys(lists).sort(function (a, b) { return lists[a].name.localeCompare(lists[b].name); });
+    if (ids.length) {
+      var mg = el("optgroup", { label: "My lists" });
+      ids.forEach(function (id) { mg.appendChild(el("option", { value: "my:" + id }, lists[id].name + " (" + Object.keys(entries[id] || {}).length + ")")); });
+      lf.appendChild(mg);
+    }
+    if (isMine(state.list) && !lists[myListId(state.list)]) state.list = "";
+    lf.value = state.list;
+    var nb = document.getElementById("newListBtn");
+    nb.hidden = readOnly || !db;
+  }
+  function renderMyList() {
+    var box = document.getElementById("myList");
+    var id = isMine(state.list) ? myListId(state.list) : null;
+    box.hidden = !id;
+    if (!id) return;
+    var l = lists[id];
+    document.getElementById("mlName").textContent = l.name;
+    var n = Object.keys(entries[id] || {}).length;
+    var outside = listNodes(id).filter(function (c) { return !byId[c]; }).length;
+    document.getElementById("mlCount").textContent = n + (n === 1 ? " concept" : " concepts") + (outside ? " · " + outside + " not in queue" : "");
+    var desc = document.getElementById("mlDesc");
+    desc.textContent = l.description || ""; desc.hidden = !l.description;
+    ["addSearch", "newConceptBtn", "deleteListBtn"].forEach(function (k) { document.getElementById(k).disabled = readOnly || !db; });
+    var del = document.getElementById("deleteListBtn");
+    if (del.dataset.armed !== id) { del.textContent = "Delete list"; delete del.dataset.armed; }
+  }
+
+  // A search box over all concept sets; onPick({concept, gloss}) or onNew(text).
+  function finder(input, results, onPick, onNew) {
+    function close() { results.hidden = true; results.textContent = ""; }
+    function run() {
+      var q = input.value.trim().toUpperCase();
+      results.textContent = "";
+      if (q.length < 2) { results.hidden = true; return; }
+      // exact gloss first, then glosses that start with the text, then a word in them, then anywhere
+      var ranked = [[], [], [], []];
+      for (var i = 0; i < POOL.length; i++) {
+        var g = POOL[i].gloss.toUpperCase(), at = g.indexOf(q);
+        if (at < 0) continue;
+        var r = g === q || g.indexOf(q + " (") === 0 ? 0 : at === 0 ? 1 : /[\s(\/-]/.test(g.charAt(at - 1)) ? 2 : 3;
+        if (ranked[r].length < 12) ranked[r].push(POOL[i]);
+      }
+      ranked[0].concat(ranked[1], ranked[2], ranked[3]).slice(0, 12).forEach(function (p) {
+        var li = el("li"), b = el("button", { type: "button" });
+        b.appendChild(el("span", null, p.gloss));
+        b.appendChild(el("span", { class: "meta2" }, (p.category || "") + (byId[p.concept] ? " · in queue" : "")));
+        if (p.definition) b.title = p.definition;
+        b.addEventListener("click", function () { close(); input.value = ""; onPick(p); });
+        li.appendChild(b); results.appendChild(li);
+      });
+      if (onNew) {
+        var li = el("li"), b = el("button", { type: "button" });
+        b.appendChild(el("span", { class: "newc" }, "New concept “" + input.value.trim() + "”…"));
+        b.addEventListener("click", function () { var t = input.value.trim(); close(); input.value = ""; onNew(t); });
+        li.appendChild(b); results.appendChild(li);
+      }
+      results.hidden = !results.childNodes.length;
+    }
+    input.addEventListener("input", run);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") close();
+      else if (e.key === "Enter") { e.preventDefault(); var first = results.querySelector("button"); if (first) first.click(); }
+      else if (e.key === "ArrowDown") { var b = results.querySelector("button"); if (b) { e.preventDefault(); b.focus(); } }
+    });
+    results.addEventListener("keydown", function (e) {
+      var all = Array.prototype.slice.call(results.querySelectorAll("button")), i = all.indexOf(document.activeElement);
+      if (e.key === "ArrowDown" && i < all.length - 1) { e.preventDefault(); all[i + 1].focus(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); if (i > 0) all[i - 1].focus(); else input.focus(); }
+      else if (e.key === "Escape") { close(); input.focus(); }
+    });
+    document.addEventListener("click", function (e) { if (e.target !== input && !results.contains(e.target)) close(); });
+  }
+
+  // --- new concept form ---
+  var picked = null;  // closest concept set chosen in the form
+  function renderPicked() {
+    var box = document.getElementById("ncPicked");
+    box.textContent = "";
+    if (!picked) return;
+    var tag = el("span", { class: "tag mylist" });
+    tag.appendChild(document.createTextNode(picked.gloss));
+    var x = el("button", { type: "button", "aria-label": "Clear the closest concept set" }, "×");
+    x.addEventListener("click", function () { picked = null; renderPicked(); });
+    tag.appendChild(x);
+    box.appendChild(tag);
+  }
+  function openNewConcept(gloss) {
+    var id = myListId(state.list);
+    if (!lists[id]) return;
+    var form = document.getElementById("newConcept");
+    document.getElementById("ncList").textContent = lists[id].name;
+    form.reset();
+    document.getElementById("ncRel").value = "broader";
+    document.getElementById("ncGloss").value = (gloss || "").toUpperCase();
+    picked = null; renderPicked();
+    form.hidden = false;
+    form.scrollIntoView({ block: "nearest" });
+    document.getElementById(gloss ? "ncDef" : "ncGloss").focus();
   }
 
   function langName(code) { return (LANGS[code] && LANGS[code].name) || code; }
@@ -504,7 +878,7 @@ button.chip:hover { border-color: var(--accent); }
 
   function setLang(code) { state.lang = code; store("review.lang", code); renderLanguages(); }
 
-  function render() { renderProgress(); renderList(); renderConcept(); renderLanguages(); }
+  function render() { renderProgress(); renderMyList(); renderList(); renderConcept(); renderLanguages(); }
 
   function select(concept) { state.current = concept; render(); }
 
@@ -533,10 +907,10 @@ button.chip:hover { border-color: var(--accent); }
       by: myId, owner: amOwner, at: new Date().toISOString()
     };
     decisions[item.concept] = body;
-    var moveOn = state.filter !== "done";
+    var moveOn = state.filter !== "done" && !!byId[item.concept];
     if (moveOn) state.current = nextOpen(item.concept);
     render();
-    db.collection("decisions").doc(localId(item.concept)).set(body).then(function () {
+    db.collection("decisions").doc(keyFor(item.concept)).set(body).then(function () {
       toast("Saved: " + item.gloss + " → " + (TYPE_LABEL[type] || type));
     }).catch(function (e) {
       delete decisions[item.concept];
@@ -547,12 +921,12 @@ button.chip:hover { border-color: var(--accent); }
   }
 
   function clearDecision() {
-    var item = byId[state.current];
+    var item = state.current && itemFor(state.current);
     if (!item || !decisions[item.concept] || !db || readOnly) return;
     var old = decisions[item.concept];
     delete decisions[item.concept];
     render();
-    db.collection("decisions").doc(localId(item.concept)).delete().then(function () { toast("Cleared " + item.gloss); })
+    db.collection("decisions").doc(keyFor(item.concept)).delete().then(function () { toast("Cleared " + item.gloss); })
       .catch(function () { decisions[item.concept] = old; render(); toast("Not cleared. Try again in a moment."); });
   }
 
@@ -566,13 +940,69 @@ button.chip:hover { border-color: var(--accent); }
   });
   document.getElementById("search").addEventListener("input", function (e) { state.query = e.target.value; renderList(); });
   var lf = document.getElementById("listFilter");
-  lf.appendChild(el("option", { value: "" }, "All concept lists"));
-  Object.keys(LIST_NAMES).forEach(function (k) { lf.appendChild(el("option", { value: k }, LIST_NAMES[k])); });
-  lf.addEventListener("change", function () { state.list = lf.value; renderList(); });
-  document.getElementById("noneBtn").addEventListener("click", function () { var item = byId[state.current]; if (item) decide(item, null, "none"); });
+  renderListOptions();
+  lf.addEventListener("change", function () { setList(lf.value); });
+
+  // new list
+  var nlForm = document.getElementById("newListForm"), nlBtn = document.getElementById("newListBtn");
+  function toggleNewList(open) {
+    nlForm.hidden = !open; nlBtn.setAttribute("aria-expanded", String(open));
+    if (open) { nlForm.reset(); document.getElementById("newListName").focus(); }
+  }
+  nlBtn.addEventListener("click", function () { toggleNewList(nlForm.hidden); });
+  document.getElementById("newListCancel").addEventListener("click", function () { toggleNewList(false); });
+  nlForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("newListName").value.trim();
+    if (!name) { toast("Give the list a name."); return; }
+    toggleNewList(false);
+    createList(name, document.getElementById("newListDesc").value.trim());
+  });
+
+  // the selected list: add concepts, new concept, delete
+  finder(document.getElementById("addSearch"), document.getElementById("addResults"), function (p) {
+    var id = myListId(state.list);
+    addToList(id, { concept: p.concept, gloss: p.gloss });
+    state.current = p.concept; render();
+  }, function (text) { openNewConcept(text); });
+  document.getElementById("newConceptBtn").addEventListener("click", function () { openNewConcept(""); });
+  var delBtn = document.getElementById("deleteListBtn");
+  delBtn.addEventListener("click", function () {
+    var id = myListId(state.list);
+    if (delBtn.dataset.armed === id) { delete delBtn.dataset.armed; delBtn.textContent = "Delete list"; deleteList(id); return; }
+    delBtn.dataset.armed = id;
+    var n = Object.keys(entries[id] || {}).length;
+    delBtn.textContent = "Click again to delete" + (n ? " (" + n + ")" : "");
+    clearTimeout(delBtn.timer);
+    delBtn.timer = setTimeout(function () { delete delBtn.dataset.armed; delBtn.textContent = "Delete list"; }, 4000);
+  });
+
+  // new concept form
+  finder(document.getElementById("ncClosest"), document.getElementById("ncResults"), function (p) { picked = p; renderPicked(); }, null);
+  document.getElementById("ncCancel").addEventListener("click", function () { document.getElementById("newConcept").hidden = true; });
+  document.getElementById("newConcept").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var id = myListId(state.list);
+    var gloss = document.getElementById("ncGloss").value.trim();
+    if (!gloss) { toast("A new concept needs a gloss."); document.getElementById("ncGloss").focus(); return; }
+    var key = slug(gloss) || ("c-" + Date.now().toString(36));
+    addToList(id, {
+      key: key, concept: null, gloss: gloss.toUpperCase(),
+      definition: document.getElementById("ncDef").value.trim(),
+      category: document.getElementById("ncCat").value,
+      closest: picked ? picked.concept : null,
+      relation: picked ? document.getElementById("ncRel").value : null,
+      note: document.getElementById("ncNote").value.trim()
+    });
+    document.getElementById("newConcept").hidden = true;
+    state.current = "custom:concept/" + key;
+    render();
+  });
+
+  document.getElementById("noneBtn").addEventListener("click", function () { var item = state.current && itemFor(state.current); if (item) decide(item, null, "none"); });
   document.getElementById("clearBtn").addEventListener("click", clearDecision);
   document.getElementById("manualBtn").addEventListener("click", function () {
-    var item = byId[state.current]; if (!item) return;
+    var item = state.current && itemFor(state.current); if (!item) return;
     var raw = document.getElementById("manualId").value.trim().replace(/^oewn:/, "");
     if (!/^oewn-\d{8}-[nvars]$/.test(raw)) { toast("Write the synset as oewn-01234567-n."); return; }
     decide(item, "oewn:" + raw, document.getElementById("manualType").value);
@@ -591,7 +1021,7 @@ button.chip:hover { border-color: var(--accent); }
   document.addEventListener("keydown", function (e) {
     var tag = (e.target && e.target.tagName) || "";
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.metaKey || e.ctrlKey || e.altKey) return;
-    var item = byId[state.current];
+    var item = state.current && itemFor(state.current);
     if (/^[1-5]$/.test(e.key) && item) {
       var c = item.candidates[Number(e.key) - 1];
       if (c) { e.preventDefault(); decide(item, c.synset, "exact"); }
@@ -600,9 +1030,19 @@ button.chip:hover { border-color: var(--accent); }
     else if (e.key === "k" || e.key === "K") { e.preventDefault(); step(-1); }
   });
 
+  function watchList(id) {
+    if (listSubs[id] || !db) return;
+    listSubs[id] = entriesRef(id).limit(1000).onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (doc) { var b = doc.data(); if (b && (b.concept || b.gloss)) next[doc.id] = b; });
+      entries[id] = next;
+      renderListOptions(); render();
+    }, function () { delete listSubs[id]; banner("Lost the connection to your lists. Reload the page to see the latest."); });
+  }
+
   render();
 
-  // --- shared decisions ---
+  // --- shared decisions and lists ---
   if (window.claude && typeof window.claude.use === "function") {
     Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (res) {
       db = res[0]; user = res[1];
@@ -617,6 +1057,14 @@ button.chip:hover { border-color: var(--accent); }
           decisions = next;
           render();
         }, function () { banner("Lost the connection to the saved decisions. Reload the page to see the latest."); });
+        db.collection("lists").limit(MAX_LISTS + 10).onSnapshot(function (snap) {
+          var next = {};
+          snap.docs.forEach(function (doc) { var b = doc.data(); if (b && b.name) next[doc.id] = b; });
+          Object.keys(listSubs).forEach(function (id) { if (!next[id]) { listSubs[id](); delete listSubs[id]; delete entries[id]; } });
+          lists = next;
+          Object.keys(lists).forEach(watchList);
+          renderListOptions(); render();
+        }, function () { banner("Lost the connection to your lists. Reload the page to see the latest."); });
       });
     });
   } else {
