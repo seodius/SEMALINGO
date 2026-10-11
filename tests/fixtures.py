@@ -265,6 +265,19 @@ def lexibank(folder: Path) -> None:
         ])
 
 
+def kaikki(entries_name: str):
+    def build(folder: Path) -> None:
+        from semalingo.fetch import write_source_info
+        from tests import kaikki_entries
+
+        folder.mkdir(parents=True, exist_ok=True)
+        with gzip.open(folder / "kaikki.jsonl.gz", "wt", encoding="utf-8") as handle:
+            for entry in getattr(kaikki_entries, entries_name):
+                handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        write_source_info(folder, source="kaikki", extracted="2026-10-03", dump="enwiktionary 2026-09-02")
+    return build
+
+
 def xlsx(path: Path, header: list[str], rows: list[list]) -> None:
     import openpyxl
 
@@ -358,7 +371,7 @@ def oewn(folder: Path, ref: str = "2025") -> None:
 
 
 BUILDERS = {"subtlex-nl": subtlex_nl, "subtlex-uk": subtlex_uk, "childlex": childlex, "subtlex-us": subtlex_us, "glottolog": glottolog, "concepticon": concepticon, "wold": wold, "clics": clics, "datsemshift": datsemshift, "oewn": oewn, "norare": norare, "concepticon-maps": concepticon_maps}
-BUILDERS.update({"lexibank": lexibank, "sumo": sumo, "cili": cili, "kuperman-aoa": kuperman_aoa, "brysbaert-concreteness": brysbaert_concreteness})
+BUILDERS.update({"kaikki-en": kaikki("ENGLISH"), "kaikki-nl": kaikki("DUTCH"), "lexibank": lexibank, "sumo": sumo, "cili": cili, "kuperman-aoa": kuperman_aoa, "brysbaert-concreteness": brysbaert_concreteness})
 BUILDERS.update({sid: wiki_page(sid) for sid in ("basic-english", "wiktionary-1000-basic", "basic-english-combined", "voa-special-english", "simple-misspellings", "nsm-primes")})
 
 

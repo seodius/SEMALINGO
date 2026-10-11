@@ -16,6 +16,7 @@ on:
       - "semalingo/wikitext.py"
       - "scripts/report_lists.py"
       - "scripts/report_sumo.py"
+      - "scripts/report_kaikki.py"
       - "semalingo/schema/**"
       - "Dockerfile"
       - ".github/workflows/load.yml"
@@ -23,7 +24,7 @@ on:
 jobs:
   load:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - name: Build the image
@@ -94,6 +95,10 @@ jobs:
         timeout-minutes: 20
         run: $RUN build lexibank
 
+      - name: Fetch and load Kaikki (Wiktionary, English and Dutch)
+        timeout-minutes: 45
+        run: $RUN build kaikki-nl kaikki-en
+
       - name: Fetch and load SUMO and CILI
         timeout-minutes: 15
         run: $RUN build cili sumo
@@ -124,6 +129,9 @@ jobs:
           docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
             --entrypoint python semalingo:load scripts/report_sumo.py | tee sumo.txt
           sed 's/^/::notice title=sumo::/' sumo.txt
+          docker run --rm --user $(id -u):$(id -g) -v $PWD/data:/app/data -v $PWD/scripts:/app/scripts \
+            --entrypoint python semalingo:load scripts/report_kaikki.py | tee kaikki.txt
+          sed 's/^/::notice title=kaikki::/' kaikki.txt
 
       - name: Report
         if: always()

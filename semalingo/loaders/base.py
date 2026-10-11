@@ -64,9 +64,13 @@ class Loader(ABC):
         problems = verify_checksums(folder)
         if problems:
             raise RuntimeError(f"{self.source_id}: raw files do not match SHA256SUMS ({'; '.join(problems[:3])}); fetch again")
-        writer = Writer(conn, self.source, self.ref)
+        writer = Writer(conn, self.source, self.version(folder))
         self.read(folder, writer)
         return writer.finish()
+
+    def version(self, folder: Path) -> str:
+        """The version recorded in the sources table; snapshot sources report the date they hold."""
+        return self.ref
 
     @abstractmethod
     def read(self, folder: Path, writer: Writer) -> None:

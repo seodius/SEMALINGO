@@ -23,6 +23,8 @@ source stays under that source's terms. "TODO" means the terms have not been ver
 | 1000 basic English words (Wiktionary appendix) (`wiktionary-1000-basic`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |
 | Basic English combined wordlist (Simple English Wikipedia) (`basic-english-combined`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL) | yes | yes |
 | VOA Special English Word Book (Simple English Wikipedia) (`voa-special-english`) | CC BY-SA 4.0 (Wikimedia page text; revisions before mid-2023 also CC BY-SA 3.0 and GFDL); the word book is by Voice of America, a U.S. government broadcaster, and the page asks to credit "VOA Special English" and "Voice of America" | yes | yes |
+| Wiktionary English entries via Kaikki (wiktextract) (`kaikki-en`) | CC BY-SA 4.0 and GFDL (Wiktionary content); cite Ylonen 2022 (LREC) for wiktextract | yes | yes |
+| Wiktionary Dutch entries via Kaikki (wiktextract) (`kaikki-nl`) | CC BY-SA 4.0 and GFDL (Wiktionary content); cite Ylonen 2022 (LREC) for wiktextract | yes | yes |
 | World Loanword Database (WOLD) (`wold`) | CC BY 3.0 Germany | yes | yes |
 | Lexibank (lexibank-analysed) (`lexibank`) | CC BY 4.0 | yes | yes |
 | CLICS4 (Database of Cross-Linguistic Colexifications) (`clics`) | CC BY 4.0 | yes | yes |

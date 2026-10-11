@@ -383,6 +383,35 @@ class LexibankTest(LoaderTestCase):
         self.assertIn("3 = complex syllable structure", self.value("SELECT description FROM property_types WHERE property = 'SyllableStructure'"))
 
 
+class KaikkiTest(LoaderTestCase):
+    def relations(self, source_id):
+        return set(self.rows("SELECT from_id, to_id, relation_type FROM relations WHERE source_id = ?", source_id))
+
+    def test_english_morphology_and_senses(self):
+        counts = self.load("kaikki-en")
+        relations = self.relations("kaikki-en")
+        self.assertIn(("kaikki-en:readable", "kaikki-en:read", "has_base"), relations)
+        self.assertIn(("kaikki-en:readable", "kaikki-en:-able", "has_suffix"), relations)
+        self.assertIn(("kaikki-en:unhappy", "kaikki-en:un-", "has_prefix"), relations)
+        self.assertIn(("kaikki-en:eyeball", "kaikki-en:eye", "has_part"), relations)
+        self.assertIn(("kaikki-en:dictionary", "kaikki-en:-ary", "has_suffix"), relations)  # the Latin af template is skipped
+        self.assertEqual(counts["relations"], 8)
+        forms = dict(self.rows("SELECT written_form, language FROM forms WHERE source_id = 'kaikki-en'"))
+        self.assertNotIn("eyes", forms)  # only an inflected form
+        self.assertNotIn("Wörterbuch", forms)  # another language
+        self.assertEqual(forms["-able"], "stan1293")  # parts become forms too
+        read = dict(self.rows("SELECT property, COALESCE(value_text, CAST(value_num AS TEXT)) FROM properties WHERE node_id = 'kaikki-en:read'"))
+        self.assertEqual((read["pos"], read["sense_count"], read["ipa"], read["etymology_source"]), ("verb, noun", "2.0", "/ɹiːd/", "inh:enm"))
+        self.assertEqual(self.value("SELECT version FROM sources WHERE source_id = 'kaikki-en'"), "snapshot of 2026-10-03 (enwiktionary 2026-09-02)")
+
+    def test_dutch_interfix_and_suffix(self):
+        self.load("kaikki-nl")
+        relations = self.relations("kaikki-nl")
+        self.assertIn(("kaikki-nl:woordenboek", "kaikki-nl:-en-", "has_interfix"), relations)
+        self.assertIn(("kaikki-nl:woordenboek", "kaikki-nl:boek", "has_base"), relations)
+        self.assertIn(("kaikki-nl:leesbaar", "kaikki-nl:-baar", "has_suffix"), relations)
+
+
 class ManualSourceTest(LoaderTestCase):
     def test_missing_manual_file_explains_add_file(self):
         from semalingo.loaders import ManualSourceMissing

@@ -280,6 +280,46 @@ sources:
       About 330 English words with their common misspellings, collected from AskOxford,
       Merriam-Webster and others. A rough signal of where English spelling is hard to learn.
 
+  - id: kaikki-en
+    name: Wiktionary English entries via Kaikki (wiktextract)
+    wave: first
+    unit: forms
+    homepage: https://kaikki.org/dictionary/English/index.html
+    download: https://kaikki.org/dictionary/English/kaikki.org-dictionary-English.jsonl
+    format: JSON lines (wiktextract), stored gzipped
+    version: "snapshot (rebuilt about weekly and not archived; SOURCE.json records the extraction date, the Wiktionary dump date and a checksum)"
+    licence: "CC BY-SA 4.0 and GFDL (Wiktionary content); cite Ylonen 2022 (LREC) for wiktextract"
+    redistributable: "yes"
+    used_by: [Q1, Q3a]
+    checked: true
+    notes: >-
+      English entries from the English Wiktionary: part of speech, first gloss, number of
+      senses, IPA, etymology source, and morphology from the etymology templates (base,
+      prefix, suffix, interfix, compound parts). The affix forms ("-able", "un-") count the
+      words built with them, which is what the affix-slot question needs. The snapshot of
+      2026-10-03 (enwiktionary dump of 2026-09-02) was the current one when this loader was
+      written.
+
+  - id: kaikki-nl
+    name: Wiktionary Dutch entries via Kaikki (wiktextract)
+    wave: first
+    unit: forms
+    homepage: https://kaikki.org/dictionary/Dutch/index.html
+    download: https://kaikki.org/dictionary/Dutch/kaikki.org-dictionary-Dutch.jsonl
+    format: JSON lines (wiktextract), stored gzipped
+    version: "snapshot (rebuilt about weekly and not archived; SOURCE.json records the extraction date, the Wiktionary dump date and a checksum)"
+    licence: "CC BY-SA 4.0 and GFDL (Wiktionary content); cite Ylonen 2022 (LREC) for wiktextract"
+    redistributable: "yes"
+    used_by: [Q1, Q3a]
+    checked: true
+    notes: >-
+      Dutch entries from the English Wiktionary: part of speech, first gloss, number of
+      senses, IPA, etymology source, and morphology from the etymology templates (base,
+      prefix, suffix, interfix, compound parts). The affix forms ("-able", "un-") count the
+      words built with them, which is what the affix-slot question needs. The snapshot of
+      2026-10-03 (enwiktionary dump of 2026-09-02) was the current one when this loader was
+      written.
+
   - id: wold
     name: World Loanword Database (WOLD)
     wave: first
